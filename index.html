@@ -16,6 +16,7 @@ h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .card.broken{border-color:#ef4444;background:#1a0a0a}
 .card.near{border-color:#f59e0b;background:#1a1500}
 .card .name{font-size:1.1em;font-weight:bold;color:#f8fafc}
+.card .symbol{color:#64748b;font-size:0.8em;margin-top:2px;font-family:monospace;direction:ltr;text-align:right}
 .card .price{font-size:1.8em;font-weight:bold;margin:8px 0}
 .card .price.down{color:#ef4444}
 .card .price.up{color:#10b981}
@@ -24,9 +25,11 @@ h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .badge.portfolio-badge{background:#3b82f633;color:#60a5fa}
 .badge.broken-badge{background:#ef444433;color:#f87171}
 .badge.near-badge{background:#f59e0b33;color:#fbbf24}
-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:0.9em}
-th{background:#334155;color:#f59e0b;padding:10px 8px;text-align:right}
+table{width:100%;border-collapse:collapse;margin-top:16px;font-size:0.85em}
+th{background:#334155;color:#f59e0b;padding:10px 8px;text-align:right;white-space:nowrap}
 td{padding:8px;border-bottom:1px solid #1e293b;text-align:right}
+td.sym{font-family:monospace;color:#64748b;direction:ltr;text-align:center;font-size:0.85em}
+td.en-name{color:#94a3b8;font-size:0.8em;direction:ltr;text-align:left;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 tr:hover{background:#1e293b}
 tr.broken-row{background:#1a0a0a}
 tr.near-row{background:#1a1500}
@@ -35,12 +38,21 @@ tr.near-row{background:#1a1500}
 .dot-red{background:#ef4444}
 .dot-yellow{background:#f59e0b}
 .dot-green{background:#10b981}
-@media(max-width:600px){.cards{grid-template-columns:1fr}h1{font-size:1.2em}body{padding:8px}}
+.stats{display:flex;justify-content:center;gap:24px;margin:16px 0;flex-wrap:wrap}
+.stat{text-align:center;padding:8px 16px;background:#1e293b;border-radius:8px}
+.stat .num{font-size:1.4em;font-weight:bold}
+.stat .label{font-size:0.75em;color:#94a3b8;margin-top:2px}
+.stat.red .num{color:#ef4444}
+.stat.yellow .num{color:#f59e0b}
+.stat.green .num{color:#10b981}
+.stat.blue .num{color:#3b82f6}
+@media(max-width:600px){.cards{grid-template-columns:1fr}h1{font-size:1.2em}body{padding:8px}table{font-size:0.75em}}
 </style>
 </head>
 <body>
 <h1>📈 متابعة أسهم تاسي — قاع كورونا 2020</h1>
 <div class="subtitle">آخر تحديث: <span id="lastUpdate">جاري التحميل...</span></div>
+<div class="stats" id="stats"></div>
 
 <div class="section-title">🟢 محفظتي</div>
 <div class="cards" id="portfolioCards"></div>
@@ -53,18 +65,17 @@ tr.near-row{background:#1a1500}
 
 <div class="section-title">📊 جدول شامل — كل الأسهم المراقبة</div>
 <table>
-<thead><tr><th>الشركة</th><th>قاع كورونا</th><th>السعر الحالي</th><th>الفرق %</th><th>الحالة</th></tr></thead>
+<thead><tr><th>الرمز</th><th>الشركة</th><th>Yahoo Finance</th><th>قاع كورونا</th><th>السعر الحالي</th><th>الفرق %</th><th>الحالة</th></tr></thead>
 <tbody id="tableBody"></tbody>
 </table>
 
 <div class="footer">
-  صفحة متابعة أسهم تاسي — تتحدث يومياً الساعة 1:00 ظهراً (الرياض)<br>
-  بيانات القاع: 16 مارس 2020 (أرقام) | هادي 🦞
+  صفحة متابعة أسهم تاسي — تتحدث يومياً 10:00 ص + 3:30 م (الرياض)<br>
+  بيانات القاع: Low يوم 16 مارس 2020 (Yahoo Finance) | هادي 🦞
 </div>
 
 <script>
-// DATA_INJECT
-const DATA = {"lastUpdated": "2026-02-28 22:13 الرياض", "covidLowDate": "2020-03-16", "portfolio": ["أسمنت العربية", "أسمنت أم القرى", "مستشفى د. سليمان فقيه"], "stocks": [{"name": "الصناعات الكهربائية", "covidLow": 31.88, "currentPrice": 101.0}, {"name": "أسترا الصناعية", "covidLow": 13.5, "currentPrice": 128.2}, {"name": "قو للاتصالات", "covidLow": 8.55, "currentPrice": 86.3}, {"name": "صناعة الورق", "covidLow": 12.49, "currentPrice": 5.41}, {"name": "تكافل الراجحي", "covidLow": 20.04, "currentPrice": 74.5}, {"name": "الإعادة السعودية", "covidLow": 4.33, "currentPrice": 23.44}, {"name": "ام آي اس", "covidLow": 21.39}, {"name": "مسك", "covidLow": 1.54, "currentPrice": 2.41}, {"name": "الوطنية للتعليم", "covidLow": 31.4, "currentPrice": 113.0}, {"name": "نسيج", "covidLow": 28.05, "currentPrice": 22.05}, {"name": "الدريس", "covidLow": 28.62, "currentPrice": 117.0}, {"name": "معادن", "covidLow": 9.33, "currentPrice": 70.2}, {"name": "أنابيب السعودية", "covidLow": 14.0, "currentPrice": 38.34}, {"name": "الكيميائية", "covidLow": 1.98}, {"name": "بوان", "covidLow": 10.6, "currentPrice": 44.4}, {"name": "رعاية", "covidLow": 34.75, "currentPrice": 99.7}, {"name": "تشب", "covidLow": 44.83, "currentPrice": 135.7}, {"name": "أنابيب", "covidLow": 2.6, "currentPrice": 4.7}, {"name": "متطورة", "covidLow": 8.16, "currentPrice": 14.75}, {"name": "دله الصحية", "covidLow": 9.4, "currentPrice": 11.2}, {"name": "ساسكو", "covidLow": 20.82, "currentPrice": 53.0}, {"name": "زجاج", "covidLow": 12.9, "currentPrice": 35.14}, {"name": "مبكو", "covidLow": 11.26, "currentPrice": 13.87}, {"name": "بحر العرب", "covidLow": 1.65, "currentPrice": 3.73}, {"name": "الباحة", "covidLow": 1.03, "currentPrice": 2.06}, {"name": "شاكر", "covidLow": 6.91, "currentPrice": 16.58}, {"name": "الأبحاث والإعلام", "covidLow": 52.6, "currentPrice": 81.85}, {"name": "البابطين", "covidLow": 12.33, "currentPrice": 139.9}, {"name": "شمس", "covidLow": 4.9, "currentPrice": 13.91}, {"name": "لجام للرياضة", "covidLow": 46.15, "currentPrice": 82.15}, {"name": "أمانة للتأمين", "covidLow": 7.35, "currentPrice": 9.9}, {"name": "جرير", "covidLow": 12.1, "currentPrice": 13.99}, {"name": "بترو رابغ", "covidLow": 6.95, "currentPrice": 7.28}, {"name": "الصقر للتأمين", "covidLow": 10.04, "currentPrice": 10.09}, {"name": "بان", "covidLow": 2.3, "currentPrice": 16.3}, {"name": "أسمنت نجران", "covidLow": 8.69, "currentPrice": 6.98}, {"name": "سابك", "covidLow": 62.0, "currentPrice": 54.2}, {"name": "أسمنت الجوف", "covidLow": 10.0, "currentPrice": 5.6}, {"name": "أسمنت الشمالية", "covidLow": 8.55, "currentPrice": 6.33}, {"name": "إعمار", "covidLow": 13.86, "currentPrice": 8.55}, {"name": "الشرقية للتنمية", "covidLow": 18.53, "currentPrice": 12.47}, {"name": "كهرباء السعودية", "covidLow": 14.8, "currentPrice": 13.54}, {"name": "الأسماك", "covidLow": 94.45, "currentPrice": 48.52}, {"name": "أسمنت العربية", "covidLow": 22.3, "currentPrice": 22.33}, {"name": "سينومي سنترز", "covidLow": 28.11, "currentPrice": 16.44}, {"name": "التصنيع", "covidLow": 8.33, "currentPrice": 8.39}, {"name": "المجموعة السعودية", "covidLow": 18.2, "currentPrice": 34.22}, {"name": "أسمنت القصيم", "covidLow": 45.5, "currentPrice": 42.38}, {"name": "أرامكو السعودية", "covidLow": 22.85, "currentPrice": 24.96}, {"name": "طباعة وتغليف", "covidLow": 9.6, "currentPrice": 6.86}, {"name": "سينومي ريتيل", "covidLow": 28.11, "currentPrice": 16.44}, {"name": "هرفي للأغذية", "covidLow": 41.0, "currentPrice": 13.75}, {"name": "أسمنت الجنوب", "covidLow": 48.2, "currentPrice": 21.5}, {"name": "عناية", "covidLow": 15.59, "currentPrice": 7.26}, {"name": "كيان السعودية", "covidLow": 7.09, "currentPrice": 4.81}, {"name": "ينساب", "covidLow": 38.8, "currentPrice": 25.2}, {"name": "أسيج", "covidLow": 16.46, "currentPrice": 6.27}, {"name": "ثمار", "covidLow": 13.57, "currentPrice": 24.4}, {"name": "تكوين", "covidLow": 10.04, "currentPrice": 9.36}, {"name": "المتقدمة", "covidLow": 32.08, "currentPrice": 23.66}, {"name": "أسمنت ينبع", "covidLow": 24.0, "currentPrice": 14.35}, {"name": "أسمنت السعودية", "covidLow": 43.75, "currentPrice": 32.9}, {"name": "الفخارية", "covidLow": 5.84, "currentPrice": 51.5}, {"name": "ساكو", "covidLow": 28.11, "currentPrice": 16.44}, {"name": "الجزيرة ريت", "covidLow": 9.6}, {"name": "المعذر ريت", "covidLow": 7.91}, {"name": "بنيان ريت", "covidLow": 8.7}, {"name": "أسمنت أم القرى", "covidLow": 14.32, "note": "يحتاج تحديث", "currentPrice": 12.53}, {"name": "مستشفى د. سليمان فقيه", "covidLow": null, "note": "مدرجة حديثاً - لا قاع كورونا", "currentPrice": 29.82}]};
+const DATA = {"lastUpdated": "2026-02-28 22:13 الرياض", "covidLowDate": "2020-03-16", "portfolio": ["أسمنت العربية", "أسمنت أم القرى", "مستشفى د. سليمان فقيه"], "stocks": [{"name": "الصناعات الكهربائية", "covidLow": 31.88, "currentPrice": 101.0, "symbol": "1120", "yahooName": "Al Rajhi Banking and Investment Corporation"}, {"name": "أسترا الصناعية", "covidLow": 13.5, "currentPrice": 128.2, "symbol": "1212", "yahooName": "Astra Industrial Group Company"}, {"name": "قو للاتصالات", "covidLow": 8.55, "currentPrice": 86.3, "symbol": "7040", "yahooName": "Etihad GO Telecom Co."}, {"name": "صناعة الورق", "covidLow": 12.49, "currentPrice": 5.41, "symbol": "1201", "yahooName": "Takween Advanced Industries"}, {"name": "تكافل الراجحي", "covidLow": 20.04, "currentPrice": 74.5, "symbol": "8230", "yahooName": "Al Rajhi Company for Cooperative Insurance"}, {"name": "الإعادة السعودية", "covidLow": 4.33, "currentPrice": 23.44, "symbol": "8200", "yahooName": "Saudi Reinsurance Company"}, {"name": "ام آي اس", "covidLow": 21.39, "symbol": "4120"}, {"name": "مسك", "covidLow": 1.54, "currentPrice": 2.41, "symbol": "4140", "yahooName": "Saudi Industrial Export Company"}, {"name": "الوطنية للتعليم", "covidLow": 31.4, "currentPrice": 113.0, "symbol": "4291", "yahooName": "National Company for Learning and Education"}, {"name": "نسيج", "covidLow": 28.05, "currentPrice": 22.05, "symbol": "1213", "yahooName": "Naseej International Trading Company"}, {"name": "الدريس", "covidLow": 28.62, "currentPrice": 117.0, "symbol": "4200", "yahooName": "Aldrees Petroleum and Transport Services Company"}, {"name": "معادن", "covidLow": 9.33, "currentPrice": 70.2, "symbol": "1211", "yahooName": "Saudi Arabian Mining Company (Maaden)"}, {"name": "أنابيب السعودية", "covidLow": 14.0, "currentPrice": 38.34, "symbol": "1320", "yahooName": "Saudi Steel Pipes Company"}, {"name": "الكيميائية", "covidLow": 1.98, "symbol": "1330"}, {"name": "بوان", "covidLow": 10.6, "currentPrice": 44.4, "symbol": "1302", "yahooName": "Bawan Company"}, {"name": "رعاية", "covidLow": 34.75, "currentPrice": 99.7, "symbol": "4004", "yahooName": "Dallah Healthcare Company"}, {"name": "تشب", "covidLow": 44.83, "currentPrice": 135.7, "symbol": "8010", "yahooName": "The Company for Cooperative Insurance"}, {"name": "أنابيب", "covidLow": 2.6, "currentPrice": 4.7, "symbol": "2200", "yahooName": "Arabian Pipes Company"}, {"name": "متطورة", "covidLow": 8.16, "currentPrice": 14.75, "symbol": "2120", "yahooName": "Saudi Advanced Industries Company"}, {"name": "دله الصحية", "covidLow": 9.4, "currentPrice": 11.2, "symbol": "4011", "yahooName": "L'azurde Company for Jewelry"}, {"name": "ساسكو", "covidLow": 20.82, "currentPrice": 53.0, "symbol": "4050", "yahooName": "Saudi Automotive Services Company"}, {"name": "زجاج", "covidLow": 12.9, "currentPrice": 35.14, "symbol": "2150", "yahooName": "The National Company for Glass Industries"}, {"name": "مبكو", "covidLow": 11.26, "currentPrice": 13.87, "symbol": "2310", "yahooName": "Sahara International Petrochemical Company"}, {"name": "بحر العرب", "covidLow": 1.65, "currentPrice": 3.73, "symbol": "7201", "yahooName": "Arab Sea Information Systems Company"}, {"name": "الباحة", "covidLow": 1.03, "currentPrice": 2.06, "symbol": "4130", "yahooName": "Darb Saudi Investment Company"}, {"name": "شاكر", "covidLow": 6.91, "currentPrice": 16.58, "symbol": "1214", "yahooName": "Al Hassan Ghazi Ibrahim Shaker Company"}, {"name": "الأبحاث والإعلام", "covidLow": 52.6, "currentPrice": 81.85, "symbol": "4210", "yahooName": "Saudi Research and Media Group"}, {"name": "البابطين", "covidLow": 12.33, "currentPrice": 139.9, "symbol": "1321", "yahooName": "East Pipes Integrated Company for Industry"}, {"name": "شمس", "covidLow": 4.9, "currentPrice": 13.91, "symbol": "4170", "yahooName": "Tourism Enterprise Company (Shams)"}, {"name": "لجام للرياضة", "covidLow": 46.15, "currentPrice": 82.15, "symbol": "1830", "yahooName": "Leejam Sports Company"}, {"name": "أمانة للتأمين", "covidLow": 7.35, "currentPrice": 9.9, "symbol": "8120", "yahooName": "Gulf Union Alahlia Cooperative Insurance Company"}, {"name": "جرير", "covidLow": 12.1, "currentPrice": 13.99, "symbol": "4190", "yahooName": "Jarir Marketing Company"}, {"name": "بترو رابغ", "covidLow": 6.95, "currentPrice": 7.28, "symbol": "2380", "yahooName": "Rabigh Refining and Petrochemical Company"}, {"name": "الصقر للتأمين", "covidLow": 10.04, "currentPrice": 10.09, "symbol": "8060", "yahooName": "Walaa Cooperative Insurance Company"}, {"name": "بان", "covidLow": 2.3, "currentPrice": 16.3, "symbol": "1183", "yahooName": "SHL Finance Company"}, {"name": "أسمنت نجران", "covidLow": 8.69, "currentPrice": 11.5, "symbol": "3003", "yahooName": "City Cement Company"}, {"name": "سابك", "covidLow": 62.0, "currentPrice": 54.2, "symbol": "2010", "yahooName": "Saudi Basic Industries Corporation"}, {"name": "أسمنت الجوف", "covidLow": 10.0, "currentPrice": 5.6, "symbol": "3091", "yahooName": "Al Jouf Cement Company"}, {"name": "أسمنت الشمالية", "covidLow": 8.55, "currentPrice": 6.98, "symbol": "3004", "yahooName": "Northern Region Cement Company"}, {"name": "إعمار", "covidLow": 13.86, "currentPrice": 8.55, "symbol": "4220", "yahooName": "Emaar The Economic City"}, {"name": "الشرقية للتنمية", "covidLow": 18.53, "currentPrice": 12.47, "symbol": "6060", "yahooName": "Ash-Sharqiyah Development Co."}, {"name": "كهرباء السعودية", "covidLow": 14.8, "currentPrice": 13.54, "symbol": "5110", "yahooName": "Saudi Electricity Company"}, {"name": "الأسماك", "covidLow": 94.45, "currentPrice": 48.52, "symbol": "6050", "yahooName": "Saudi Fisheries Company"}, {"name": "أسمنت العربية", "covidLow": 22.3, "currentPrice": 22.33, "symbol": "3010", "yahooName": "Arabian Cement Company"}, {"name": "سينومي سنترز", "covidLow": 28.11, "currentPrice": 18.08, "symbol": "4321", "yahooName": "Arabian Centres Company"}, {"name": "التصنيع", "covidLow": 8.33, "currentPrice": 8.39, "symbol": "2060", "yahooName": "National Industrialization Company"}, {"name": "المجموعة السعودية", "covidLow": 18.2, "currentPrice": 34.22, "symbol": "1060", "yahooName": "Saudi Awwal Bank"}, {"name": "أسمنت القصيم", "covidLow": 45.5, "currentPrice": 42.38, "symbol": "3040", "yahooName": "Qassim Cement Company"}, {"name": "أرامكو السعودية", "covidLow": 22.85, "currentPrice": 24.96, "symbol": "2222", "yahooName": "Saudi Arabian Oil Company"}, {"name": "طباعة وتغليف", "covidLow": 9.6, "currentPrice": 6.86, "symbol": "4270", "yahooName": "Saudi Printing and Packaging Co."}, {"name": "سينومي ريتيل", "covidLow": 28.11, "currentPrice": 16.44, "symbol": "4240", "yahooName": "AFG International Company"}, {"name": "هرفي للأغذية", "covidLow": 41.0, "currentPrice": 13.75, "symbol": "6002", "yahooName": "Herfy Food Services Company"}, {"name": "أسمنت الجنوب", "covidLow": 48.2, "currentPrice": 21.5, "symbol": "3050", "yahooName": "Southern Province Cement Company"}, {"name": "عناية", "covidLow": 15.59, "currentPrice": 7.26, "symbol": "8311", "yahooName": "Saudi Enaya Cooperative Insurance Company"}, {"name": "كيان السعودية", "covidLow": 7.09, "currentPrice": 4.81, "symbol": "2350", "yahooName": "Saudi Kayan Petrochemical Company"}, {"name": "ينساب", "covidLow": 38.8, "currentPrice": 25.2, "symbol": "2290", "yahooName": "Yanbu National Petrochemical Company"}, {"name": "أسيج", "covidLow": 16.46, "currentPrice": 6.27, "symbol": "8150", "yahooName": "Allied Cooperative Insurance Group"}, {"name": "ثمار", "covidLow": 13.57, "currentPrice": 24.4, "symbol": "4007", "yahooName": "Al Hammadi Holding Company"}, {"name": "تكوين", "covidLow": 10.04, "currentPrice": 9.36, "symbol": "1310"}, {"name": "المتقدمة", "covidLow": 32.08, "currentPrice": 23.66, "symbol": "2330", "yahooName": "Advanced Petrochemical Company"}, {"name": "أسمنت ينبع", "covidLow": 24.0, "currentPrice": 14.35, "symbol": "3060", "yahooName": "Yanbu Cement Company"}, {"name": "أسمنت السعودية", "covidLow": 43.75, "currentPrice": 32.9, "symbol": "3030", "yahooName": "Saudi Cement Company"}, {"name": "الفخارية", "covidLow": 5.84, "currentPrice": 51.5, "symbol": "2300", "yahooName": "Saudi Paper Manufacturing Company"}, {"name": "ساكو", "covidLow": 28.11, "currentPrice": 22.99, "symbol": "4008", "yahooName": "Saudi Company for Hardware SACO"}, {"name": "الجزيرة ريت", "covidLow": 9.6}, {"name": "المعذر ريت", "covidLow": 7.91}, {"name": "بنيان ريت", "covidLow": 8.7}, {"name": "أسمنت أم القرى", "covidLow": 14.32, "note": "يحتاج تحديث", "currentPrice": 12.53, "symbol": "3005", "yahooName": "Umm Al-Qura Cement Company"}, {"name": "مستشفى د. سليمان فقيه", "covidLow": null, "note": "مدرجة حديثاً - لا قاع كورونا", "currentPrice": 29.82, "symbol": "4017", "yahooName": "Dr. Soliman Abdel Kader Fakeeh "}]};
 
 function render() {
   const d = DATA;
@@ -77,11 +88,14 @@ function render() {
   const brokenEl = document.getElementById('brokenCards');
   const nearEl = document.getElementById('nearCards');
   const tableEl = document.getElementById('tableBody');
+  const statsEl = document.getElementById('stats');
 
   portfolioEl.innerHTML = '';
   brokenEl.innerHTML = '';
   nearEl.innerHTML = '';
   tableEl.innerHTML = '';
+
+  let countBroken = 0, countNear = 0, countAbove = 0;
 
   const sorted = [...stocks].sort((a, b) => {
     const da = a.currentPrice && a.covidLow ? ((a.currentPrice - a.covidLow) / a.covidLow) : 999;
@@ -96,57 +110,67 @@ function render() {
     let isBroken = diffPct !== null && diffPct < 0;
     let isNear = diffPct !== null && diffPct >= 0 && diffPct < 10;
 
-    // Cards for portfolio
-    if (isPortfolio) {
-      let cls = 'card portfolio';
-      if (isBroken) cls += ' broken';
-      else if (isNear) cls += ' near';
+    if (isBroken) countBroken++;
+    else if (isNear) countNear++;
+    else if (hasData) countAbove++;
+
+    const symDisplay = s.symbol || '?';
+    const yahooDisplay = s.yahooName || '';
+
+    function makeCard(s, cls, badges) {
       let priceClass = diffPct !== null ? (diffPct < 0 ? 'down' : 'up') : '';
-      portfolioEl.innerHTML += `<div class="${cls}">
-        <div class="name">${s.name} <span class="badge portfolio-badge">محفظتي</span>
-        ${isBroken ? '<span class="badge broken-badge">كسر القاع!</span>' : ''}
-        ${isNear ? '<span class="badge near-badge">قريب من القاع</span>' : ''}</div>
+      return `<div class="card ${cls}">
+        <div class="name">${s.name} ${badges}</div>
+        <div class="symbol">${symDisplay}.SR — ${yahooDisplay}</div>
         <div class="price ${priceClass}">${s.currentPrice ? s.currentPrice + ' ريال' : 'غير متوفر'}</div>
         <div class="detail">قاع كورونا: ${s.covidLow ? s.covidLow + ' ريال' : s.note || 'غير متوفر'}<br>
         ${diffPct !== null ? 'الفرق: ' + diffPct.toFixed(1) + '%' : ''}</div>
       </div>`;
     }
 
-    // Cards for broken
+    if (isPortfolio) {
+      let cls = 'portfolio';
+      if (isBroken) cls += ' broken';
+      else if (isNear) cls += ' near';
+      let badges = '<span class="badge portfolio-badge">محفظتي</span>';
+      if (isBroken) badges += '<span class="badge broken-badge">كسر القاع!</span>';
+      if (isNear) badges += '<span class="badge near-badge">قريب</span>';
+      portfolioEl.innerHTML += makeCard(s, cls, badges);
+    }
+
     if (isBroken && !isPortfolio) {
-      brokenEl.innerHTML += `<div class="card broken">
-        <div class="name">${s.name} <span class="badge broken-badge">كسر القاع!</span></div>
-        <div class="price down">${s.currentPrice} ريال</div>
-        <div class="detail">قاع كورونا: ${s.covidLow} ريال<br>الفرق: ${diffPct.toFixed(1)}%</div>
-      </div>`;
+      brokenEl.innerHTML += makeCard(s, 'broken', '<span class="badge broken-badge">كسر القاع!</span>');
     }
 
-    // Cards for near
     if (isNear && !isPortfolio) {
-      nearEl.innerHTML += `<div class="card near">
-        <div class="name">${s.name} <span class="badge near-badge">قريب من القاع</span></div>
-        <div class="price">${s.currentPrice} ريال</div>
-        <div class="detail">قاع كورونا: ${s.covidLow} ريال<br>الفرق: ${diffPct.toFixed(1)}%</div>
-      </div>`;
+      nearEl.innerHTML += makeCard(s, 'near', '<span class="badge near-badge">قريب</span>');
     }
 
-    // Table row
     let rowClass = isBroken ? 'broken-row' : (isNear ? 'near-row' : '');
     let status = '';
-    if (isPortfolio) status += '<span class="status-dot" style="background:#3b82f6"></span>محفظتي ';
-    if (isBroken) status += '<span class="dot-red status-dot"></span>كسر القاع';
+    if (isPortfolio) status += '<span class="status-dot" style="background:#3b82f6"></span>⭐ ';
+    if (isBroken) status += '<span class="dot-red status-dot"></span>كسر';
     else if (isNear) status += '<span class="dot-yellow status-dot"></span>قريب';
-    else if (hasData) status += '<span class="dot-green status-dot"></span>فوق القاع';
-    else status = '—';
+    else if (hasData) status += '<span class="dot-green status-dot"></span>فوق';
+    else status += '—';
 
     tableEl.innerHTML += `<tr class="${rowClass}">
+      <td class="sym">${symDisplay}</td>
       <td>${s.name}</td>
+      <td class="en-name">${yahooDisplay}</td>
       <td>${s.covidLow || '—'}</td>
       <td>${s.currentPrice || '—'}</td>
-      <td>${diffPct !== null ? diffPct.toFixed(1) + '%' : '—'}</td>
+      <td style="color:${diffPct !== null ? (diffPct < 0 ? '#ef4444' : diffPct < 10 ? '#f59e0b' : '#10b981') : '#64748b'}">${diffPct !== null ? diffPct.toFixed(1) + '%' : '—'}</td>
       <td>${status}</td>
     </tr>`;
   });
+
+  statsEl.innerHTML = `
+    <div class="stat blue"><div class="num">${stocks.length}</div><div class="label">إجمالي الأسهم</div></div>
+    <div class="stat red"><div class="num">${countBroken}</div><div class="label">كسرت القاع 🔴</div></div>
+    <div class="stat yellow"><div class="num">${countNear}</div><div class="label">قريبة 🟡</div></div>
+    <div class="stat green"><div class="num">${countAbove}</div><div class="label">فوق القاع 🟢</div></div>
+  `;
 
   if (!brokenEl.innerHTML) brokenEl.innerHTML = '<div class="card"><div class="name">لا توجد أسهم كسرت القاع حالياً ✅</div></div>';
   if (!nearEl.innerHTML) nearEl.innerHTML = '<div class="card"><div class="name">لا توجد أسهم قريبة من القاع حالياً</div></div>';
