@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📈 متابعة أسهم تاسي — قاع كورونا</title>
+<title>📈 متابعة أسهم تاسي — قاع كورونا + الصحة المالية</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',Tahoma,sans-serif;background:#0f172a;color:#e2e8f0;padding:16px;max-width:1200px;margin:0 auto}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#0f172a;color:#e2e8f0;padding:16px;max-width:1400px;margin:0 auto}
 h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .subtitle{text-align:center;color:#94a3b8;margin-bottom:24px;font-size:0.9em}
 .section-title{color:#f59e0b;font-size:1.2em;margin:24px 0 12px;padding-bottom:6px;border-bottom:2px solid #f59e0b33}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:24px}
-.card{background:#1e293b;border-radius:12px;padding:16px;border:1px solid #334155}
-.card.portfolio{border-color:#3b82f6;background:#1e293b}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:24px}
+.card{background:#1e293b;border-radius:12px;padding:16px;border:1px solid #334155;position:relative}
+.card.portfolio{border-color:#3b82f6}
 .card.broken{border-color:#ef4444;background:#1a0a0a}
 .card.near{border-color:#f59e0b;background:#1a1500}
 .card .name{font-size:1.1em;font-weight:bold;color:#f8fafc}
@@ -21,15 +21,29 @@ h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .card .price.down{color:#ef4444}
 .card .price.up{color:#10b981}
 .card .detail{color:#94a3b8;font-size:0.85em;line-height:1.6}
+.card .fin-bar{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.card .fin-item{font-size:0.7em;padding:2px 6px;border-radius:4px;background:#0f172a;color:#94a3b8}
+.card .fin-item.g{color:#10b981;background:#10b98115}
+.card .fin-item.y{color:#f59e0b;background:#f59e0b15}
+.card .fin-item.r{color:#ef4444;background:#ef444415}
+.health-dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-left:6px;vertical-align:middle}
+.health-dot.hg{background:#10b981}
+.health-dot.hy{background:#f59e0b}
+.health-dot.hr{background:#ef4444}
+.health-dot.hna{background:#475569}
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.75em;font-weight:bold;margin-left:8px}
 .badge.portfolio-badge{background:#3b82f633;color:#60a5fa}
 .badge.broken-badge{background:#ef444433;color:#f87171}
 .badge.near-badge{background:#f59e0b33;color:#fbbf24}
-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:0.85em}
-th{background:#334155;color:#f59e0b;padding:10px 8px;text-align:right;white-space:nowrap}
-td{padding:8px;border-bottom:1px solid #1e293b;text-align:right}
+.badge.health-badge{padding:2px 6px;font-size:0.7em}
+.badge.hg-badge{background:#10b98125;color:#10b981}
+.badge.hy-badge{background:#f59e0b25;color:#f59e0b}
+.badge.hr-badge{background:#ef444425;color:#ef4444}
+table{width:100%;border-collapse:collapse;margin-top:16px;font-size:0.8em}
+th{background:#334155;color:#f59e0b;padding:10px 6px;text-align:right;white-space:nowrap;position:sticky;top:0;z-index:1}
+td{padding:6px;border-bottom:1px solid #1e293b;text-align:right}
 td.sym{font-family:monospace;color:#64748b;direction:ltr;text-align:center;font-size:0.85em}
-td.en-name{color:#94a3b8;font-size:0.8em;direction:ltr;text-align:left;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.en-name{color:#94a3b8;font-size:0.75em;direction:ltr;text-align:left;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 tr:hover{background:#1e293b}
 tr.broken-row{background:#1a0a0a}
 tr.near-row{background:#1a1500}
@@ -38,48 +52,104 @@ tr.near-row{background:#1a1500}
 .dot-red{background:#ef4444}
 .dot-yellow{background:#f59e0b}
 .dot-green{background:#10b981}
-.stats{display:flex;justify-content:center;gap:24px;margin:16px 0;flex-wrap:wrap}
-.stat{text-align:center;padding:8px 16px;background:#1e293b;border-radius:8px}
-.stat .num{font-size:1.4em;font-weight:bold}
-.stat .label{font-size:0.75em;color:#94a3b8;margin-top:2px}
+.stats{display:flex;justify-content:center;gap:16px;margin:16px 0;flex-wrap:wrap}
+.stat{text-align:center;padding:8px 14px;background:#1e293b;border-radius:8px}
+.stat .num{font-size:1.3em;font-weight:bold}
+.stat .label{font-size:0.7em;color:#94a3b8;margin-top:2px}
 .stat.red .num{color:#ef4444}
 .stat.yellow .num{color:#f59e0b}
 .stat.green .num{color:#10b981}
 .stat.blue .num{color:#3b82f6}
-@media(max-width:600px){.cards{grid-template-columns:1fr}h1{font-size:1.2em}body{padding:8px}table{font-size:0.75em}}
+.legend{text-align:center;color:#64748b;font-size:0.75em;margin:8px 0 16px;line-height:1.8}
+.legend span{margin:0 8px}
+.tooltip{position:relative;cursor:help}
+.tooltip:hover::after{content:attr(data-tip);position:absolute;bottom:120%;right:50%;transform:translateX(50%);background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:6px 10px;border-radius:6px;font-size:0.75em;white-space:pre-line;z-index:10;min-width:180px;text-align:right}
+@media(max-width:600px){.cards{grid-template-columns:1fr}h1{font-size:1.2em}body{padding:8px}table{font-size:0.7em}.stats{gap:8px}.stat{padding:6px 10px}}
 </style>
 </head>
 <body>
 <h1>📈 متابعة أسهم تاسي — قاع كورونا 2020</h1>
-<div class="subtitle">آخر تحديث: <span id="lastUpdate">جاري التحميل...</span></div>
+<div class="subtitle">آخر تحديث: <span id="lastUpdate">جاري التحميل...</span> | المصدر: Yahoo Finance</div>
 <div class="stats" id="stats"></div>
+<div class="legend">
+  <b>الصحة المالية:</b>
+  <span><span class="health-dot hg"></span> قوي</span>
+  <span><span class="health-dot hy"></span> متوسط</span>
+  <span><span class="health-dot hr"></span> ضعيف</span>
+  &nbsp;|&nbsp;
+  <b>المعايير:</b> نسبة التداول • الدين/الملكية • هامش الربح • العائد على الملكية • نمو الإيرادات
+</div>
 
-<div class="section-title">🟢 محفظتي</div>
+<div class="section-title">⭐ محفظتي</div>
 <div class="cards" id="portfolioCards"></div>
 
-<div class="section-title">🔴 أسهم كسرت قاع كورونا (فرص استثمارية)</div>
+<div class="section-title">🔴 أسهم كسرت قاع كورونا</div>
 <div class="cards" id="brokenCards"></div>
 
-<div class="section-title">🟡 أسهم قريبة من القاع (أقل من 10% فوق القاع)</div>
+<div class="section-title">🟡 أسهم قريبة من القاع (أقل من 10%)</div>
 <div class="cards" id="nearCards"></div>
 
-<div class="section-title">📊 جدول شامل — كل الأسهم المراقبة</div>
+<div class="section-title">📊 الجدول الشامل</div>
 <table>
-<thead><tr><th>الرمز</th><th>الشركة</th><th>Yahoo Finance</th><th>قاع كورونا</th><th>السعر الحالي</th><th>الفرق %</th><th>الحالة</th></tr></thead>
+<thead><tr>
+<th>الرمز</th><th>الشركة</th><th>Yahoo</th>
+<th>💰</th>
+<th>قاع كورونا</th><th>الحالي</th><th>الفرق %</th><th>القاع</th>
+</tr></thead>
 <tbody id="tableBody"></tbody>
 </table>
 
 <div class="footer">
-  صفحة متابعة أسهم تاسي — تتحدث يومياً 10:00 ص + 3:30 م (الرياض)<br>
-  بيانات القاع: Low يوم 16 مارس 2020 (Yahoo Finance) | هادي 🦞
+  تتحدث يومياً 10:00 ص + 3:30 م (الرياض) | قاع كورونا: Low يوم 16 مارس 2020<br>
+  💰 = الصحة المالية (5 معايير: سيولة + ديون + ربحية + كفاءة + نمو) | هادي 🦞
 </div>
 
 <script>
 const DATA = __STOCKS_DATA__;
 
+function healthIcon(h) {
+  if (h === 'green') return '<span class="health-dot hg" title="صحة مالية قوية"></span>';
+  if (h === 'yellow') return '<span class="health-dot hy" title="صحة مالية متوسطة"></span>';
+  if (h === 'red') return '<span class="health-dot hr" title="صحة مالية ضعيفة"></span>';
+  return '<span class="health-dot hna" title="لا بيانات"></span>';
+}
+
+function healthBadge(h) {
+  if (h === 'green') return '<span class="badge health-badge hg-badge">صحة قوية</span>';
+  if (h === 'yellow') return '<span class="badge health-badge hy-badge">صحة متوسطة</span>';
+  if (h === 'red') return '<span class="badge health-badge hr-badge">صحة ضعيفة</span>';
+  return '';
+}
+
+function finBar(f) {
+  if (!f) return '';
+  let items = [];
+  if (f.currentRatio !== undefined) {
+    let c = f.currentRatio > 1.5 ? 'g' : f.currentRatio >= 1 ? 'y' : 'r';
+    items.push(`<span class="fin-item ${c}">سيولة: ${f.currentRatio}</span>`);
+  }
+  if (f.debtToEquity !== undefined) {
+    let c = f.debtToEquity < 50 ? 'g' : f.debtToEquity <= 150 ? 'y' : 'r';
+    items.push(`<span class="fin-item ${c}">دين: ${f.debtToEquity}%</span>`);
+  }
+  if (f.profitMargins !== undefined) {
+    let c = f.profitMargins > 10 ? 'g' : f.profitMargins >= 0 ? 'y' : 'r';
+    items.push(`<span class="fin-item ${c}">ربح: ${f.profitMargins}%</span>`);
+  }
+  if (f.returnOnEquity !== undefined) {
+    let c = f.returnOnEquity > 10 ? 'g' : f.returnOnEquity >= 0 ? 'y' : 'r';
+    items.push(`<span class="fin-item ${c}">ROE: ${f.returnOnEquity}%</span>`);
+  }
+  if (f.revenueGrowth !== undefined) {
+    let c = f.revenueGrowth > 5 ? 'g' : f.revenueGrowth >= 0 ? 'y' : 'r';
+    items.push(`<span class="fin-item ${c}">نمو: ${f.revenueGrowth}%</span>`);
+  }
+  return '<div class="fin-bar">' + items.join('') + '</div>';
+}
+
 function render() {
   const d = DATA;
-  document.getElementById('lastUpdate').textContent = d.lastUpdated || 'لم يتحدث بعد';
+  document.getElementById('lastUpdate').textContent = d.lastUpdated || '';
 
   const portfolio = d.portfolio || [];
   const stocks = d.stocks || [];
@@ -114,17 +184,18 @@ function render() {
     else if (isNear) countNear++;
     else if (hasData) countAbove++;
 
-    const symDisplay = s.symbol || '?';
-    const yahooDisplay = s.yahooName || '';
+    const sym = s.symbol || '?';
+    const yn = s.yahooName || '';
+    const h = s.health;
 
     function makeCard(s, cls, badges) {
       let priceClass = diffPct !== null ? (diffPct < 0 ? 'down' : 'up') : '';
       return `<div class="card ${cls}">
-        <div class="name">${s.name} ${badges}</div>
-        <div class="symbol">${symDisplay}.SR — ${yahooDisplay}</div>
+        <div class="name">${healthIcon(h)} ${s.name} ${badges}</div>
+        <div class="symbol">${sym}.SR — ${yn}</div>
         <div class="price ${priceClass}">${s.currentPrice ? s.currentPrice + ' ريال' : 'غير متوفر'}</div>
-        <div class="detail">قاع كورونا: ${s.covidLow ? s.covidLow + ' ريال' : s.note || 'غير متوفر'}<br>
-        ${diffPct !== null ? 'الفرق: ' + diffPct.toFixed(1) + '%' : ''}</div>
+        <div class="detail">قاع كورونا: ${s.covidLow ? s.covidLow + ' ريال' : 'غير متوفر'}${diffPct !== null ? ' | الفرق: ' + diffPct.toFixed(1) + '%' : ''}</div>
+        ${finBar(s.financials)}
       </div>`;
     }
 
@@ -135,45 +206,55 @@ function render() {
       let badges = '<span class="badge portfolio-badge">محفظتي</span>';
       if (isBroken) badges += '<span class="badge broken-badge">كسر القاع!</span>';
       if (isNear) badges += '<span class="badge near-badge">قريب</span>';
+      badges += healthBadge(h);
       portfolioEl.innerHTML += makeCard(s, cls, badges);
     }
 
     if (isBroken && !isPortfolio) {
-      brokenEl.innerHTML += makeCard(s, 'broken', '<span class="badge broken-badge">كسر القاع!</span>');
+      brokenEl.innerHTML += makeCard(s, 'broken', '<span class="badge broken-badge">كسر القاع!</span>' + healthBadge(h));
     }
 
     if (isNear && !isPortfolio) {
-      nearEl.innerHTML += makeCard(s, 'near', '<span class="badge near-badge">قريب</span>');
+      nearEl.innerHTML += makeCard(s, 'near', '<span class="badge near-badge">قريب</span>' + healthBadge(h));
     }
 
+    // Table
     let rowClass = isBroken ? 'broken-row' : (isNear ? 'near-row' : '');
-    let status = '';
-    if (isPortfolio) status += '<span class="status-dot" style="background:#3b82f6"></span>⭐ ';
-    if (isBroken) status += '<span class="dot-red status-dot"></span>كسر';
-    else if (isNear) status += '<span class="dot-yellow status-dot"></span>قريب';
-    else if (hasData) status += '<span class="dot-green status-dot"></span>فوق';
-    else status += '—';
+    let covidStatus = '';
+    if (isPortfolio) covidStatus += '⭐ ';
+    if (isBroken) covidStatus += '<span class="dot-red status-dot"></span>كسر';
+    else if (isNear) covidStatus += '<span class="dot-yellow status-dot"></span>قريب';
+    else if (hasData) covidStatus += '<span class="dot-green status-dot"></span>فوق';
+    else covidStatus += '—';
 
     tableEl.innerHTML += `<tr class="${rowClass}">
-      <td class="sym">${symDisplay}</td>
+      <td class="sym">${sym}</td>
       <td>${s.name}</td>
-      <td class="en-name">${yahooDisplay}</td>
+      <td class="en-name">${yn}</td>
+      <td>${healthIcon(h)}</td>
       <td>${s.covidLow || '—'}</td>
       <td>${s.currentPrice || '—'}</td>
       <td style="color:${diffPct !== null ? (diffPct < 0 ? '#ef4444' : diffPct < 10 ? '#f59e0b' : '#10b981') : '#64748b'}">${diffPct !== null ? diffPct.toFixed(1) + '%' : '—'}</td>
-      <td>${status}</td>
+      <td>${covidStatus}</td>
     </tr>`;
   });
 
+  let hGreen = stocks.filter(s=>s.health==='green').length;
+  let hYellow = stocks.filter(s=>s.health==='yellow').length;
+  let hRed = stocks.filter(s=>s.health==='red').length;
+
   statsEl.innerHTML = `
-    <div class="stat blue"><div class="num">${stocks.length}</div><div class="label">إجمالي الأسهم</div></div>
-    <div class="stat red"><div class="num">${countBroken}</div><div class="label">كسرت القاع 🔴</div></div>
-    <div class="stat yellow"><div class="num">${countNear}</div><div class="label">قريبة 🟡</div></div>
-    <div class="stat green"><div class="num">${countAbove}</div><div class="label">فوق القاع 🟢</div></div>
+    <div class="stat blue"><div class="num">${stocks.length}</div><div class="label">إجمالي</div></div>
+    <div class="stat red"><div class="num">${countBroken}</div><div class="label">كسرت القاع</div></div>
+    <div class="stat yellow"><div class="num">${countNear}</div><div class="label">قريبة</div></div>
+    <div class="stat green"><div class="num">${countAbove}</div><div class="label">فوق القاع</div></div>
+    <div class="stat green"><div class="num">${hGreen}</div><div class="label">💰 صحة قوية</div></div>
+    <div class="stat yellow"><div class="num">${hYellow}</div><div class="label">💰 متوسطة</div></div>
+    <div class="stat red"><div class="num">${hRed}</div><div class="label">💰 ضعيفة</div></div>
   `;
 
-  if (!brokenEl.innerHTML) brokenEl.innerHTML = '<div class="card"><div class="name">لا توجد أسهم كسرت القاع حالياً ✅</div></div>';
-  if (!nearEl.innerHTML) nearEl.innerHTML = '<div class="card"><div class="name">لا توجد أسهم قريبة من القاع حالياً</div></div>';
+  if (!brokenEl.innerHTML) brokenEl.innerHTML = '<div class="card"><div class="name">لا توجد أسهم كسرت القاع ✅</div></div>';
+  if (!nearEl.innerHTML) nearEl.innerHTML = '<div class="card"><div class="name">لا توجد أسهم قريبة من القاع</div></div>';
 }
 
 render();
