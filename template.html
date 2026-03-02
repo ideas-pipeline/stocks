@@ -94,7 +94,7 @@ tr.near-row{background:#1a1500}
 <thead><tr>
 <th>الرمز</th><th>الشركة</th><th>Yahoo</th>
 <th>💰</th>
-<th>قاع كورونا</th><th>الحالي</th><th>الفرق %</th><th>القاع</th>
+<th>قاع كورونا</th><th>الحالي</th><th>أمس</th><th>يومي %</th><th>الفرق %</th><th>القاع</th>
 </tr></thead>
 <tbody id="tableBody"></tbody>
 </table>
@@ -193,8 +193,8 @@ function render() {
       return `<div class="card ${cls}">
         <div class="name">${healthIcon(h)} ${s.name} ${badges}</div>
         <div class="symbol">${sym}.SR — ${yn}</div>
-        <div class="price ${priceClass}">${s.currentPrice ? s.currentPrice + ' ريال' : 'غير متوفر'}</div>
-        <div class="detail">قاع كورونا: ${s.covidLow ? s.covidLow + ' ريال' : 'غير متوفر'}${diffPct !== null ? ' | الفرق: ' + diffPct.toFixed(1) + '%' : ''}</div>
+        <div class="price ${priceClass}">${s.currentPrice ? s.currentPrice + ' ريال' : 'غير متوفر'}${s.dailyChange !== undefined ? ' <span style="font-size:0.5em;color:' + (s.dailyChange >= 0 ? '#10b981' : '#ef4444') + '">' + (s.dailyChange >= 0 ? '▲' : '▼') + Math.abs(s.dailyChange).toFixed(2) + '%</span>' : ''}</div>
+        <div class="detail">${s.previousClose ? 'إغلاق أمس: ' + s.previousClose + ' ريال | ' : ''}قاع كورونا: ${s.covidLow ? s.covidLow + ' ريال' : 'غير متوفر'}${diffPct !== null ? ' | الفرق: ' + diffPct.toFixed(1) + '%' : ''}</div>
         ${finBar(s.financials)}
       </div>`;
     }
@@ -234,6 +234,8 @@ function render() {
       <td>${healthIcon(h)}</td>
       <td>${s.covidLow || '—'}</td>
       <td>${s.currentPrice || '—'}</td>
+      <td>${s.previousClose || '—'}</td>
+      <td style="color:${s.dailyChange !== undefined ? (s.dailyChange >= 0 ? '#10b981' : '#ef4444') : '#64748b'}">${s.dailyChange !== undefined ? (s.dailyChange >= 0 ? '+' : '') + s.dailyChange.toFixed(2) + '%' : '—'}</td>
       <td style="color:${diffPct !== null ? (diffPct < 0 ? '#ef4444' : diffPct < 10 ? '#f59e0b' : '#10b981') : '#64748b'}">${diffPct !== null ? diffPct.toFixed(1) + '%' : '—'}</td>
       <td>${covidStatus}</td>
     </tr>`;
