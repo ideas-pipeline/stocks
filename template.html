@@ -11,7 +11,8 @@ h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .subtitle{text-align:center;color:#94a3b8;margin-bottom:24px;font-size:0.9em}
 .section-title{color:#f59e0b;font-size:1.2em;margin:24px 0 12px;padding-bottom:6px;border-bottom:2px solid #f59e0b33}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:24px}
-.card{background:#1e293b;border-radius:12px;padding:16px;border:1px solid #334155;position:relative}
+.card{background:#1e293b;border-radius:12px;padding:16px;border:1px solid #334155;position:relative;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 25px #0006}
 .card.portfolio{border-color:#3b82f6}
 .card.broken{border-color:#ef4444;background:#1a0a0a}
 .card.near{border-color:#f59e0b;background:#1a1500}
@@ -26,11 +27,10 @@ h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .card .fin-item.g{color:#10b981;background:#10b98115}
 .card .fin-item.y{color:#f59e0b;background:#f59e0b15}
 .card .fin-item.r{color:#ef4444;background:#ef444415}
+.card .alert-badge{position:absolute;top:8px;left:8px;background:#f59e0b;color:#0f172a;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75em;font-weight:bold;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 .health-dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-left:6px;vertical-align:middle}
-.health-dot.hg{background:#10b981}
-.health-dot.hy{background:#f59e0b}
-.health-dot.hr{background:#ef4444}
-.health-dot.hna{background:#475569}
+.health-dot.hg{background:#10b981}.health-dot.hy{background:#f59e0b}.health-dot.hr{background:#ef4444}.health-dot.hna{background:#475569}
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.75em;font-weight:bold;margin-left:8px}
 .badge.portfolio-badge{background:#3b82f633;color:#60a5fa}
 .badge.broken-badge{background:#ef444433;color:#f87171}
@@ -39,32 +39,67 @@ h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .badge.hg-badge{background:#10b98125;color:#10b981}
 .badge.hy-badge{background:#f59e0b25;color:#f59e0b}
 .badge.hr-badge{background:#ef444425;color:#ef4444}
+.badge.rec-badge{padding:3px 10px;font-size:0.75em}
+.badge.rec-buy{background:#10b98130;color:#10b981}
+.badge.rec-strong_buy{background:#10b98150;color:#10b981;border:1px solid #10b981}
+.badge.rec-sell{background:#ef444430;color:#ef4444}
+.badge.rec-strong_sell{background:#ef444450;color:#ef4444;border:1px solid #ef4444}
+.badge.rec-hold{background:#f59e0b30;color:#f59e0b}
 table{width:100%;border-collapse:collapse;margin-top:16px;font-size:0.8em}
 th{background:#334155;color:#f59e0b;padding:10px 6px;text-align:right;white-space:nowrap;position:sticky;top:0;z-index:1}
 td{padding:6px;border-bottom:1px solid #1e293b;text-align:right}
 td.sym{font-family:monospace;color:#64748b;direction:ltr;text-align:center;font-size:0.85em}
 td.en-name{color:#94a3b8;font-size:0.75em;direction:ltr;text-align:left;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-tr:hover{background:#1e293b}
+tr{cursor:pointer;transition:background .2s}
+tr:hover{background:#1e293b88}
 tr.broken-row{background:#1a0a0a}
 tr.near-row{background:#1a1500}
 .footer{text-align:center;color:#475569;margin-top:32px;font-size:0.8em;padding:16px}
 .status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px}
-.dot-red{background:#ef4444}
-.dot-yellow{background:#f59e0b}
-.dot-green{background:#10b981}
+.dot-red{background:#ef4444}.dot-yellow{background:#f59e0b}.dot-green{background:#10b981}
 .stats{display:flex;justify-content:center;gap:16px;margin:16px 0;flex-wrap:wrap}
 .stat{text-align:center;padding:8px 14px;background:#1e293b;border-radius:8px}
 .stat .num{font-size:1.3em;font-weight:bold}
 .stat .label{font-size:0.7em;color:#94a3b8;margin-top:2px}
-.stat.red .num{color:#ef4444}
-.stat.yellow .num{color:#f59e0b}
-.stat.green .num{color:#10b981}
-.stat.blue .num{color:#3b82f6}
+.stat.red .num{color:#ef4444}.stat.yellow .num{color:#f59e0b}.stat.green .num{color:#10b981}.stat.blue .num{color:#3b82f6}
 .legend{text-align:center;color:#64748b;font-size:0.75em;margin:8px 0 16px;line-height:1.8}
 .legend span{margin:0 8px}
-.tooltip{position:relative;cursor:help}
-.tooltip:hover::after{content:attr(data-tip);position:absolute;bottom:120%;right:50%;transform:translateX(50%);background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:6px 10px;border-radius:6px;font-size:0.75em;white-space:pre-line;z-index:10;min-width:180px;text-align:right}
-@media(max-width:600px){.cards{grid-template-columns:1fr}h1{font-size:1.2em}body{padding:8px}table{font-size:0.7em}.stats{gap:8px}.stat{padding:6px 10px}}
+
+/* === MODAL === */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);z-index:100;justify-content:center;align-items:center;padding:16px}
+.modal-overlay.active{display:flex}
+.modal{background:#1e293b;border-radius:16px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;border:1px solid #334155;animation:modalIn .3s ease-out}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px;border-bottom:1px solid #334155;position:sticky;top:0;background:#1e293b;z-index:2;border-radius:16px 16px 0 0}
+.modal-header h2{font-size:1.2em;color:#f8fafc}
+.modal-close{background:none;border:none;color:#94a3b8;font-size:1.5em;cursor:pointer;padding:4px 8px;border-radius:8px}
+.modal-close:hover{background:#334155;color:#f8fafc}
+.modal-body{padding:20px}
+.modal-section{margin-bottom:20px}
+.modal-section h3{color:#f59e0b;font-size:1em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #33415544}
+.indicator-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.indicator{background:#0f172a;border-radius:10px;padding:12px;text-align:center}
+.indicator .val{font-size:1.4em;font-weight:bold}
+.indicator .lbl{font-size:0.75em;color:#94a3b8;margin-top:4px}
+.indicator.green .val{color:#10b981}.indicator.red .val{color:#ef4444}.indicator.yellow .val{color:#f59e0b}.indicator.blue .val{color:#60a5fa}
+.chart-container{background:#0f172a;border-radius:10px;padding:16px;height:180px;position:relative;overflow:hidden}
+.chart-canvas{width:100%;height:100%}
+.rec-box{padding:16px;border-radius:12px;text-align:center;font-size:1.1em;font-weight:bold}
+.rec-box.strong_buy,.rec-box.buy{background:#10b98120;color:#10b981;border:1px solid #10b98140}
+.rec-box.strong_sell,.rec-box.sell{background:#ef444420;color:#ef4444;border:1px solid #ef444440}
+.rec-box.hold{background:#f59e0b20;color:#f59e0b;border:1px solid #f59e0b40}
+.rec-reasons{margin-top:10px;font-size:0.8em;color:#94a3b8;font-weight:normal}
+.alert-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#0f172a;border-radius:8px;margin-bottom:6px;font-size:0.9em}
+.news-item{padding:10px 0;border-bottom:1px solid #33415544}
+.news-item:last-child{border:none}
+.news-item .news-title{color:#e2e8f0;font-size:0.9em;line-height:1.4}
+.news-item .news-title a{color:#60a5fa;text-decoration:none}
+.news-item .news-title a:hover{text-decoration:underline}
+.news-item .news-meta{font-size:0.75em;color:#64748b;margin-top:4px}
+.div-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #33415544;font-size:0.9em}
+.div-item:last-child{border:none}
+
+@media(max-width:600px){.cards{grid-template-columns:1fr}h1{font-size:1.2em}body{padding:8px}table{font-size:0.7em}.stats{gap:8px}.stat{padding:6px 10px}.modal{max-height:95vh;border-radius:12px}.indicator-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -92,20 +127,34 @@ tr.near-row{background:#1a1500}
 <div class="section-title">📊 الجدول الشامل</div>
 <table>
 <thead><tr>
-<th>الرمز</th><th>الشركة</th><th>Yahoo</th>
-<th>💰</th>
+<th>⚠️</th><th>الرمز</th><th>الشركة</th><th>Yahoo</th>
+<th>💰</th><th>التوصية</th>
 <th>قاع كورونا</th><th>الحالي</th><th>أمس</th><th>يومي %</th><th>الفرق %</th><th>القاع</th>
 </tr></thead>
 <tbody id="tableBody"></tbody>
 </table>
 
+<!-- STOCK DETAIL MODAL -->
+<div class="modal-overlay" id="stockModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">—</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
 <div class="footer">
   تتحدث يومياً 10:00 ص + 3:30 م (الرياض) | قاع كورونا: Low يوم 16 مارس 2020<br>
-  💰 = الصحة المالية (5 معايير: سيولة + ديون + ربحية + كفاءة + نمو) | هادي 🦞
+  💰 = الصحة المالية (5 معايير: سيولة + ديون + ربحية + كفاءة + نمو) | هادي 🦞<br>
+  ⚠️ التوصيات مبنية على مؤشرات فنية فقط — ليست نصيحة استثمارية
 </div>
 
 <script>
 const DATA = __STOCKS_DATA__;
+const stocksMap = {};
+DATA.stocks.forEach(s => { stocksMap[s.symbol] = s; });
 
 function healthIcon(h) {
   if (h === 'green') return '<span class="health-dot hg" title="صحة مالية قوية"></span>';
@@ -113,58 +162,250 @@ function healthIcon(h) {
   if (h === 'red') return '<span class="health-dot hr" title="صحة مالية ضعيفة"></span>';
   return '<span class="health-dot hna" title="لا بيانات"></span>';
 }
-
 function healthBadge(h) {
   if (h === 'green') return '<span class="badge health-badge hg-badge">صحة قوية</span>';
   if (h === 'yellow') return '<span class="badge health-badge hy-badge">صحة متوسطة</span>';
   if (h === 'red') return '<span class="badge health-badge hr-badge">صحة ضعيفة</span>';
   return '';
 }
-
 function finBar(f) {
   if (!f) return '';
   let items = [];
-  if (f.currentRatio !== undefined) {
-    let c = f.currentRatio > 1.5 ? 'g' : f.currentRatio >= 1 ? 'y' : 'r';
-    items.push(`<span class="fin-item ${c}">سيولة: ${f.currentRatio}</span>`);
-  }
-  if (f.debtToEquity !== undefined) {
-    let c = f.debtToEquity < 50 ? 'g' : f.debtToEquity <= 150 ? 'y' : 'r';
-    items.push(`<span class="fin-item ${c}">دين: ${f.debtToEquity}%</span>`);
-  }
-  if (f.profitMargins !== undefined) {
-    let c = f.profitMargins > 10 ? 'g' : f.profitMargins >= 0 ? 'y' : 'r';
-    items.push(`<span class="fin-item ${c}">ربح: ${f.profitMargins}%</span>`);
-  }
-  if (f.returnOnEquity !== undefined) {
-    let c = f.returnOnEquity > 10 ? 'g' : f.returnOnEquity >= 0 ? 'y' : 'r';
-    items.push(`<span class="fin-item ${c}">ROE: ${f.returnOnEquity}%</span>`);
-  }
-  if (f.revenueGrowth !== undefined) {
-    let c = f.revenueGrowth > 5 ? 'g' : f.revenueGrowth >= 0 ? 'y' : 'r';
-    items.push(`<span class="fin-item ${c}">نمو: ${f.revenueGrowth}%</span>`);
-  }
+  if (f.currentRatio !== undefined) { let c = f.currentRatio > 1.5 ? 'g' : f.currentRatio >= 1 ? 'y' : 'r'; items.push(`<span class="fin-item ${c}">سيولة: ${f.currentRatio}</span>`); }
+  if (f.debtToEquity !== undefined) { let c = f.debtToEquity < 50 ? 'g' : f.debtToEquity <= 150 ? 'y' : 'r'; items.push(`<span class="fin-item ${c}">دين: ${f.debtToEquity}%</span>`); }
+  if (f.profitMargins !== undefined) { let c = f.profitMargins > 10 ? 'g' : f.profitMargins >= 0 ? 'y' : 'r'; items.push(`<span class="fin-item ${c}">ربح: ${f.profitMargins}%</span>`); }
+  if (f.returnOnEquity !== undefined) { let c = f.returnOnEquity > 10 ? 'g' : f.returnOnEquity >= 0 ? 'y' : 'r'; items.push(`<span class="fin-item ${c}">ROE: ${f.returnOnEquity}%</span>`); }
+  if (f.revenueGrowth !== undefined) { let c = f.revenueGrowth > 5 ? 'g' : f.revenueGrowth >= 0 ? 'y' : 'r'; items.push(`<span class="fin-item ${c}">نمو: ${f.revenueGrowth}%</span>`); }
   return '<div class="fin-bar">' + items.join('') + '</div>';
 }
+function recBadge(t) {
+  if (!t) return '';
+  const r = t.recommendation || 'hold';
+  return `<span class="badge rec-badge rec-${r}">${t.recommendationText || '—'}</span>`;
+}
 
+// === OPEN STOCK MODAL ===
+function openStock(symbol) {
+  const s = stocksMap[symbol];
+  if (!s) return;
+  const t = s.technical || {};
+  const alerts = s.alerts || [];
+  const news = s.news || [];
+  const divs = s.dividends || {};
+  const f = s.financials || {};
+
+  document.getElementById('modalTitle').innerHTML = `${healthIcon(s.health)} ${s.name} <span style="color:#64748b;font-size:.7em">${symbol}.SR</span>`;
+  
+  let html = '';
+  
+  // === RECOMMENDATION ===
+  const rec = t.recommendation || 'hold';
+  const recText = t.recommendationText || 'انتظار';
+  const recIcon = rec.includes('buy') ? '📈' : rec.includes('sell') ? '📉' : '⏸️';
+  html += `<div class="modal-section">
+    <div class="rec-box ${rec}">${recIcon} ${recText}
+      <div class="rec-reasons">${(t.reasons||[]).join(' • ')}</div>
+    </div>
+  </div>`;
+
+  // === ALERTS ===
+  if (alerts.length > 0) {
+    html += `<div class="modal-section"><h3>⚠️ تنبيهات</h3>`;
+    alerts.forEach(a => {
+      html += `<div class="alert-item">${a.icon} ${a.text}</div>`;
+    });
+    html += `</div>`;
+  }
+
+  // === CHART ===
+  if (t.chartPrices && t.chartPrices.length > 5) {
+    html += `<div class="modal-section"><h3>📊 حركة السعر (30 يوم)</h3>
+      <div class="chart-container"><canvas id="priceChart" class="chart-canvas"></canvas></div>
+    </div>`;
+  }
+
+  // === TECHNICAL INDICATORS ===
+  html += `<div class="modal-section"><h3>📈 المؤشرات الفنية</h3><div class="indicator-grid">`;
+  
+  const rsiColor = t.rsi > 70 ? 'red' : t.rsi < 30 ? 'green' : 'blue';
+  html += `<div class="indicator ${rsiColor}"><div class="val">${t.rsi || '—'}</div><div class="lbl">RSI (14)</div></div>`;
+  
+  const macdColor = t.macd > 0 ? 'green' : t.macd < 0 ? 'red' : 'yellow';
+  html += `<div class="indicator ${macdColor}"><div class="val">${t.macd || '—'}</div><div class="lbl">MACD</div></div>`;
+  
+  html += `<div class="indicator blue"><div class="val">${t.ma20 || '—'}</div><div class="lbl">MA20</div></div>`;
+  html += `<div class="indicator blue"><div class="val">${t.ma50 || '—'}</div><div class="lbl">MA50</div></div>`;
+  
+  const trendColor = t.trend === 'صاعد' ? 'green' : t.trend === 'هابط' ? 'red' : 'yellow';
+  html += `<div class="indicator ${trendColor}"><div class="val">${t.trend || '—'}</div><div class="lbl">الاتجاه</div></div>`;
+  
+  html += `<div class="indicator blue"><div class="val">${t.support || '—'}</div><div class="lbl">الدعم</div></div>`;
+  html += `<div class="indicator blue"><div class="val">${t.resistance || '—'}</div><div class="lbl">المقاومة</div></div>`;
+  
+  const dcColor = (s.dailyChange||0) >= 0 ? 'green' : 'red';
+  html += `<div class="indicator ${dcColor}"><div class="val">${s.dailyChange !== undefined ? s.dailyChange.toFixed(2)+'%' : '—'}</div><div class="lbl">التغير اليومي</div></div>`;
+  
+  html += `</div></div>`;
+
+  // === FINANCIAL HEALTH ===
+  html += `<div class="modal-section"><h3>💰 الصحة المالية</h3><div class="indicator-grid">`;
+  if (f.profitMargins !== undefined) { const c = f.profitMargins > 10 ? 'green' : f.profitMargins >= 0 ? 'yellow' : 'red'; html += `<div class="indicator ${c}"><div class="val">${f.profitMargins}%</div><div class="lbl">هامش الربح</div></div>`; }
+  if (f.returnOnEquity !== undefined) { const c = f.returnOnEquity > 10 ? 'green' : f.returnOnEquity >= 0 ? 'yellow' : 'red'; html += `<div class="indicator ${c}"><div class="val">${f.returnOnEquity}%</div><div class="lbl">العائد على الملكية</div></div>`; }
+  if (f.revenueGrowth !== undefined) { const c = f.revenueGrowth > 5 ? 'green' : f.revenueGrowth >= 0 ? 'yellow' : 'red'; html += `<div class="indicator ${c}"><div class="val">${f.revenueGrowth}%</div><div class="lbl">نمو الإيرادات</div></div>`; }
+  if (f.debtToEquity !== undefined) { const c = f.debtToEquity < 50 ? 'green' : f.debtToEquity <= 150 ? 'yellow' : 'red'; html += `<div class="indicator ${c}"><div class="val">${f.debtToEquity}%</div><div class="lbl">الدين/الملكية</div></div>`; }
+  html += `</div></div>`;
+
+  // === NEWS ===
+  if (news.length > 0) {
+    html += `<div class="modal-section"><h3>📰 آخر الأخبار</h3>`;
+    news.forEach(n => {
+      html += `<div class="news-item">
+        <div class="news-title"><a href="${n.url}" target="_blank">${n.title}</a></div>
+        <div class="news-meta">${n.source} — ${n.date ? new Date(n.date).toLocaleDateString('ar-SA') : ''}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // === DIVIDENDS ===
+  if (divs.hasDividends && divs.history && divs.history.length > 0) {
+    html += `<div class="modal-section"><h3>💵 تاريخ التوزيعات</h3>`;
+    divs.history.forEach(d => {
+      html += `<div class="div-item"><span>${d.date}</span><span style="color:#10b981;font-weight:bold">${d.amount} ريال</span></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // === PRICE INFO ===
+  html += `<div class="modal-section"><h3>💲 بيانات السعر</h3><div class="indicator-grid">`;
+  html += `<div class="indicator blue"><div class="val">${s.currentPrice || '—'}</div><div class="lbl">السعر الحالي</div></div>`;
+  html += `<div class="indicator blue"><div class="val">${s.previousClose || '—'}</div><div class="lbl">إغلاق أمس</div></div>`;
+  html += `<div class="indicator blue"><div class="val">${s.covidLow || '—'}</div><div class="lbl">قاع كوفيد</div></div>`;
+  const diff = s.covidLow && s.currentPrice ? (((s.currentPrice - s.covidLow) / s.covidLow) * 100).toFixed(1) : null;
+  if (diff !== null) { const c = diff < 0 ? 'red' : diff < 10 ? 'yellow' : 'green'; html += `<div class="indicator ${c}"><div class="val">${diff}%</div><div class="lbl">فرق القاع</div></div>`; }
+  html += `</div></div>`;
+
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('stockModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  // Draw chart
+  if (t.chartPrices && t.chartPrices.length > 5) {
+    setTimeout(() => drawChart(t.chartPrices, t.ma20, t.support, t.resistance), 100);
+  }
+}
+
+function closeModal() {
+  document.getElementById('stockModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// === DRAW MINI CHART ===
+function drawChart(prices, ma20, support, resistance) {
+  const canvas = document.getElementById('priceChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+  
+  const w = canvas.width, h = canvas.height;
+  const pad = {top: 10, bottom: 20, left: 10, right: 50};
+  const cw = w - pad.left - pad.right;
+  const ch = h - pad.top - pad.bottom;
+  
+  const min = Math.min(...prices) * 0.995;
+  const max = Math.max(...prices) * 1.005;
+  const range = max - min || 1;
+  
+  const x = i => pad.left + (i / (prices.length - 1)) * cw;
+  const y = v => pad.top + (1 - (v - min) / range) * ch;
+  
+  // Grid
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < 4; i++) {
+    const gy = pad.top + (i / 3) * ch;
+    ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(w - pad.right, gy); ctx.stroke();
+    const val = max - (i / 3) * range;
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(val.toFixed(1), w - pad.right + 4, gy + 4);
+  }
+
+  // Support line
+  if (support && support >= min && support <= max) {
+    ctx.strokeStyle = '#10b98160';
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(pad.left, y(support)); ctx.lineTo(w-pad.right, y(support)); ctx.stroke();
+    ctx.fillStyle = '#10b981';
+    ctx.font = '9px sans-serif';
+    ctx.fillText('دعم', pad.left + 2, y(support) - 3);
+    ctx.setLineDash([]);
+  }
+  
+  // Resistance line
+  if (resistance && resistance >= min && resistance <= max) {
+    ctx.strokeStyle = '#ef444460';
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(pad.left, y(resistance)); ctx.lineTo(w-pad.right, y(resistance)); ctx.stroke();
+    ctx.fillStyle = '#ef4444';
+    ctx.font = '9px sans-serif';
+    ctx.fillText('مقاومة', pad.left + 2, y(resistance) - 3);
+    ctx.setLineDash([]);
+  }
+
+  // Price line
+  const up = prices[prices.length-1] >= prices[0];
+  ctx.strokeStyle = up ? '#10b981' : '#ef4444';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  prices.forEach((p, i) => { i === 0 ? ctx.moveTo(x(i), y(p)) : ctx.lineTo(x(i), y(p)); });
+  ctx.stroke();
+
+  // Fill gradient
+  const grad = ctx.createLinearGradient(0, pad.top, 0, h - pad.bottom);
+  grad.addColorStop(0, up ? '#10b98120' : '#ef444420');
+  grad.addColorStop(1, 'transparent');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  prices.forEach((p, i) => { i === 0 ? ctx.moveTo(x(i), y(p)) : ctx.lineTo(x(i), y(p)); });
+  ctx.lineTo(x(prices.length-1), h - pad.bottom);
+  ctx.lineTo(x(0), h - pad.bottom);
+  ctx.closePath();
+  ctx.fill();
+
+  // MA20 line
+  if (ma20 && ma20 >= min && ma20 <= max) {
+    ctx.strokeStyle = '#f59e0b80';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(pad.left, y(ma20)); ctx.lineTo(w-pad.right, y(ma20)); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Current price dot
+  const last = prices[prices.length-1];
+  ctx.fillStyle = up ? '#10b981' : '#ef4444';
+  ctx.beginPath();
+  ctx.arc(x(prices.length-1), y(last), 4, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// === MAIN RENDER ===
 function render() {
   const d = DATA;
   document.getElementById('lastUpdate').textContent = d.lastUpdated || '';
-
   const portfolio = d.portfolio || [];
   const stocks = d.stocks || [];
-
   const portfolioEl = document.getElementById('portfolioCards');
   const brokenEl = document.getElementById('brokenCards');
   const nearEl = document.getElementById('nearCards');
   const tableEl = document.getElementById('tableBody');
   const statsEl = document.getElementById('stats');
-
-  portfolioEl.innerHTML = '';
-  brokenEl.innerHTML = '';
-  nearEl.innerHTML = '';
-  tableEl.innerHTML = '';
-
+  portfolioEl.innerHTML = ''; brokenEl.innerHTML = ''; nearEl.innerHTML = ''; tableEl.innerHTML = '';
   let countBroken = 0, countNear = 0, countAbove = 0;
 
   const sorted = [...stocks].sort((a, b) => {
@@ -179,44 +420,37 @@ function render() {
     let diffPct = hasData ? ((s.currentPrice - s.covidLow) / s.covidLow * 100) : null;
     let isBroken = diffPct !== null && diffPct < 0;
     let isNear = diffPct !== null && diffPct >= 0 && diffPct < 10;
-
-    if (isBroken) countBroken++;
-    else if (isNear) countNear++;
-    else if (hasData) countAbove++;
-
+    if (isBroken) countBroken++; else if (isNear) countNear++; else if (hasData) countAbove++;
     const sym = s.symbol || '?';
     const yn = s.yahooName || '';
     const h = s.health;
+    const alerts = s.alerts || [];
+    const t = s.technical || {};
 
     function makeCard(s, cls, badges) {
       let priceClass = diffPct !== null ? (diffPct < 0 ? 'down' : 'up') : '';
-      return `<div class="card ${cls}">
+      let alertBadge = alerts.length > 0 ? `<div class="alert-badge">⚠️</div>` : '';
+      return `<div class="card ${cls}" onclick="openStock('${sym}')">
+        ${alertBadge}
         <div class="name">${healthIcon(h)} ${s.name} ${badges}</div>
         <div class="symbol">${sym}.SR — ${yn}</div>
         <div class="price ${priceClass}">${s.currentPrice ? s.currentPrice + ' ريال' : 'غير متوفر'}${s.dailyChange !== undefined ? ' <span style="font-size:0.5em;color:' + (s.dailyChange >= 0 ? '#10b981' : '#ef4444') + '">' + (s.dailyChange >= 0 ? '▲' : '▼') + Math.abs(s.dailyChange).toFixed(2) + '%</span>' : ''}</div>
         <div class="detail">${s.previousClose ? 'إغلاق أمس: ' + s.previousClose + ' ريال | ' : ''}قاع كورونا: ${s.covidLow ? s.covidLow + ' ريال' : 'غير متوفر'}${diffPct !== null ? ' | الفرق: ' + diffPct.toFixed(1) + '%' : ''}</div>
+        ${recBadge(t)}
         ${finBar(s.financials)}
       </div>`;
     }
 
     if (isPortfolio) {
-      let cls = 'portfolio';
-      if (isBroken) cls += ' broken';
-      else if (isNear) cls += ' near';
+      let cls = 'portfolio'; if (isBroken) cls += ' broken'; else if (isNear) cls += ' near';
       let badges = '<span class="badge portfolio-badge">محفظتي</span>';
       if (isBroken) badges += '<span class="badge broken-badge">كسر القاع!</span>';
       if (isNear) badges += '<span class="badge near-badge">قريب</span>';
       badges += healthBadge(h);
       portfolioEl.innerHTML += makeCard(s, cls, badges);
     }
-
-    if (isBroken && !isPortfolio) {
-      brokenEl.innerHTML += makeCard(s, 'broken', '<span class="badge broken-badge">كسر القاع!</span>' + healthBadge(h));
-    }
-
-    if (isNear && !isPortfolio) {
-      nearEl.innerHTML += makeCard(s, 'near', '<span class="badge near-badge">قريب</span>' + healthBadge(h));
-    }
+    if (isBroken && !isPortfolio) brokenEl.innerHTML += makeCard(s, 'broken', '<span class="badge broken-badge">كسر القاع!</span>' + healthBadge(h));
+    if (isNear && !isPortfolio) nearEl.innerHTML += makeCard(s, 'near', '<span class="badge near-badge">قريب</span>' + healthBadge(h));
 
     // Table
     let rowClass = isBroken ? 'broken-row' : (isNear ? 'near-row' : '');
@@ -227,11 +461,16 @@ function render() {
     else if (hasData) covidStatus += '<span class="dot-green status-dot"></span>فوق';
     else covidStatus += '—';
 
-    tableEl.innerHTML += `<tr class="${rowClass}">
+    const alertIcon = alerts.length > 0 ? `<span style="cursor:pointer" title="${alerts.map(a=>a.text).join('\n')}">⚠️</span>` : '';
+    const recTd = recBadge(t);
+
+    tableEl.innerHTML += `<tr class="${rowClass}" onclick="openStock('${sym}')">
+      <td>${alertIcon}</td>
       <td class="sym">${sym}</td>
       <td>${s.name}</td>
       <td class="en-name">${yn}</td>
       <td>${healthIcon(h)}</td>
+      <td>${recTd}</td>
       <td>${s.covidLow || '—'}</td>
       <td>${s.currentPrice || '—'}</td>
       <td>${s.previousClose || '—'}</td>
@@ -244,6 +483,7 @@ function render() {
   let hGreen = stocks.filter(s=>s.health==='green').length;
   let hYellow = stocks.filter(s=>s.health==='yellow').length;
   let hRed = stocks.filter(s=>s.health==='red').length;
+  let alertsCount = stocks.filter(s=>(s.alerts||[]).length>0).length;
 
   statsEl.innerHTML = `
     <div class="stat blue"><div class="num">${stocks.length}</div><div class="label">إجمالي</div></div>
@@ -253,12 +493,12 @@ function render() {
     <div class="stat green"><div class="num">${hGreen}</div><div class="label">💰 صحة قوية</div></div>
     <div class="stat yellow"><div class="num">${hYellow}</div><div class="label">💰 متوسطة</div></div>
     <div class="stat red"><div class="num">${hRed}</div><div class="label">💰 ضعيفة</div></div>
+    <div class="stat yellow"><div class="num">${alertsCount}</div><div class="label">⚠️ تنبيهات</div></div>
   `;
 
   if (!brokenEl.innerHTML) brokenEl.innerHTML = '<div class="card"><div class="name">لا توجد أسهم كسرت القاع ✅</div></div>';
   if (!nearEl.innerHTML) nearEl.innerHTML = '<div class="card"><div class="name">لا توجد أسهم قريبة من القاع</div></div>';
 }
-
 render();
 </script>
 </body>
