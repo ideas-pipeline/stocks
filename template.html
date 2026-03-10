@@ -851,6 +851,104 @@ function compareStocks() {
   document.getElementById('compareResult').innerHTML = html;
 }
 
+// ══════════════════════════════════════
+// DATA ADAPTER LAYER — جاهز لأي مصدر بيانات
+// ══════════════════════════════════════
+
+const DATA_PROVIDERS = {
+  yahoo: { id: 'yahoo', name: 'Yahoo Finance', nameAr: 'ياهو فاينانس', type: 'free', status: 'active', color: '#7c3aed', fields: ['price', 'volume', 'history'] },
+  spglobal: { id: 'spglobal', name: 'S&P Global', nameAr: 'S&P Global', type: 'free', status: 'active', color: '#ef4444', fields: ['financials'] },
+  // ── جاهزة للتفعيل عند الاشتراك ──
+  tradingview: { id: 'tradingview', name: 'TradingView', nameAr: 'تريدنج فيو', type: 'paid', status: 'ready', color: '#2962FF', fields: ['signals', 'screener', 'alerts'], apiDocs: 'https://www.tradingview.com/rest-api-spec/' },
+  polygonio: { id: 'polygonio', name: 'Polygon.io', nameAr: 'بوليغون', type: 'paid', status: 'ready', color: '#8b5cf6', fields: ['realtime', 'history', 'fundamentals', 'news'], apiDocs: 'https://polygon.io/docs' },
+  alphavantage: { id: 'alphavantage', name: 'Alpha Vantage', nameAr: 'ألفا فانتيج', type: 'freemium', status: 'ready', color: '#059669', fields: ['fundamentals', 'earnings', 'overview'], apiDocs: 'https://www.alphavantage.co/documentation/' },
+  fmp: { id: 'fmp', name: 'Financial Modeling Prep', nameAr: 'FMP', type: 'freemium', status: 'ready', color: '#f59e0b', fields: ['financials', 'ratios', 'dcf', 'peers'], apiDocs: 'https://financialmodelingprep.com/developer/docs/' },
+  twelvedata: { id: 'twelvedata', name: 'Twelve Data', nameAr: 'تويلف داتا', type: 'freemium', status: 'ready', color: '#06b6d4', fields: ['realtime', 'technical', 'fundamentals'], apiDocs: 'https://twelvedata.com/docs' },
+  argaam: { id: 'argaam', name: 'Argaam', nameAr: 'أرقام', type: 'paid', status: 'ready', color: '#dc2626', fields: ['saudi_market', 'news_ar', 'financials_ar'], apiDocs: 'https://www.argaam.com' },
+  tadawul: { id: 'tadawul', name: 'Tadawul API', nameAr: 'تداول', type: 'paid', status: 'ready', color: '#1e40af', fields: ['official_data', 'announcements', 'ownership'], apiDocs: 'https://www.saudiexchange.sa' }
+};
+
+/**
+ * Data Adapter — نقطة واحدة لاستقبال بيانات من أي مصدر
+ * عند إضافة API جديد: أضف adapter هنا وربطه بالـ provider
+ */
+const DataAdapter = {
+  // ── تحويل بيانات أي مصدر لـ format المنصة ──
+  normalize(provider, rawData) {
+    const adapters = {
+      polygonio: (data) => ({
+        symbol: data.ticker?.replace('.SR',''),
+        currentPrice: data.results?.[0]?.c,
+        previousClose: data.results?.[0]?.o,
+        volume: data.results?.[0]?.v,
+        high: data.results?.[0]?.h,
+        low: data.results?.[0]?.l,
+        _source: 'polygonio'
+      }),
+      alphavantage: (data) => ({
+        symbol: data['Symbol'],
+        marketCap: data['MarketCapitalization'],
+        pe: data['PERatio'],
+        eps: data['EPS'],
+        dividendYield: data['DividendYield'],
+        _source: 'alphavantage'
+      }),
+      fmp: (data) => ({
+        symbol: data.symbol,
+        financials: {
+          currentRatio: data.currentRatio,
+          debtToEquity: data.debtEquityRatio,
+          profitMargins: data.netProfitMargin,
+          returnOnEquity: data.returnOnEquity,
+          revenueGrowth: data.revenueGrowth
+        },
+        _source: 'fmp'
+      }),
+      twelvedata: (data) => ({
+        symbol: data.symbol?.replace('.SR',''),
+        technical: {
+          rsi: data.rsi?.rsi,
+          macd: data.macd?.macd,
+          bbUpper: data.bbands?.upper_band,
+          bbLower: data.bbands?.lower_band
+        },
+        _source: 'twelvedata'
+      }),
+      generic: (data) => data // passthrough
+    };
+    return (adapters[provider] || adapters.generic)(rawData);
+  },
+
+  // ── دمج بيانات المصدر الجديد مع الموجود ──
+  merge(stock, newData) {
+    if (newData.currentPrice) stock.currentPrice = newData.currentPrice;
+    if (newData.financials) stock.financials = { ...stock.financials, ...newData.financials };
+    if (newData.technical) stock.technical = { ...stock.technical, ...newData.technical };
+    if (newData.marketCap) stock.marketCap = newData.marketCap;
+    if (newData.pe) stock.pe = newData.pe;
+    if (newData.eps) stock.eps = newData.eps;
+    if (newData._source) {
+      stock.dataSources = stock.dataSources || [];
+      if (!stock.dataSources.includes(newData._source)) stock.dataSources.push(newData._source);
+    }
+    return stock;
+  },
+
+  // ── استيراد بيانات من API خارجي (مستقبلي) ──
+  async fetchFromProvider(providerId, symbol) {
+    const provider = DATA_PROVIDERS[providerId];
+    if (!provider || provider.status !== 'active') {
+      return { ok: false, error: `المزود ${providerId} غير مفعّل` };
+    }
+    // placeholder — يُفعّل عند إضافة API key
+    return { ok: false, error: 'التكامل المباشر قيد التطوير — استخدم الاستيراد اليدوي حالياً' };
+  },
+
+  // ── قائمة المزودين النشطين ──
+  getActiveProviders() { return Object.values(DATA_PROVIDERS).filter(p => p.status === 'active'); },
+  getReadyProviders() { return Object.values(DATA_PROVIDERS).filter(p => p.status === 'ready'); }
+};
+
 // === MAIN RENDER ===
 function render() {
   const d = DATA;
