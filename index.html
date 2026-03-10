@@ -577,6 +577,11 @@ function openStock(symbol) {
   if (diff !== null) { const c = diff < 0 ? 'red' : diff < 10 ? 'yellow' : 'green'; html += `<div class="indicator ${c}"><div class="val">${diff}%</div><div class="lbl">فرق القاع</div></div>`; }
   html += `</div></div>`;
 
+  // AI Analysis button
+  html += `<div style="margin-top:14px;text-align:center">
+    <button onclick="event.stopPropagation();closeModal();showStockAIAnalysis('${symbol}')" style="padding:10px 24px;background:#f59e0b;color:#000;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;font-size:0.95em">🤖 تحليل AI شامل</button>
+  </div>`;
+
   document.getElementById('modalBody').innerHTML = html;
   document.getElementById('stockModal').classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -949,6 +954,96 @@ const DataAdapter = {
   getReadyProviders() { return Object.values(DATA_PROVIDERS).filter(p => p.status === 'ready'); }
 };
 
+// ══════════════════════════════════════
+// AI ANALYSIS LAYER
+// ══════════════════════════════════════
+
+const AI_STOCK_CONFIG = {
+  enabled: false,
+  provider: null,
+  model: null,
+  apiEndpoint: null,
+  maxTokens: 1500,
+  temperature: 0.3
+};
+
+function generateStockAnalysis(s) {
+  const t = s.technical || {};
+  const f = s.financials || {};
+  const sc = s.scoring;
+  if (!sc) return 'لا تقييم متاح';
+
+  const bd = sc.breakdown;
+  let text = `## ${s.name} (${s.symbol})\n\n`;
+  text += `**السعر:** ${s.currentPrice} ر.س | **التغير:** ${(s.dailyChange||0)>0?'+':''}${(s.dailyChange||0).toFixed(1)}% | **التقييم:** ${sc.total}/100 ${sc.ratingEmoji} ${sc.ratingAr}\n\n`;
+
+  // Strengths
+  text += `### ✅ نقاط القوة\n`;
+  if (bd.techScore >= 60) text += `- تحليل فني إيجابي (${bd.techScore}/100)\n`;
+  if (bd.finScore >= 60) text += `- صحة مالية جيدة (${bd.finScore}/100)\n`;
+  if (bd.momScore >= 60) text += `- زخم صاعد (${bd.momScore}/100)\n`;
+  if (bd.riskScore >= 60) text += `- مخاطر منخفضة (${bd.riskScore}/100)\n`;
+  if (bd.valScore >= 60) text += `- تقييم جاذب (${bd.valScore}/100)\n`;
+  if (t.macdCrossover === 'bullish') text += `- تقاطع MACD صاعد — إشارة شراء\n`;
+  if (t.rsi && t.rsi < 30) text += `- RSI منخفض (${t.rsi}) — فرصة شراء محتملة\n`;
+  if (f.revenueGrowth > 15) text += `- نمو إيرادات قوي (+${f.revenueGrowth}%)\n`;
+
+  // Weaknesses
+  text += `\n### ⚠️ نقاط الضعف\n`;
+  if (bd.techScore < 40) text += `- تحليل فني سلبي (${bd.techScore}/100)\n`;
+  if (bd.finScore < 40) text += `- صحة مالية ضعيفة (${bd.finScore}/100)\n`;
+  if (bd.momScore < 40) text += `- زخم هابط (${bd.momScore}/100)\n`;
+  if (bd.riskScore < 40) text += `- مخاطر عالية (${bd.riskScore}/100)\n`;
+  if (s.covidLow && s.currentPrice < s.covidLow) text += `- تحت قاع كورونا 2020 (${s.covidLow} ر.س)\n`;
+  if (f.debtToEquity > 150) text += `- ديون مرتفعة (${f.debtToEquity}%)\n`;
+  if (f.profitMargins < 0) text += `- هامش ربح سلبي (${f.profitMargins}%)\n`;
+
+  // Key indicators
+  text += `\n### 📊 المؤشرات الرئيسية\n`;
+  text += `- RSI: ${t.rsi || '—'} | MACD: ${t.macd || '—'} | الاتجاه: ${t.trend || '—'}\n`;
+  text += `- الدعم: ${t.support || '—'} | المقاومة: ${t.resistance || '—'}\n`;
+  if (f.currentRatio) text += `- نسبة التداول: ${f.currentRatio} | الديون: ${f.debtToEquity || '—'}%\n`;
+  if (f.profitMargins) text += `- هامش الربح: ${f.profitMargins}% | نمو الإيرادات: ${f.revenueGrowth || '—'}%\n`;
+
+  // Recommendation
+  text += `\n### 🎯 التوصية\n`;
+  if (sc.total >= 70) text += `**شراء قوي** — السهم يظهر مؤشرات ممتازة على كل المعايير. فرصة قوية.\n`;
+  else if (sc.total >= 58) text += `**شراء** — مؤشرات إيجابية بشكل عام. تستحق المتابعة والدخول.\n`;
+  else if (sc.total >= 45) text += `**انتظار** — إشارات مختلطة. راقب المؤشرات قبل اتخاذ قرار.\n`;
+  else if (sc.total >= 35) text += `**بيع/تخفيف** — مؤشرات سلبية. إذا عندك السهم فكّر بالتخفيف.\n`;
+  else text += `**بيع قوي** — مؤشرات سلبية على كل المعايير. تجنّب.\n`;
+
+  text += `\n---\n*تحليل آلي من بيانات ${new Date().toLocaleDateString('ar-SA')} — ليس توصية مالية نهائية*`;
+  return text;
+}
+
+function showStockAIAnalysis(symbol) {
+  const s = stocksMap[symbol];
+  if (!s) return;
+  const text = generateStockAnalysis(s);
+  const sc = s.scoring;
+
+  const html = text
+    .replace(/^## (.+)$/gm, '<h2 style="font-size:1.2em;margin:12px 0 6px;color:#f59e0b">$1</h2>')
+    .replace(/^### (.+)$/gm, '<h3 style="font-size:1em;margin:10px 0 4px;color:#e2e8f0">$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+    .replace(/^- (.+)$/gm, '<div style="padding:2px 0 2px 14px;font-size:0.88em">• $1</div>')
+    .replace(/\n\n/g, '<br>').replace(/\n/g, '<br>');
+
+  document.getElementById('modalTitle').innerHTML = `🤖 تحليل AI — ${s.name}`;
+  document.getElementById('modalBody').innerHTML = `
+    <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+      <span class="badge" style="background:#1e293b;color:#94a3b8">📊 تحليل آلي (محلي)</span>
+      ${sc ? `<span style="font-size:1.5em;font-weight:800;color:${sc.ratingColor}">${sc.total} ${sc.ratingEmoji}</span>` : ''}
+    </div>
+    <div style="color:#cbd5e1;line-height:1.8;font-size:0.9em" dir="rtl">${html}</div>
+    <div style="margin-top:14px;padding:10px;background:#1e293b;border-radius:8px;font-size:0.8em;color:#64748b">
+      💡 لتحليل أعمق بالذكاء الاصطناعي (Claude/GPT)، فعّل AI من الإعدادات.
+    </div>
+  `;
+  document.getElementById('stockModal').style.display = 'flex';
+}
+
 // === MAIN RENDER ===
 function render() {
   const d = DATA;
@@ -987,6 +1082,7 @@ function render() {
         <span>مخاطر ${sc.breakdown.riskScore}</span>
         <span>قيمة ${sc.breakdown.valScore}</span>
       </div>
+      <div style="margin-top:6px"><button onclick="event.stopPropagation();showStockAIAnalysis('${s.symbol}')" style="padding:4px 12px;background:#f59e0b33;color:#f59e0b;border:1px solid #f59e0b44;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.75em">🤖 تحليل</button></div>
     </div>`;
   }).join('');
 
