@@ -116,6 +116,15 @@ tr.near-row{background:#1a1500}
   <b>المعايير:</b> نسبة التداول • الدين/الملكية • هامش الربح • العائد على الملكية • نمو الإيرادات
 </div>
 
+<div class="section-title">🏆 أفضل الفرص — التقييم الشامل</div>
+<div class="cards" id="topOpportunities"></div>
+
+<div class="section-title">⛔ احذر منها — أضعف الأسهم</div>
+<div class="cards" id="worstStocks"></div>
+
+<div class="section-title">📊 تحليل القطاعات</div>
+<div class="cards" id="sectorAnalysis"></div>
+
 <div class="section-title">⭐ محفظتي</div>
 <div class="cards" id="portfolioCards"></div>
 
@@ -129,7 +138,7 @@ tr.near-row{background:#1a1500}
 <table>
 <thead><tr>
 <th>⚠️</th><th>الرمز</th><th>الشركة</th><th>Yahoo</th>
-<th>💰</th><th>التوصية</th>
+<th>💰</th><th>التقييم</th><th>التوصية</th>
 <th>قاع كورونا</th><th>الحالي</th><th>أمس</th><th>يومي %</th><th>الفرق %</th><th>القاع</th>
 </tr></thead>
 <tbody id="tableBody"></tbody>
@@ -156,6 +165,179 @@ tr.near-row{background:#1a1500}
 const DATA = __STOCKS_DATA__;
 const stocksMap = {};
 DATA.stocks.forEach(s => { stocksMap[s.symbol] = s; });
+
+// ══════════════════════════════════════
+// SCORING ENGINE — تقييم شامل لكل سهم
+// ══════════════════════════════════════
+
+const SCORE_WEIGHTS = {
+  technical: 0.30,   // التحليل الفني (RSI, MACD, trend)
+  financial: 0.25,   // الصحة المالية
+  momentum: 0.20,    // الزخم (تغير يومي + حجم)
+  risk: 0.15,        // المخاطر (تذبذب + قرب من القاع)
+  value: 0.10        // القيمة (بولنجر + دعم/مقاومة)
+};
+
+function calculateStockScore(s) {
+  const t = s.technical || {};
+  const f = s.financials || {};
+
+  // 1. Technical Score (0-100)
+  let techScore = 50;
+  const rsi = t.rsi || 50;
+  if (rsi >= 30 && rsi <= 70) techScore += 10;
+  if (rsi < 30) techScore += 20; // oversold = فرصة
+  if (rsi > 70) techScore -= 15;
+  if (t.macd > 0) techScore += 10;
+  if (t.macdCrossover === 'bullish') techScore += 15;
+  if (t.macdCrossover === 'bearish') techScore -= 15;
+  if (t.trend && t.trend.includes('صاعد')) techScore += 15;
+  if (t.trend && t.trend.includes('هابط')) techScore -= 10;
+  techScore = Math.max(0, Math.min(100, techScore));
+
+  // 2. Financial Score (0-100)
+  let finScore = 50;
+  if (s.health === 'green') finScore = 80;
+  else if (s.health === 'yellow') finScore = 50;
+  else if (s.health === 'red') finScore = 20;
+  const cr = f.currentRatio;
+  if (cr && cr > 1.5) finScore += 10;
+  if (cr && cr < 0.5) finScore -= 15;
+  const de = f.debtToEquity;
+  if (de && de < 50) finScore += 10;
+  if (de && de > 200) finScore -= 15;
+  const rg = f.revenueGrowth;
+  if (rg && rg > 10) finScore += 10;
+  if (rg && rg < -10) finScore -= 10;
+  finScore = Math.max(0, Math.min(100, finScore));
+
+  // 3. Momentum Score (0-100)
+  let momScore = 50;
+  const dc = s.dailyChange || 0;
+  if (dc > 3) momScore += 20;
+  else if (dc > 0) momScore += 10;
+  else if (dc < -3) momScore -= 15;
+  else if (dc < 0) momScore -= 5;
+  const vr = t.volumeRatio || 1;
+  if (vr > 1.5) momScore += 15;
+  if (t.volumeTrend === 'صاعد') momScore += 10;
+  if (t.volumeTrend === 'هابط') momScore -= 5;
+  momScore = Math.max(0, Math.min(100, momScore));
+
+  // 4. Risk Score (0-100, higher = less risky = better)
+  let riskScore = 60;
+  if (s.covidLow && s.currentPrice < s.covidLow) riskScore -= 20;
+  const atr = t.atr || 0;
+  const price = s.currentPrice || 1;
+  const atrPct = (atr / price) * 100;
+  if (atrPct > 5) riskScore -= 15;
+  if (atrPct < 2) riskScore += 10;
+  const bbw = t.bbWidth || 20;
+  if (bbw > 30) riskScore -= 10;
+  if (bbw < 15) riskScore += 10;
+  riskScore = Math.max(0, Math.min(100, riskScore));
+
+  // 5. Value Score (0-100)
+  let valScore = 50;
+  const bbPos = t.bbPosition || 50;
+  if (bbPos < 25) valScore += 20; // near lower band = potential value
+  if (bbPos > 80) valScore -= 15;
+  if (t.stochK && t.stochK < 20) valScore += 15; // oversold
+  if (t.stochK && t.stochK > 80) valScore -= 10;
+  valScore = Math.max(0, Math.min(100, valScore));
+
+  // Weighted total
+  const total = Math.round(
+    techScore * SCORE_WEIGHTS.technical +
+    finScore * SCORE_WEIGHTS.financial +
+    momScore * SCORE_WEIGHTS.momentum +
+    riskScore * SCORE_WEIGHTS.risk +
+    valScore * SCORE_WEIGHTS.value
+  );
+
+  // Rating
+  let rating, ratingAr, ratingColor, ratingEmoji;
+  if (total >= 70) { rating = 'strong-buy'; ratingAr = 'شراء قوي'; ratingColor = '#00cec9'; ratingEmoji = '🟢'; }
+  else if (total >= 58) { rating = 'buy'; ratingAr = 'شراء'; ratingColor = '#55efc4'; ratingEmoji = '🟢'; }
+  else if (total >= 45) { rating = 'hold'; ratingAr = 'انتظار'; ratingColor = '#fdcb6e'; ratingEmoji = '🟡'; }
+  else if (total >= 35) { rating = 'sell'; ratingAr = 'بيع'; ratingColor = '#f97316'; ratingEmoji = '🟠'; }
+  else { rating = 'strong-sell'; ratingAr = 'بيع قوي'; ratingColor = '#ff6b6b'; ratingEmoji = '🔴'; }
+
+  // Generate reasons
+  const reasons = [];
+  if (techScore >= 70) reasons.push('تحليل فني إيجابي');
+  if (techScore <= 30) reasons.push('تحليل فني سلبي');
+  if (finScore >= 70) reasons.push('صحة مالية قوية');
+  if (finScore <= 30) reasons.push('صحة مالية ضعيفة');
+  if (momScore >= 70) reasons.push('زخم صاعد');
+  if (momScore <= 30) reasons.push('زخم هابط');
+  if (riskScore <= 35) reasons.push('مخاطر عالية');
+  if (valScore >= 70) reasons.push('تقييم جاذب');
+  if (t.macdCrossover === 'bullish') reasons.push('تقاطع MACD صاعد');
+
+  return {
+    total, rating, ratingAr, ratingColor, ratingEmoji,
+    breakdown: { techScore, finScore, momScore, riskScore, valScore },
+    reasons
+  };
+}
+
+// Calculate scores for all stocks
+DATA.stocks.forEach(s => {
+  if (s.technical && s.currentPrice) {
+    s.scoring = calculateStockScore(s);
+  }
+});
+
+// Helper functions for scoring
+function getTopStocks(limit = 10) {
+  return DATA.stocks
+    .filter(s => s.scoring && s.currentPrice)
+    .sort((a, b) => b.scoring.total - a.scoring.total)
+    .slice(0, limit);
+}
+
+function getWorstStocks(limit = 10) {
+  return DATA.stocks
+    .filter(s => s.scoring && s.currentPrice)
+    .sort((a, b) => a.scoring.total - b.scoring.total)
+    .slice(0, limit);
+}
+
+function getSectorAnalysis() {
+  const sectors = {};
+  DATA.stocks.forEach(s => {
+    if (!s.scoring || !s.currentPrice) return;
+    const sym = s.symbol;
+    let sec = 'أخرى';
+    if (sym.startsWith('1')) sec = sym <= '1199' ? 'بنوك' : 'مواد أساسية';
+    else if (sym.startsWith('2')) sec = sym <= '2199' ? 'طاقة' : (sym <= '2299' ? 'كيميائيات' : 'مرافق');
+    else if (sym.startsWith('3')) sec = 'أسمنت';
+    else if (sym.startsWith('4')) sec = sym <= '4199' ? 'تجزئة' : 'عقارات';
+    else if (sym.startsWith('5')) sec = 'مرافق';
+    else if (sym.startsWith('6')) sec = 'أغذية وزراعة';
+    else if (sym.startsWith('7')) sec = sym <= '7099' ? 'اتصالات' : 'تقنية';
+    else if (sym.startsWith('8')) sec = 'تأمين';
+    else if (sym.startsWith('9')) sec = 'نمو';
+
+    if (!sectors[sec]) sectors[sec] = { name: sec, stocks: [], totalScore: 0 };
+    sectors[sec].stocks.push(s);
+    sectors[sec].totalScore += s.scoring.total;
+  });
+
+  Object.values(sectors).forEach(sec => {
+    sec.avgScore = Math.round(sec.totalScore / sec.stocks.length);
+    sec.topStock = sec.stocks.sort((a, b) => b.scoring.total - a.scoring.total)[0];
+  });
+
+  return Object.values(sectors).sort((a, b) => b.avgScore - a.avgScore);
+}
+
+function scoreBadge(s) {
+  if (!s || !s.scoring) return '';
+  const sc = s.scoring;
+  return `<span class="badge" style="background:${sc.ratingColor}22;color:${sc.ratingColor};font-weight:700;padding:2px 8px;border-radius:12px;font-size:0.78em">${sc.total} ${sc.ratingEmoji}</span>`;
+}
 
 function healthIcon(h) {
   if (h === 'green') return '<span class="health-dot hg" title="صحة مالية قوية"></span>';
@@ -199,6 +381,31 @@ function openStock(symbol) {
   
   let html = '';
   
+  // === COMPREHENSIVE SCORE ===
+  const sc = s.scoring;
+  if (sc) {
+    const bd = sc.breakdown;
+    html += `<div class="modal-section" style="background:${sc.ratingColor}11;border:1px solid ${sc.ratingColor}33;border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:1.1em;font-weight:700">التقييم الشامل</span>
+        <span style="font-size:1.8em;font-weight:800;color:${sc.ratingColor}">${sc.total} ${sc.ratingEmoji}</span>
+      </div>
+      <div style="font-size:0.9em;color:${sc.ratingColor};font-weight:700;margin-bottom:8px">${sc.ratingAr}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        ${['فني|techScore', 'مالي|finScore', 'زخم|momScore', 'مخاطر|riskScore', 'قيمة|valScore'].map(item => {
+          const [label, key] = item.split('|');
+          const v = bd[key];
+          const c = v >= 60 ? '#00cec9' : v >= 40 ? '#fdcb6e' : '#ff6b6b';
+          return `<div style="flex:1;min-width:55px;text-align:center;background:#0f172a;border-radius:6px;padding:6px">
+            <div style="font-size:1.1em;font-weight:700;color:${c}">${v}</div>
+            <div style="font-size:0.7em;color:#64748b">${label}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${sc.reasons.length > 0 ? `<div style="font-size:0.82em;color:#94a3b8">${sc.reasons.join(' • ')}</div>` : ''}
+    </div>`;
+  }
+
   // === RECOMMENDATION ===
   const rec = t.recommendation || 'hold';
   const recText = t.recommendationText || 'انتظار';
@@ -457,6 +664,63 @@ function render() {
   const tableEl = document.getElementById('tableBody');
   const statsEl = document.getElementById('stats');
   portfolioEl.innerHTML = ''; brokenEl.innerHTML = ''; nearEl.innerHTML = ''; tableEl.innerHTML = '';
+
+  // ── Render Top Opportunities ──
+  const topEl = document.getElementById('topOpportunities');
+  const worstEl = document.getElementById('worstStocks');
+  const sectorEl = document.getElementById('sectorAnalysis');
+
+  const topStocks = getTopStocks(8);
+  topEl.innerHTML = topStocks.map(s => {
+    const sc = s.scoring;
+    return `<div class="card" onclick="openStock('${s.symbol}')" style="cursor:pointer;border-right:3px solid ${sc.ratingColor}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><b>${s.name}</b> <span style="color:#94a3b8;font-size:0.8em">${s.symbol}</span> ${healthIcon(s.health)}</div>
+        <div style="font-size:1.3em;font-weight:800;color:${sc.ratingColor}">${sc.total}</div>
+      </div>
+      <div style="color:#94a3b8;font-size:0.82em;margin-top:4px">${s.currentPrice} ر.س | ${(s.dailyChange||0)>0?'+':''}${(s.dailyChange||0).toFixed(1)}%</div>
+      <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">
+        <span class="badge" style="background:${sc.ratingColor}22;color:${sc.ratingColor}">${sc.ratingEmoji} ${sc.ratingAr}</span>
+        ${sc.reasons.slice(0,2).map(r => `<span class="badge" style="background:#1e293b;color:#94a3b8;font-size:0.72em">${r}</span>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;font-size:0.75em;color:#64748b">
+        <span>فني ${sc.breakdown.techScore}</span>
+        <span>مالي ${sc.breakdown.finScore}</span>
+        <span>زخم ${sc.breakdown.momScore}</span>
+        <span>مخاطر ${sc.breakdown.riskScore}</span>
+        <span>قيمة ${sc.breakdown.valScore}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // ── Render Worst Stocks ──
+  const worstStocks = getWorstStocks(5);
+  worstEl.innerHTML = worstStocks.map(s => {
+    const sc = s.scoring;
+    return `<div class="card" onclick="openStock('${s.symbol}')" style="cursor:pointer;border-right:3px solid ${sc.ratingColor}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><b>${s.name}</b> <span style="color:#94a3b8;font-size:0.8em">${s.symbol}</span> ${healthIcon(s.health)}</div>
+        <div style="font-size:1.3em;font-weight:800;color:${sc.ratingColor}">${sc.total}</div>
+      </div>
+      <div style="color:#94a3b8;font-size:0.82em;margin-top:4px">${s.currentPrice} ر.س | ${(s.dailyChange||0)>0?'+':''}${(s.dailyChange||0).toFixed(1)}%</div>
+      <div style="margin-top:6px">${sc.reasons.map(r => `<span class="badge" style="background:#ff6b6b22;color:#ff6b6b;font-size:0.72em">${r}</span>`).join(' ')}</div>
+    </div>`;
+  }).join('');
+
+  // ── Render Sector Analysis ──
+  const sectors = getSectorAnalysis();
+  sectorEl.innerHTML = sectors.map(sec => {
+    const clr = sec.avgScore >= 58 ? '#00cec9' : sec.avgScore >= 45 ? '#fdcb6e' : '#ff6b6b';
+    const top = sec.topStock;
+    return `<div class="card" style="border-right:3px solid ${clr}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <b>${sec.name}</b>
+        <span style="font-size:1.2em;font-weight:800;color:${clr}">${sec.avgScore}</span>
+      </div>
+      <div style="color:#94a3b8;font-size:0.82em;margin-top:4px">${sec.stocks.length} سهم</div>
+      ${top ? `<div style="font-size:0.8em;color:#64748b;margin-top:4px">الأفضل: <b style="color:#e2e8f0">${top.name}</b> (${top.scoring.total})</div>` : ''}
+    </div>`;
+  }).join('');
   let countBroken = 0, countNear = 0, countAbove = 0;
 
   const sorted = [...stocks].sort((a, b) => {
@@ -521,6 +785,7 @@ function render() {
       <td>${s.name}</td>
       <td class="en-name">${yn}</td>
       <td>${healthIcon(h)}</td>
+      <td>${scoreBadge(s)}</td>
       <td>${recTd}</td>
       <td>${s.covidLow || '—'}</td>
       <td>${s.currentPrice || '—'}</td>
