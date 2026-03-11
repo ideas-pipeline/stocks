@@ -3,69 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>سيف تداول — تحليل أسهم تاسي</title>
+<title>سيف تداول — النموذج الاستثماري</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Tahoma,sans-serif;background:#0f172a;color:#e2e8f0;padding:16px;max-width:1400px;margin:0 auto}
 h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
-.subtitle{text-align:center;color:#94a3b8;margin-bottom:24px;font-size:0.9em}
+.subtitle{text-align:center;color:#94a3b8;margin-bottom:8px;font-size:0.9em}
 .section-title{color:#f59e0b;font-size:1.2em;margin:24px 0 12px;padding-bottom:6px;border-bottom:2px solid #f59e0b33}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:24px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:24px}
 .card{background:#1e293b;border-radius:12px;padding:16px;border:1px solid #334155;position:relative;cursor:pointer;transition:transform .2s,box-shadow .2s}
 .card:hover{transform:translateY(-3px);box-shadow:0 8px 25px #0006}
-.card.portfolio{border-color:#3b82f6}
-.card.broken{border-color:#ef4444;background:#1a0a0a}
-.card.near{border-color:#f59e0b;background:#1a1500}
-.card .name{font-size:1.1em;font-weight:bold;color:#f8fafc}
-.card .symbol{color:#64748b;font-size:0.8em;margin-top:2px;font-family:monospace;direction:ltr;text-align:right}
-.card .price{font-size:1.8em;font-weight:bold;margin:8px 0}
-.card .price.down{color:#ef4444}
-.card .price.up{color:#10b981}
-.card .detail{color:#94a3b8;font-size:0.85em;line-height:1.6}
-.card .fin-bar{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
-.card .fin-item{font-size:0.7em;padding:2px 6px;border-radius:4px;background:#0f172a;color:#94a3b8}
-.card .fin-item.g{color:#10b981;background:#10b98115}
-.card .fin-item.y{color:#f59e0b;background:#f59e0b15}
-.card .fin-item.r{color:#ef4444;background:#ef444415}
-.card .alert-badge{position:absolute;top:8px;left:8px;background:#f59e0b;color:#0f172a;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75em;font-weight:bold;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
-.health-dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-left:6px;vertical-align:middle}
-.health-dot.hg{background:#10b981}.health-dot.hy{background:#f59e0b}.health-dot.hr{background:#ef4444}.health-dot.hna{background:#475569}
-.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.75em;font-weight:bold;margin-left:8px}
-.badge.portfolio-badge{background:#3b82f633;color:#60a5fa}
-.badge.broken-badge{background:#ef444433;color:#f87171}
-.badge.near-badge{background:#f59e0b33;color:#fbbf24}
-.badge.health-badge{padding:2px 6px;font-size:0.7em}
-.badge.hg-badge{background:#10b98125;color:#10b981}
-.badge.hy-badge{background:#f59e0b25;color:#f59e0b}
-.badge.hr-badge{background:#ef444425;color:#ef4444}
-.badge.rec-badge{padding:3px 10px;font-size:0.75em}
-.badge.rec-buy{background:#10b98130;color:#10b981}
-.badge.rec-strong_buy{background:#10b98150;color:#10b981;border:1px solid #10b981}
-.badge.rec-sell{background:#ef444430;color:#ef4444}
-.badge.rec-strong_sell{background:#ef444450;color:#ef4444;border:1px solid #ef4444}
-.badge.rec-hold{background:#f59e0b30;color:#f59e0b}
-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:0.8em}
-th{background:#334155;color:#f59e0b;padding:10px 6px;text-align:right;white-space:nowrap;position:sticky;top:0;z-index:1}
-td{padding:6px;border-bottom:1px solid #1e293b;text-align:right}
-td.sym{font-family:monospace;color:#64748b;direction:ltr;text-align:center;font-size:0.85em}
-td.en-name{color:#94a3b8;font-size:0.75em;direction:ltr;text-align:left;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-tr{cursor:pointer;transition:background .2s}
-tr:hover{background:#1e293b88}
-tr.broken-row{background:#1a0a0a}
-tr.near-row{background:#1a1500}
-.footer{text-align:center;color:#475569;margin-top:32px;font-size:0.8em;padding:16px}
-.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px}
-.dot-red{background:#ef4444}.dot-yellow{background:#f59e0b}.dot-green{background:#10b981}
-.stats{display:flex;justify-content:center;gap:16px;margin:16px 0;flex-wrap:wrap}
+.card .name{font-size:1.05em;font-weight:bold;color:#f8fafc}
+.card .symbol{color:#64748b;font-size:0.8em;font-family:monospace;direction:ltr;text-align:right}
+.card .price{font-size:1.6em;font-weight:bold;margin:6px 0}
+.card .price.down{color:#ef4444}.card .price.up{color:#10b981}
+.card .sector-tag{font-size:0.7em;padding:2px 8px;border-radius:12px;background:#334155;color:#94a3b8;display:inline-block;margin-top:4px}
+
+/* Score bar */
+.score-bar{margin:10px 0 6px;position:relative;height:8px;background:#334155;border-radius:4px;overflow:hidden}
+.score-fill{height:100%;border-radius:4px;transition:width .5s}
+.score-fill.high{background:linear-gradient(90deg,#10b981,#059669)}
+.score-fill.mid{background:linear-gradient(90deg,#f59e0b,#d97706)}
+.score-fill.low{background:linear-gradient(90deg,#ef4444,#dc2626)}
+.score-label{display:flex;justify-content:space-between;font-size:0.8em;color:#94a3b8}
+.score-num{font-size:1.3em;font-weight:bold;margin-left:4px}
+.score-num.high{color:#10b981}.score-num.mid{color:#f59e0b}.score-num.low{color:#ef4444}
+
+/* Pillars */
+.pillars{display:flex;gap:4px;margin:8px 0;flex-wrap:wrap}
+.pillar{font-size:0.65em;padding:3px 6px;border-radius:4px;background:#0f172a;color:#94a3b8}
+.pillar.g{color:#10b981;background:#10b98115}
+.pillar.y{color:#f59e0b;background:#f59e0b15}
+.pillar.r{color:#ef4444;background:#ef444415}
+
+/* Classification badge */
+.class-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.8em;font-weight:bold}
+.class-badge.strong_buy{background:#10b98140;color:#10b981;border:1px solid #10b981}
+.class-badge.buy{background:#10b98125;color:#10b981}
+.class-badge.hold{background:#f59e0b25;color:#f59e0b}
+.class-badge.sell{background:#ef444425;color:#ef4444}
+.class-badge.strong_sell{background:#ef444440;color:#ef4444;border:1px solid #ef4444}
+
+/* Timing */
+.timing{font-size:0.75em;margin-top:4px}
+.timing .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:4px}
+.timing .dot.g{background:#10b981}.timing .dot.y{background:#f59e0b}.timing .dot.r{background:#ef4444}
+
+/* Stats */
+.stats{display:flex;justify-content:center;gap:12px;margin:16px 0;flex-wrap:wrap}
 .stat{text-align:center;padding:8px 14px;background:#1e293b;border-radius:8px}
 .stat .num{font-size:1.3em;font-weight:bold}
 .stat .label{font-size:0.7em;color:#94a3b8;margin-top:2px}
-.stat.red .num{color:#ef4444}.stat.yellow .num{color:#f59e0b}.stat.green .num{color:#10b981}.stat.blue .num{color:#3b82f6}
-.legend{text-align:center;color:#64748b;font-size:0.75em;margin:8px 0 16px;line-height:1.8}
-.legend span{margin:0 8px}
+.stat.green .num{color:#10b981}.stat.yellow .num{color:#f59e0b}.stat.red .num{color:#ef4444}.stat.blue .num{color:#3b82f6}
 
-/* === MODAL === */
+/* Filter bar */
+.filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.filter-bar button{padding:6px 14px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;border-radius:8px;cursor:pointer;font-family:inherit;font-size:0.85em;transition:all .2s}
+.filter-bar button:hover{border-color:#f59e0b}
+.filter-bar button.active{background:#f59e0b;color:#000;border-color:#f59e0b}
+.filter-bar select{padding:6px;background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:8px;font-family:inherit}
+
+/* Table */
+table{width:100%;border-collapse:collapse;margin-top:16px;font-size:0.8em}
+th{background:#334155;color:#f59e0b;padding:10px 6px;text-align:right;white-space:nowrap;position:sticky;top:0;z-index:1;cursor:pointer}
+th:hover{color:#fbbf24}
+td{padding:6px;border-bottom:1px solid #1e293b44;text-align:right}
+tr{cursor:pointer;transition:background .2s}
+tr:hover{background:#1e293b88}
+
+/* Modal */
 .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);z-index:100;justify-content:center;align-items:center;padding:16px}
 .modal-overlay.active{display:flex}
 .modal{background:#1e293b;border-radius:16px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;border:1px solid #334155;animation:modalIn .3s ease-out}
@@ -77,153 +83,79 @@ tr.near-row{background:#1a1500}
 .modal-body{padding:20px}
 .modal-section{margin-bottom:20px}
 .modal-section h3{color:#f59e0b;font-size:1em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #33415544}
-.indicator-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.indicator-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 .indicator{background:#0f172a;border-radius:10px;padding:12px;text-align:center}
-.indicator .val{font-size:1.4em;font-weight:bold}
-.indicator .lbl{font-size:0.75em;color:#94a3b8;margin-top:4px}
+.indicator .val{font-size:1.3em;font-weight:bold}
+.indicator .lbl{font-size:0.7em;color:#94a3b8;margin-top:4px}
 .indicator.green .val{color:#10b981}.indicator.red .val{color:#ef4444}.indicator.yellow .val{color:#f59e0b}.indicator.blue .val{color:#60a5fa}
-.chart-container{background:#0f172a;border-radius:10px;padding:16px;height:180px;position:relative;overflow:hidden}
-.chart-canvas{width:100%;height:100%}
-.rec-box{padding:16px;border-radius:12px;text-align:center;font-size:1.1em;font-weight:bold}
-.rec-box.strong_buy,.rec-box.buy{background:#10b98120;color:#10b981;border:1px solid #10b98140}
-.rec-box.strong_sell,.rec-box.sell{background:#ef444420;color:#ef4444;border:1px solid #ef444440}
-.rec-box.hold{background:#f59e0b20;color:#f59e0b;border:1px solid #f59e0b40}
-.rec-reasons{margin-top:10px;font-size:0.8em;color:#94a3b8;font-weight:normal}
-.alert-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#0f172a;border-radius:8px;margin-bottom:6px;font-size:0.9em}
-.news-item{padding:10px 0;border-bottom:1px solid #33415544}
-.news-item:last-child{border:none}
-.news-item .news-title{color:#e2e8f0;font-size:0.9em;line-height:1.4}
-.news-item .news-title a{color:#60a5fa;text-decoration:none}
-.news-item .news-title a:hover{text-decoration:underline}
-.news-item .news-meta{font-size:0.75em;color:#64748b;margin-top:4px}
-.div-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #33415544;font-size:0.9em}
-.div-item:last-child{border:none}
+.chart-container{background:#0f172a;border-radius:10px;padding:16px;height:160px;position:relative;overflow:hidden}
 
-.watchlist-btn{position:absolute;top:8px;left:8px;background:none;border:none;font-size:1.3em;cursor:pointer;opacity:0.5;transition:opacity .2s}
-.watchlist-btn:hover,.watchlist-btn.active{opacity:1}
-.watchlist-bar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
-.watchlist-bar button{padding:6px 14px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;border-radius:8px;cursor:pointer;font-family:inherit;font-size:0.85em}
-.watchlist-bar button.active{background:#f59e0b;color:#000;border-color:#f59e0b}
-.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:700px){.compare-grid{grid-template-columns:1fr}}
+/* Pillar detail bars */
+.pillar-bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:0.85em}
+.pillar-bar .bar-label{min-width:80px;color:#94a3b8}
+.pillar-bar .bar-track{flex:1;height:10px;background:#334155;border-radius:5px;overflow:hidden}
+.pillar-bar .bar-fill{height:100%;border-radius:5px}
+.pillar-bar .bar-val{min-width:40px;text-align:left;font-weight:bold}
 
-/* ══════ MOBILE RESPONSIVE ══════ */
+.footer{text-align:center;color:#475569;margin-top:32px;font-size:0.8em;padding:16px}
+
+/* Mobile */
 @media(max-width:768px){
   body{padding:10px;font-size:0.95em}
-  h1{font-size:1.3em;margin:12px 0 6px}
-  .subtitle{font-size:0.8em}
+  h1{font-size:1.3em}
   .cards{grid-template-columns:1fr}
-  .card{padding:12px}
-  .card .name{font-size:1em}
-  .card .price{font-size:1.4em}
-  .card .detail{font-size:0.8em}
-  .card .fin-bar{gap:4px}
-  .card .fin-item{font-size:0.65em;padding:2px 4px}
-  .stats{gap:6px;flex-wrap:wrap}
-  .stat{padding:6px 10px;min-width:70px}
-  .stat .num{font-size:1.1em}
-  .stat .label{font-size:0.65em}
-  .legend{font-size:0.7em;line-height:1.6}
-  .watchlist-bar{gap:6px}
-  .watchlist-bar button{padding:5px 10px;font-size:0.8em}
-  .section-title{font-size:1em;margin:16px 0 8px}
-  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;font-size:0.72em}
-  thead{position:static}
-  th{padding:8px 4px;font-size:0.78em}
-  td{padding:5px 4px}
-  .modal-overlay{padding:8px}
+  .filter-bar{gap:6px}
+  .filter-bar button{padding:5px 10px;font-size:0.8em}
+  table{display:block;overflow-x:auto;font-size:0.72em}
   .modal{max-width:100%;max-height:95vh;border-radius:12px}
-  .modal-header{padding:14px}
-  .modal-header h2{font-size:1em}
   .modal-body{padding:14px}
   .indicator-grid{grid-template-columns:1fr 1fr}
-  .indicator{padding:8px}
-  .indicator .val{font-size:1.1em}
-  .indicator .lbl{font-size:0.7em}
-  .rec-box{padding:12px;font-size:1em}
-  .chart-container{height:140px}
-  .news-item .news-title{font-size:0.85em}
-}
-@media(max-width:400px){
-  body{padding:6px}
-  h1{font-size:1.1em}
-  .stats{justify-content:space-around}
-  .stat{flex:1;min-width:60px}
-  .card .price{font-size:1.2em}
-  table{font-size:0.65em}
-  .indicator-grid{grid-template-columns:1fr 1fr}
-  .modal-body{padding:10px}
+  .stats{gap:6px}
+  .stat{padding:6px 10px;min-width:65px}
 }
 </style>
 </head>
 <body>
-<h1>سيف تداول — تحليل أسهم تاسي</h1>
-<div class="subtitle">منصة خاصة (أبوسيف)</div>
-<div class="subtitle" style="margin-top:-18px">آخر تحديث: <span id="lastUpdate">جاري التحميل...</span> | المصدر: Yahoo Finance</div>
+<h1>⚔️ سيف تداول — النموذج الاستثماري</h1>
+<div class="subtitle">تقييم استثماري متوسط المدى (6-12 شهر) | 5 محاور | 100 نقطة</div>
+<div class="subtitle" style="margin-top:-4px">آخر تحديث: <span id="lastUpdate">—</span></div>
 <div class="stats" id="stats"></div>
-<div class="legend">
-  <b>الصحة المالية:</b>
-  <span><span class="health-dot hg"></span> قوي</span>
-  <span><span class="health-dot hy"></span> متوسط</span>
-  <span><span class="health-dot hr"></span> ضعيف</span>
-  &nbsp;|&nbsp;
-  <b>المعايير:</b> نسبة التداول • الدين/الملكية • هامش الربح • العائد على الملكية • نمو الإيرادات
+
+<div class="filter-bar" id="filterBar">
+  <button class="active" onclick="filterBy('all')">📊 الكل</button>
+  <button onclick="filterBy('strong_buy')">⭐ شراء قوي</button>
+  <button onclick="filterBy('buy')">✅ شراء</button>
+  <button onclick="filterBy('hold')">⏳ انتظار</button>
+  <button onclick="filterBy('sell')">❌ بيع</button>
+  <button onclick="filterBy('filtered')">⛔ لم يعدّ الفلتر</button>
+  <select id="sectorFilter" onchange="filterBySector(this.value)">
+    <option value="all">كل القطاعات</option>
+  </select>
 </div>
 
-<div class="watchlist-bar">
-  <button onclick="showSection('all')" class="active" id="btn-all">📊 الكل</button>
-  <button onclick="showSection('watchlist')" id="btn-watchlist">⭐ قائمة المتابعة (<span id="watchCount">0</span>)</button>
-  <button onclick="showSection('compare')" id="btn-compare">⚖️ مقارنة</button>
-  <button onclick="exportWatchlist()" style="margin-right:auto;font-size:0.78em;color:#94a3b8;border-color:#334155">📤 تصدير القائمة</button>
-</div>
-
-<div id="section-watchlist" style="display:none">
-  <div class="section-title">⭐ قائمة المتابعة</div>
-  <div id="watchlistEmpty" style="color:#64748b;padding:20px;text-align:center">لا أسهم في القائمة بعد. اضغط ⭐ على أي سهم لإضافته.</div>
-  <div class="cards" id="watchlistCards"></div>
-</div>
-
-<div id="section-compare" style="display:none">
-  <div class="section-title">⚖️ مقارنة أسهم</div>
-  <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
-    <select id="cmp-stock-a" style="padding:8px;background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:8px;font-family:inherit"></select>
-    <span style="color:#64748b;font-weight:700">vs</span>
-    <select id="cmp-stock-b" style="padding:8px;background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:8px;font-family:inherit"></select>
-    <button onclick="compareStocks()" style="padding:8px 16px;background:#f59e0b;color:#000;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700">قارن</button>
-  </div>
-  <div id="compareResult"></div>
-</div>
-
-<div id="section-all">
-<div class="section-title">🏆 أفضل الفرص — التقييم الشامل</div>
-<div class="cards" id="topOpportunities"></div>
-
-<div class="section-title">⛔ احذر منها — أضعف الأسهم</div>
-<div class="cards" id="worstStocks"></div>
-
-<div class="section-title">📊 تحليل القطاعات</div>
-<div class="cards" id="sectorAnalysis"></div>
-
-<div class="section-title">⭐ محفظتي</div>
-<div class="cards" id="portfolioCards"></div>
-
-<div class="section-title">🔴 أسهم كسرت قاع كورونا</div>
-<div class="cards" id="brokenCards"></div>
-
-<div class="section-title">🟡 أسهم قريبة من القاع (أقل من 10%)</div>
-<div class="cards" id="nearCards"></div>
+<div class="section-title">🏆 أفضل الفرص الاستثمارية</div>
+<div class="cards" id="topCards"></div>
 
 <div class="section-title">📊 الجدول الشامل</div>
-<table>
+<table id="mainTable">
 <thead><tr>
-<th>⚠️</th><th>الرمز</th><th>الشركة</th><th>Yahoo</th>
-<th>💰</th><th>التقييم</th><th>التوصية</th>
-<th>قاع كورونا</th><th>الحالي</th><th>أمس</th><th>يومي %</th><th>الفرق %</th><th>القاع</th>
+<th onclick="sortTable('score')">النقاط ↕</th>
+<th>التصنيف</th>
+<th>التوقيت</th>
+<th>الرمز</th>
+<th>الشركة</th>
+<th>القطاع</th>
+<th onclick="sortTable('price')">السعر ↕</th>
+<th onclick="sortTable('change')">يومي % ↕</th>
+<th onclick="sortTable('pe')">P/E ↕</th>
+<th onclick="sortTable('pb')">P/B ↕</th>
+<th onclick="sortTable('roe')">ROE ↕</th>
+<th onclick="sortTable('rs6m')">RS 6M ↕</th>
 </tr></thead>
 <tbody id="tableBody"></tbody>
 </table>
 
-<!-- STOCK DETAIL MODAL -->
+<!-- Modal -->
 <div class="modal-overlay" id="stockModal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-header">
@@ -234,1078 +166,359 @@ tr.near-row{background:#1a1500}
   </div>
 </div>
 
-</div><!-- close section-all -->
-
 <div class="footer">
-  تتحدث يومياً 10:00 ص + 3:30 م (الرياض) | قاع كورونا: Low يوم 16 مارس 2020<br>
-  💰 = الصحة المالية (5 معايير: سيولة + ديون + ربحية + كفاءة + نمو) | أبوسيف<br>
-  ⚠️ التوصيات مبنية على مؤشرات فنية فقط — ليست نصيحة استثمارية
+  النموذج الاستثماري: صحة مالية 30% | اتجاه فني أسبوعي 25% | زخم نسبي 15% | مخاطر 15% | تقييم 15%<br>
+  التوقيت: EMA50D + RSI Daily + MACD Daily + Volume — لا يؤثر على النقاط، يحدد وقت الدخول فقط<br>
+  ⚠️ ليست نصيحة استثمارية | أبوسيف
 </div>
 
 <script>
 const DATA = __STOCKS_DATA__;
-const stocksMap = {};
-DATA.stocks.forEach(s => { stocksMap[s.symbol] = s; });
 
-// ══════════════════════════════════════
-// SCORING ENGINE — تقييم شامل لكل سهم
-// ══════════════════════════════════════
+const SECTOR_AR = {"Financials": "المالية", "Materials": "المواد الأساسية", "Industrials": "الصناعية", "Consumer Discretionary": "السلع الاستهلاكية", "Consumer Staples": "السلع الأساسية", "Healthcare": "الرعاية الصحية", "Real Estate": "العقارية", "Energy": "الطاقة", "Technology": "التقنية", "Communication Services": "الاتصالات", "Utilities": "المرافق", "Unknown": "غير مصنف"};
 
-const SCORE_WEIGHTS = {
-  technical: 0.30,   // التحليل الفني (RSI, MACD, trend)
-  financial: 0.25,   // الصحة المالية
-  momentum: 0.20,    // الزخم (تغير يومي + حجم)
-  risk: 0.15,        // المخاطر (تذبذب + قرب من القاع)
-  value: 0.10        // القيمة (بولنجر + دعم/مقاومة)
-};
+const stocks = DATA.stocks;
+let currentFilter = 'all';
+let currentSector = 'all';
+let sortKey = 'score';
+let sortAsc = false;
 
-function calculateStockScore(s) {
-  const t = s.technical || {};
-  const f = s.financials || {};
-
-  // 1. Technical Score (0-100) — مع عقوبات كاملة للإشارات السلبية
-  let techScore = 50;
-  const rsi = t.rsi || 50;
-  if (rsi >= 30 && rsi <= 70) techScore += 10;
-  if (rsi < 30) techScore += 20; // oversold = فرصة
-  if (rsi > 70) techScore -= 15;
-  if (t.macd > 0) techScore += 10;
-  if (t.macd < 0) techScore -= 15; // ⚡ عقوبة MACD سلبي
-  if (t.macdCrossover === 'bullish') techScore += 15;
-  if (t.macdCrossover === 'bearish') techScore -= 15;
-  if (t.trend && t.trend.includes('صاعد')) techScore += 15;
-  if (t.trend && t.trend.includes('هابط')) techScore -= 15; // ⚡ عقوبة أقوى
-  // عقوبة: السعر تحت MA20
-  if (t.ma20 && s.currentPrice && s.currentPrice < t.ma20) techScore -= 10;
-  techScore = Math.max(0, Math.min(100, techScore));
-
-  // 2. Financial Score (0-100)
-  let finScore = 50;
-  if (s.health === 'green') finScore = 80;
-  else if (s.health === 'yellow') finScore = 50;
-  else if (s.health === 'red') finScore = 20;
-  const cr = f.currentRatio;
-  if (cr && cr > 1.5) finScore += 10;
-  if (cr && cr < 0.5) finScore -= 15;
-  const de = f.debtToEquity;
-  if (de && de < 50) finScore += 10;
-  if (de && de > 200) finScore -= 15;
-  const rg = f.revenueGrowth;
-  if (rg && rg > 10) finScore += 10;
-  if (rg && rg < -10) finScore -= 10;
-  finScore = Math.max(0, Math.min(100, finScore));
-
-  // 3. Momentum Score (0-100)
-  let momScore = 50;
-  const dc = s.dailyChange || 0;
-  if (dc > 3) momScore += 20;
-  else if (dc > 0) momScore += 10;
-  else if (dc < -3) momScore -= 15;
-  else if (dc < 0) momScore -= 5;
-  const vr = t.volumeRatio || 1;
-  if (vr > 1.5) momScore += 15;
-  if (t.volumeTrend === 'صاعد') momScore += 10;
-  if (t.volumeTrend === 'هابط') momScore -= 5;
-  momScore = Math.max(0, Math.min(100, momScore));
-
-  // 4. Risk Score (0-100, higher = less risky = better)
-  let riskScore = 60;
-  if (s.covidLow && s.currentPrice < s.covidLow) riskScore -= 20;
-  const atr = t.atr || 0;
-  const price = s.currentPrice || 1;
-  const atrPct = (atr / price) * 100;
-  if (atrPct > 5) riskScore -= 15;
-  if (atrPct < 2) riskScore += 10;
-  const bbw = t.bbWidth || 20;
-  if (bbw > 30) riskScore -= 10;
-  if (bbw < 15) riskScore += 10;
-  riskScore = Math.max(0, Math.min(100, riskScore));
-
-  // 5. Value Score (0-100)
-  let valScore = 50;
-  const bbPos = t.bbPosition || 50;
-  if (bbPos < 25) valScore += 20;
-  if (bbPos > 80) valScore -= 15;
-  if (t.stochK && t.stochK < 20) valScore += 15;
-  if (t.stochK && t.stochK > 80) valScore -= 10;
-  valScore = Math.max(0, Math.min(100, valScore));
-
-  // Weighted total
-  const total = Math.round(
-    techScore * SCORE_WEIGHTS.technical +
-    finScore * SCORE_WEIGHTS.financial +
-    momScore * SCORE_WEIGHTS.momentum +
-    riskScore * SCORE_WEIGHTS.risk +
-    valScore * SCORE_WEIGHTS.value
-  );
-
-  // ══════════════════════════════════════
-  // التوصية النهائية — نظام البوابتين
-  // الأساسيات تحدد "هل تستاهل؟"
-  // الفنيات تحدد "هل الوقت صح؟"
-  // ══════════════════════════════════════
-  const finOK = finScore >= 55;       // أساسيات مقبولة+
-  const finStrong = finScore >= 70;   // أساسيات قوية
-  const techOK = techScore >= 50;     // فنيات إيجابية
-  const techStrong = techScore >= 65; // فنيات قوية
-
-  let rating, ratingAr, ratingColor, ratingEmoji, logic;
-
-  if (finStrong && techStrong) {
-    rating = 'strong-buy'; ratingAr = 'شراء قوي'; ratingColor = '#00cec9'; ratingEmoji = '🟢';
-    logic = 'شركة ممتازة + توقيت ممتاز';
-  } else if (finOK && techOK) {
-    rating = 'buy'; ratingAr = 'شراء'; ratingColor = '#55efc4'; ratingEmoji = '🟢';
-    logic = 'أساسيات جيدة + إشارات فنية إيجابية';
-  } else if (finStrong && !techOK) {
-    // ⚡ الحالة المهمة: شركة ممتازة لكن فنياً هابطة = راقب
-    rating = 'watch'; ratingAr = 'راقب'; ratingColor = '#74b9ff'; ratingEmoji = '🔵';
-    logic = 'شركة ممتازة — انتظر إشارة ارتداد';
-  } else if (finOK && !techOK) {
-    rating = 'hold'; ratingAr = 'انتظار'; ratingColor = '#fdcb6e'; ratingEmoji = '🟡';
-    logic = 'أساسيات مقبولة — لا إشارة فنية واضحة';
-  } else if (!finOK && techOK) {
-    rating = 'caution'; ratingAr = 'حذر'; ratingColor = '#f97316'; ratingEmoji = '🟠';
-    logic = 'ارتداد فني لكن أساسيات ضعيفة — مضاربة فقط';
-  } else if (!finOK && !techOK && finScore <= 35) {
-    rating = 'strong-sell'; ratingAr = 'بيع قوي'; ratingColor = '#ff6b6b'; ratingEmoji = '🔴';
-    logic = 'أساسيات ضعيفة + فنيات سلبية';
-  } else {
-    rating = 'sell'; ratingAr = 'بيع'; ratingColor = '#f97316'; ratingEmoji = '🟠';
-    logic = 'إشارات سلبية — يُنصح بالحذر';
-  }
-
-  // Generate reasons
-  const reasons = [];
-  reasons.push(logic);
-  if (finStrong) reasons.push('صحة مالية قوية');
-  else if (finScore <= 35) reasons.push('صحة مالية ضعيفة');
-  if (techStrong) reasons.push('تحليل فني إيجابي');
-  else if (techScore <= 30) reasons.push('تحليل فني سلبي');
-  if (momScore >= 70) reasons.push('زخم صاعد');
-  if (momScore <= 30) reasons.push('زخم هابط');
-  if (riskScore <= 35) reasons.push('مخاطر عالية');
-  if (valScore >= 70) reasons.push('تقييم جاذب');
-  if (t.macdCrossover === 'bullish') reasons.push('تقاطع MACD صاعد');
-
-  return {
-    total, rating, ratingAr, ratingColor, ratingEmoji, logic,
-    breakdown: { techScore, finScore, momScore, riskScore, valScore },
-    reasons
-  };
-}
-
-// Calculate scores for all stocks
-DATA.stocks.forEach(s => {
-  if (s.technical && s.currentPrice) {
-    s.scoring = calculateStockScore(s);
-  }
-});
-
-// Helper functions for scoring
-function getTopStocks(limit = 10) {
-  return DATA.stocks
-    .filter(s => s.scoring && s.currentPrice)
-    .sort((a, b) => b.scoring.total - a.scoring.total)
-    .slice(0, limit);
-}
-
-function getWorstStocks(limit = 10) {
-  return DATA.stocks
-    .filter(s => s.scoring && s.currentPrice)
-    .sort((a, b) => a.scoring.total - b.scoring.total)
-    .slice(0, limit);
-}
-
-function getSectorAnalysis() {
-  const sectors = {};
-  DATA.stocks.forEach(s => {
-    if (!s.scoring || !s.currentPrice) return;
-    const sym = s.symbol;
-    let sec = 'أخرى';
-    if (sym.startsWith('1')) sec = sym <= '1199' ? 'بنوك' : 'مواد أساسية';
-    else if (sym.startsWith('2')) sec = sym <= '2199' ? 'طاقة' : (sym <= '2299' ? 'كيميائيات' : 'مرافق');
-    else if (sym.startsWith('3')) sec = 'أسمنت';
-    else if (sym.startsWith('4')) sec = sym <= '4199' ? 'تجزئة' : 'عقارات';
-    else if (sym.startsWith('5')) sec = 'مرافق';
-    else if (sym.startsWith('6')) sec = 'أغذية وزراعة';
-    else if (sym.startsWith('7')) sec = sym <= '7099' ? 'اتصالات' : 'تقنية';
-    else if (sym.startsWith('8')) sec = 'تأمين';
-    else if (sym.startsWith('9')) sec = 'نمو';
-
-    if (!sectors[sec]) sectors[sec] = { name: sec, stocks: [], totalScore: 0 };
-    sectors[sec].stocks.push(s);
-    sectors[sec].totalScore += s.scoring.total;
+function init() {
+  document.getElementById('lastUpdate').textContent = DATA.lastUpdated || DATA.analysisUpdated || '';
+  
+  // Stats
+  let counts = {strong_buy:0, buy:0, hold:0, sell:0, strong_sell:0, filtered:0};
+  stocks.forEach(s => {
+    let sc = s.investmentScore || {};
+    if (sc.filtered) counts.filtered++;
+    else counts[sc.classCode] = (counts[sc.classCode]||0) + 1;
   });
-
-  Object.values(sectors).forEach(sec => {
-    sec.avgScore = Math.round(sec.totalScore / sec.stocks.length);
-    sec.topStock = sec.stocks.sort((a, b) => b.scoring.total - a.scoring.total)[0];
+  
+  document.getElementById('stats').innerHTML = `
+    <div class="stat green"><div class="num">${counts.strong_buy}</div><div class="label">شراء قوي</div></div>
+    <div class="stat green"><div class="num">${counts.buy}</div><div class="label">شراء</div></div>
+    <div class="stat yellow"><div class="num">${counts.hold}</div><div class="label">انتظار</div></div>
+    <div class="stat red"><div class="num">${counts.sell + counts.strong_sell}</div><div class="label">بيع</div></div>
+    <div class="stat blue"><div class="num">${counts.filtered}</div><div class="label">فلتر</div></div>
+    <div class="stat"><div class="num">${stocks.length}</div><div class="label">إجمالي</div></div>
+  `;
+  
+  // Sector filter
+  let secs = new Set();
+  stocks.forEach(s => { if(s.investmentScore?.sector) secs.add(s.investmentScore.sector); });
+  let sel = document.getElementById('sectorFilter');
+  [...secs].sort().forEach(sec => {
+    let o = document.createElement('option');
+    o.value = sec;
+    o.textContent = SECTOR_AR[sec] || sec;
+    sel.appendChild(o);
   });
-
-  return Object.values(sectors).sort((a, b) => b.avgScore - a.avgScore);
+  
+  renderTopCards();
+  renderTable();
 }
 
-function scoreBadge(s) {
-  if (!s || !s.scoring) return '';
-  const sc = s.scoring;
-  return `<span class="badge" style="background:${sc.ratingColor}22;color:${sc.ratingColor};font-weight:700;padding:2px 8px;border-radius:12px;font-size:0.78em">${sc.total} ${sc.ratingEmoji}</span>`;
+function getScoreClass(score) {
+  if (score >= 65) return 'high';
+  if (score >= 40) return 'mid';
+  return 'low';
 }
 
-function healthIcon(h) {
-  if (h === 'green') return '<span class="health-dot hg" title="صحة مالية قوية"></span>';
-  if (h === 'yellow') return '<span class="health-dot hy" title="صحة مالية متوسطة"></span>';
-  if (h === 'red') return '<span class="health-dot hr" title="صحة مالية ضعيفة"></span>';
-  return '<span class="health-dot hna" title="لا بيانات"></span>';
-}
-function healthBadge(h) {
-  if (h === 'green') return '<span class="badge health-badge hg-badge">صحة قوية</span>';
-  if (h === 'yellow') return '<span class="badge health-badge hy-badge">صحة متوسطة</span>';
-  if (h === 'red') return '<span class="badge health-badge hr-badge">صحة ضعيفة</span>';
-  return '';
-}
-function finBar(f) {
-  if (!f) return '';
-  let items = [];
-  if (f.currentRatio !== undefined) { let c = f.currentRatio > 1.5 ? 'g' : f.currentRatio >= 1 ? 'y' : 'r'; items.push(`<span class="fin-item ${c}">سيولة: ${f.currentRatio}</span>`); }
-  if (f.debtToEquity !== undefined) { let c = f.debtToEquity < 50 ? 'g' : f.debtToEquity <= 150 ? 'y' : 'r'; items.push(`<span class="fin-item ${c}">دين: ${f.debtToEquity}%</span>`); }
-  if (f.profitMargins !== undefined) { let c = f.profitMargins > 10 ? 'g' : f.profitMargins >= 0 ? 'y' : 'r'; items.push(`<span class="fin-item ${c}">ربح: ${f.profitMargins}%</span>`); }
-  if (f.returnOnEquity !== undefined) { let c = f.returnOnEquity > 10 ? 'g' : f.returnOnEquity >= 0 ? 'y' : 'r'; items.push(`<span class="fin-item ${c}">ROE: ${f.returnOnEquity}%</span>`); }
-  if (f.revenueGrowth !== undefined) { let c = f.revenueGrowth > 5 ? 'g' : f.revenueGrowth >= 0 ? 'y' : 'r'; items.push(`<span class="fin-item ${c}">نمو: ${f.revenueGrowth}%</span>`); }
-  return '<div class="fin-bar">' + items.join('') + '</div>';
-}
-function recBadge(t, scoring) {
-  // يستخدم التقييم الشامل بدل التوصية الفنية القديمة
-  if (scoring) {
-    const r = scoring.rating.includes('buy') ? 'buy' : scoring.rating.includes('sell') ? 'sell' : 'hold';
-    return `<span class="badge rec-badge rec-${r}" style="background:${scoring.ratingColor}22;color:${scoring.ratingColor}">${scoring.ratingAr}</span>`;
-  }
-  if (!t) return '';
-  const r = t.recommendation || 'hold';
-  return `<span class="badge rec-badge rec-${r}">${t.recommendationText || '—'}</span>`;
-}
-
-// === OPEN STOCK MODAL ===
-function openStock(symbol) {
-  const s = stocksMap[symbol];
-  if (!s) return;
-  const t = s.technical || {};
-  const alerts = s.alerts || [];
-  const news = s.news || [];
-  const divs = s.dividends || {};
-  const f = s.financials || {};
-
-  document.getElementById('modalTitle').innerHTML = `${healthIcon(s.health)} ${s.name} <span style="color:#64748b;font-size:.7em">${symbol}.SR</span>`;
+function renderTopCards() {
+  let top = stocks.filter(s => !s.investmentScore?.filtered && s.investmentScore?.total >= 65)
+    .sort((a,b) => (b.investmentScore?.total||0) - (a.investmentScore?.total||0))
+    .slice(0, 12);
   
   let html = '';
-  
-  // === COMPREHENSIVE SCORE ===
-  const sc = s.scoring;
-  if (sc) {
-    const bd = sc.breakdown;
-    html += `<div class="modal-section" style="background:${sc.ratingColor}11;border:1px solid ${sc.ratingColor}33;border-radius:8px;padding:12px;margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span style="font-size:1.1em;font-weight:700">التقييم الشامل</span>
-        <span style="font-size:1.8em;font-weight:800;color:${sc.ratingColor}">${sc.total} ${sc.ratingEmoji}</span>
+  top.forEach(s => {
+    let sc = s.investmentScore || {};
+    let scClass = getScoreClass(sc.total);
+    let priceClass = (s.dailyChange||0) >= 0 ? 'up' : 'down';
+    let timingDot = sc.timing === 'ممتاز' ? 'g' : (sc.timing === 'مقبول' ? 'y' : 'r');
+    
+    html += `<div class="card" onclick="openModal('${s.symbol}')">
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <div>
+          <div class="name">${s.name}</div>
+          <div class="symbol">${s.symbol}</div>
+          <div class="sector-tag">${SECTOR_AR[sc.sector] || sc.sector || ''}</div>
+        </div>
+        <div style="text-align:left">
+          <div class="score-num ${scClass}">${sc.total}</div>
+          <div class="class-badge ${sc.classCode}">${sc.classification}</div>
+        </div>
       </div>
-      <div style="font-size:0.9em;color:${sc.ratingColor};font-weight:700;margin-bottom:8px">${sc.ratingAr}</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-        ${['فني|techScore', 'مالي|finScore', 'زخم|momScore', 'مخاطر|riskScore', 'قيمة|valScore'].map(item => {
-          const [label, key] = item.split('|');
-          const v = bd[key];
-          const c = v >= 60 ? '#00cec9' : v >= 40 ? '#fdcb6e' : '#ff6b6b';
-          return `<div style="flex:1;min-width:55px;text-align:center;background:#0f172a;border-radius:6px;padding:6px">
-            <div style="font-size:1.1em;font-weight:700;color:${c}">${v}</div>
-            <div style="font-size:0.7em;color:#64748b">${label}</div>
-          </div>`;
-        }).join('')}
+      <div class="score-bar"><div class="score-fill ${scClass}" style="width:${sc.total}%"></div></div>
+      <div class="pillars">
+        <span class="pillar ${sc.financial>=20?'g':(sc.financial>=12?'y':'r')}">مالية ${sc.financial}/30</span>
+        <span class="pillar ${sc.trend>=17?'g':(sc.trend>=10?'y':'r')}">اتجاه ${sc.trend}/25</span>
+        <span class="pillar ${sc.relativeStrength>=10?'g':(sc.relativeStrength>=5?'y':'r')}">زخم ${sc.relativeStrength}/15</span>
+        <span class="pillar ${sc.risk>=10?'g':(sc.risk>=5?'y':'r')}">مخاطر ${sc.risk}/15</span>
+        <span class="pillar ${sc.valuation>=10?'g':(sc.valuation>=5?'y':'r')}">تقييم ${sc.valuation}/15</span>
       </div>
-      ${sc.reasons.length > 0 ? `<div style="font-size:0.82em;color:#94a3b8">${sc.reasons.join(' • ')}</div>` : ''}
-    </div>`;
-  }
-
-  // === RECOMMENDATION (من التقييم الشامل — نظام واحد موحد) ===
-  if (sc) {
-    const recIcon = sc.rating.includes('buy') ? '📈' : sc.rating === 'watch' ? '🔍' : sc.rating.includes('sell') ? '📉' : sc.rating === 'caution' ? '⚠️' : '⏸️';
-    const recClass = sc.rating.includes('buy') ? 'buy' : sc.rating.includes('sell') ? 'sell' : 'hold';
-    html += `<div class="modal-section">
-      <div class="rec-box ${recClass}" style="background:${sc.ratingColor}20;color:${sc.ratingColor};border:1px solid ${sc.ratingColor}40">
-        ${recIcon} ${sc.ratingAr}
-        <div class="rec-reasons">${sc.logic || ''}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+        <div class="price ${priceClass}">${s.currentPrice} ر.س</div>
+        <div class="timing"><span class="dot ${timingDot}"></span> توقيت: ${sc.timing} (${sc.timingSignals}/4)</div>
       </div>
     </div>`;
-  }
+  });
+  
+  document.getElementById('topCards').innerHTML = html || '<div style="color:#64748b;padding:20px;text-align:center">لا توجد أسهم تعدت حاجز 65 نقطة</div>';
+}
 
-  // === FORECAST ===
-  if (t.forecast) {
-    html += `<div class="modal-section" style="background:#0f172a;border-radius:12px;padding:14px;margin-bottom:16px">
-      <div style="font-size:.85em;color:#94a3b8;margin-bottom:4px">📮 التوقع القادم</div>
-      <div style="font-size:1.05em;font-weight:600;color:#f8fafc">${t.forecast}</div>
-      <div style="margin-top:6px;font-size:.75em;color:#64748b">القوة: <span style="color:${Math.abs(t.score||0)>40?'#10b981':Math.abs(t.score||0)>20?'#f59e0b':'#64748b'}">${t.score||0}/100</span></div>
+function getFiltered() {
+  let list = stocks;
+  if (currentFilter === 'filtered') {
+    list = list.filter(s => s.investmentScore?.filtered);
+  } else if (currentFilter !== 'all') {
+    list = list.filter(s => !s.investmentScore?.filtered && s.investmentScore?.classCode === currentFilter);
+  }
+  if (currentSector !== 'all') {
+    list = list.filter(s => s.investmentScore?.sector === currentSector);
+  }
+  // Sort
+  list.sort((a,b) => {
+    let va, vb;
+    switch(sortKey) {
+      case 'score': va = a.investmentScore?.total||0; vb = b.investmentScore?.total||0; break;
+      case 'price': va = a.currentPrice||0; vb = b.currentPrice||0; break;
+      case 'change': va = a.dailyChange||0; vb = b.dailyChange||0; break;
+      case 'pe': va = a.valuation?.pe||999; vb = b.valuation?.pe||999; break;
+      case 'pb': va = a.valuation?.pb||999; vb = b.valuation?.pb||999; break;
+      case 'roe': va = a.financials?.returnOnEquity||0; vb = b.financials?.returnOnEquity||0; break;
+      case 'rs6m': va = a.relativeStrength?.rsTasi6m||0; vb = b.relativeStrength?.rsTasi6m||0; break;
+      default: va = a.investmentScore?.total||0; vb = b.investmentScore?.total||0;
+    }
+    return sortAsc ? va - vb : vb - va;
+  });
+  return list;
+}
+
+function renderTable() {
+  let list = getFiltered();
+  let html = '';
+  list.forEach(s => {
+    let sc = s.investmentScore || {};
+    let scClass = getScoreClass(sc.total);
+    let chClass = (s.dailyChange||0) >= 0 ? 'up' : 'down';
+    let timingDot = sc.timing === 'ممتاز' ? 'g' : (sc.timing === 'مقبول' ? 'y' : 'r');
+    let pe = s.valuation?.pe ? s.valuation.pe.toFixed(1) : '—';
+    let pb = s.valuation?.pb ? s.valuation.pb.toFixed(2) : '—';
+    let roe = s.financials?.returnOnEquity != null ? s.financials.returnOnEquity + '%' : '—';
+    let rs6 = s.relativeStrength?.rsTasi6m != null ? (s.relativeStrength.rsTasi6m > 0 ? '+' : '') + s.relativeStrength.rsTasi6m.toFixed(1) + '%' : '—';
+    
+    html += `<tr onclick="openModal('${s.symbol}')">
+      <td><span class="score-num ${scClass}" style="font-size:1em">${sc.filtered ? '—' : sc.total}</span></td>
+      <td><span class="class-badge ${sc.classCode}" style="font-size:0.7em;padding:2px 8px">${sc.classification}</span></td>
+      <td>${sc.filtered ? '' : '<span class=\'dot '+timingDot+'\'></span> '+sc.timing}</td>
+      <td style="font-family:monospace;color:#64748b;text-align:center">${s.symbol}</td>
+      <td style="font-weight:600">${s.name}</td>
+      <td style="font-size:0.75em;color:#94a3b8">${SECTOR_AR[sc.sector] || sc.sector || ''}</td>
+      <td class="${chClass}">${s.currentPrice || '—'}</td>
+      <td class="${chClass}">${s.dailyChange != null ? (s.dailyChange > 0 ? '+' : '') + s.dailyChange + '%' : '—'}</td>
+      <td>${pe}</td>
+      <td>${pb}</td>
+      <td>${roe}</td>
+      <td style="color:${(s.relativeStrength?.rsTasi6m||0) > 0 ? '#10b981' : '#ef4444'}">${rs6}</td>
+    </tr>`;
+  });
+  document.getElementById('tableBody').innerHTML = html;
+}
+
+function filterBy(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-bar button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderTable();
+}
+
+function filterBySector(s) {
+  currentSector = s;
+  renderTable();
+}
+
+function sortTable(key) {
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = false; }
+  renderTable();
+}
+
+function openModal(sym) {
+  let s = stocks.find(x => x.symbol === sym);
+  if (!s) return;
+  let sc = s.investmentScore || {};
+  let wt = s.weeklyTechnical || {};
+  let dt = s.dailyTechnical || {};
+  let val = s.valuation || {};
+  let fin = s.financials || {};
+  let rs = s.relativeStrength || {};
+  let scClass = getScoreClass(sc.total);
+  
+  document.getElementById('modalTitle').textContent = s.name + ' (' + s.symbol + ')';
+  
+  let body = '';
+  
+  // Score overview
+  body += `<div class="modal-section">
+    <h3>📊 التقييم الاستثماري</h3>
+    <div style="text-align:center;margin:16px 0">
+      <div class="score-num ${scClass}" style="font-size:2.5em">${sc.filtered ? '—' : sc.total}<span style="font-size:0.4em;color:#94a3b8">/100</span></div>
+      <div class="class-badge ${sc.classCode}" style="font-size:1em;margin:8px 0">${sc.classification}</div>
+      ${sc.filtered ? '<div style="color:#f59e0b;margin-top:8px">⛔ ' + (sc.filterReason||'') + '</div>' : ''}
     </div>`;
-  }
-
-  // === ALERTS ===
-  if (alerts.length > 0) {
-    html += `<div class="modal-section"><h3>⚠️ تنبيهات</h3>`;
-    alerts.forEach(a => {
-      html += `<div class="alert-item">${a.icon} ${a.text}</div>`;
-    });
-    html += `</div>`;
-  }
-
-  // === CHART ===
-  if (t.chartPrices && t.chartPrices.length > 5) {
-    html += `<div class="modal-section"><h3>📊 حركة السعر (30 يوم)</h3>
-      <div class="chart-container"><canvas id="priceChart" class="chart-canvas"></canvas></div>
-    </div>`;
-  }
-
-  // === TECHNICAL INDICATORS ===
-  html += `<div class="modal-section"><h3>📈 المؤشرات الفنية</h3><div class="indicator-grid">`;
   
-  const rsiColor = t.rsi > 70 ? 'red' : t.rsi < 30 ? 'green' : 'blue';
-  html += `<div class="indicator ${rsiColor}"><div class="val">${t.rsi || '—'}</div><div class="lbl">RSI (14)</div></div>`;
-  
-  const macdColor = t.macd > 0 ? 'green' : t.macd < 0 ? 'red' : 'yellow';
-  html += `<div class="indicator ${macdColor}"><div class="val">${t.macd || '—'}</div><div class="lbl">MACD</div></div>`;
-  
-  html += `<div class="indicator blue"><div class="val">${t.ma20 || '—'}</div><div class="lbl">MA20</div></div>`;
-  html += `<div class="indicator blue"><div class="val">${t.ma50 || '—'}</div><div class="lbl">MA50</div></div>`;
-  if (t.ma200) html += `<div class="indicator blue"><div class="val">${t.ma200}</div><div class="lbl">MA200</div></div>`;
-  
-  const trendColor = t.trend && t.trend.includes('صاعد') ? 'green' : t.trend && t.trend.includes('هابط') ? 'red' : 'yellow';
-  html += `<div class="indicator ${trendColor}"><div class="val">${t.trend || '—'}</div><div class="lbl">الاتجاه</div></div>`;
-  
-  // Bollinger
-  if (t.bbPosition !== undefined && t.bbPosition !== null) {
-    const bbC = t.bbPosition < 20 ? 'green' : t.bbPosition > 80 ? 'red' : 'blue';
-    html += `<div class="indicator ${bbC}"><div class="val">${t.bbPosition.toFixed(0)}%</div><div class="lbl">بولنجر (%)</div></div>`;
-  }
-  
-  // Stochastic
-  if (t.stochK !== undefined && t.stochK !== null) {
-    const stC = t.stochK < 20 ? 'green' : t.stochK > 80 ? 'red' : 'blue';
-    html += `<div class="indicator ${stC}"><div class="val">${t.stochK}</div><div class="lbl">Stochastic %K</div></div>`;
-  }
-  
-  // MACD Signal & Histogram
-  if (t.macdSignal) html += `<div class="indicator blue"><div class="val">${t.macdSignal}</div><div class="lbl">MACD Signal</div></div>`;
-  if (t.macdCrossover) {
-    const mcC = t.macdCrossover === 'bullish' ? 'green' : 'red';
-    const mcT = t.macdCrossover === 'bullish' ? 'تقاطع صاعد ⬆️' : 'تقاطع هابط ⬇️';
-    html += `<div class="indicator ${mcC}"><div class="val">${mcT}</div><div class="lbl">MACD Cross</div></div>`;
-  }
-  
-  // Volume
-  if (t.volumeRatio) {
-    const vC = t.volumeRatio > 2 ? 'red' : t.volumeRatio > 1.3 ? 'yellow' : 'blue';
-    html += `<div class="indicator ${vC}"><div class="val">${t.volumeRatio}x</div><div class="lbl">حجم التداول</div></div>`;
-  }
-  if (t.volumeTrend) {
-    const vtC = t.volumeTrend === 'صاعد' ? 'green' : t.volumeTrend === 'هابط' ? 'red' : 'yellow';
-    html += `<div class="indicator ${vtC}"><div class="val">${t.volumeTrend}</div><div class="lbl">اتجاه الحجم (OBV)</div></div>`;
-  }
-  
-  // ATR
-  if (t.atr) html += `<div class="indicator blue"><div class="val">${t.atr}</div><div class="lbl">ATR (تذبذب)</div></div>`;
-  
-  html += `<div class="indicator blue"><div class="val">${t.support || '—'}</div><div class="lbl">الدعم</div></div>`;
-  html += `<div class="indicator blue"><div class="val">${t.resistance || '—'}</div><div class="lbl">المقاومة</div></div>`;
-  
-  // Pivot Points
-  if (t.pivot) {
-    html += `<div class="indicator blue"><div class="val">${t.pivot}</div><div class="lbl">Pivot</div></div>`;
-    if (t.s1) html += `<div class="indicator green"><div class="val">${t.s1}</div><div class="lbl">S1</div></div>`;
-    if (t.r1) html += `<div class="indicator red"><div class="val">${t.r1}</div><div class="lbl">R1</div></div>`;
-  }
-  
-  const dcColor = (s.dailyChange||0) >= 0 ? 'green' : 'red';
-  html += `<div class="indicator ${dcColor}"><div class="val">${s.dailyChange !== undefined ? s.dailyChange.toFixed(2)+'%' : '—'}</div><div class="lbl">التغير اليومي</div></div>`;
-  
-  html += `</div></div>`;
-
-  // === FINANCIAL HEALTH ===
-  html += `<div class="modal-section"><h3>💰 الصحة المالية</h3><div class="indicator-grid">`;
-  if (f.profitMargins !== undefined) { const c = f.profitMargins > 10 ? 'green' : f.profitMargins >= 0 ? 'yellow' : 'red'; html += `<div class="indicator ${c}"><div class="val">${f.profitMargins}%</div><div class="lbl">هامش الربح</div></div>`; }
-  if (f.returnOnEquity !== undefined) { const c = f.returnOnEquity > 10 ? 'green' : f.returnOnEquity >= 0 ? 'yellow' : 'red'; html += `<div class="indicator ${c}"><div class="val">${f.returnOnEquity}%</div><div class="lbl">العائد على الملكية</div></div>`; }
-  if (f.revenueGrowth !== undefined) { const c = f.revenueGrowth > 5 ? 'green' : f.revenueGrowth >= 0 ? 'yellow' : 'red'; html += `<div class="indicator ${c}"><div class="val">${f.revenueGrowth}%</div><div class="lbl">نمو الإيرادات</div></div>`; }
-  if (f.debtToEquity !== undefined) { const c = f.debtToEquity < 50 ? 'green' : f.debtToEquity <= 150 ? 'yellow' : 'red'; html += `<div class="indicator ${c}"><div class="val">${f.debtToEquity}%</div><div class="lbl">الدين/الملكية</div></div>`; }
-  html += `</div></div>`;
-
-  // === NEWS ===
-  if (news.length > 0) {
-    html += `<div class="modal-section"><h3>📰 آخر الأخبار</h3>`;
-    news.forEach(n => {
-      html += `<div class="news-item">
-        <div class="news-title"><a href="${n.url}" target="_blank">${n.title}</a></div>
-        <div class="news-meta">${n.source} — ${n.date ? new Date(n.date).toLocaleDateString('ar-SA') : ''}</div>
+  if (!sc.filtered) {
+    // Pillar bars
+    let pillars = [
+      ['المالية', sc.financial, 30],
+      ['الاتجاه', sc.trend, 25],
+      ['الزخم', sc.relativeStrength, 15],
+      ['المخاطر', sc.risk, 15],
+      ['التقييم', sc.valuation, 15],
+    ];
+    pillars.forEach(([label, val, max]) => {
+      let pct = Math.round((val/max)*100);
+      let color = pct >= 65 ? '#10b981' : (pct >= 40 ? '#f59e0b' : '#ef4444');
+      body += `<div class="pillar-bar">
+        <span class="bar-label">${label}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <span class="bar-val" style="color:${color}">${val}/${max}</span>
       </div>`;
     });
-    html += `</div>`;
+    
+    // Timing
+    let timingDot = sc.timing === 'ممتاز' ? '#10b981' : (sc.timing === 'مقبول' ? '#f59e0b' : '#ef4444');
+    body += `<div style="text-align:center;margin:16px 0;padding:12px;background:#0f172a;border-radius:10px">
+      <div style="font-size:0.85em;color:#94a3b8">توقيت الدخول</div>
+      <div style="font-size:1.2em;font-weight:bold;color:${timingDot};margin-top:4px">${sc.timing} (${sc.timingSignals}/4)</div>
+    </div>`;
   }
-
-  // === DIVIDENDS ===
-  if (divs.hasDividends && divs.history && divs.history.length > 0) {
-    html += `<div class="modal-section"><h3>💵 تاريخ التوزيعات</h3>`;
-    divs.history.forEach(d => {
-      html += `<div class="div-item"><span>${d.date}</span><span style="color:#10b981;font-weight:bold">${d.amount} ريال</span></div>`;
-    });
-    html += `</div>`;
-  }
-
-  // === PRICE INFO ===
-  html += `<div class="modal-section"><h3>💲 بيانات السعر</h3><div class="indicator-grid">`;
-  html += `<div class="indicator blue"><div class="val">${s.currentPrice || '—'}</div><div class="lbl">السعر الحالي</div></div>`;
-  html += `<div class="indicator blue"><div class="val">${s.previousClose || '—'}</div><div class="lbl">إغلاق أمس</div></div>`;
-  html += `<div class="indicator blue"><div class="val">${s.covidLow || '—'}</div><div class="lbl">قاع كوفيد</div></div>`;
-  const diff = s.covidLow && s.currentPrice ? (((s.currentPrice - s.covidLow) / s.covidLow) * 100).toFixed(1) : null;
-  if (diff !== null) { const c = diff < 0 ? 'red' : diff < 10 ? 'yellow' : 'green'; html += `<div class="indicator ${c}"><div class="val">${diff}%</div><div class="lbl">فرق القاع</div></div>`; }
-  html += `</div></div>`;
-
-  // AI Analysis button
-  html += `<div style="margin-top:14px;text-align:center">
-    <button onclick="event.stopPropagation();closeModal();showStockAIAnalysis('${symbol}')" style="padding:10px 24px;background:#f59e0b;color:#000;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;font-size:0.95em">🤖 تحليل AI شامل</button>
+  body += '</div>';
+  
+  // Valuation
+  body += `<div class="modal-section">
+    <h3>💎 التقييم المالي</h3>
+    <div class="indicator-grid">
+      <div class="indicator"><div class="val">${val.pe ? val.pe.toFixed(1) : '—'}</div><div class="lbl">P/E</div></div>
+      <div class="indicator"><div class="val">${val.pb ? val.pb.toFixed(2) : '—'}</div><div class="lbl">P/B</div></div>
+      <div class="indicator"><div class="val">${val.evEbitda ? val.evEbitda.toFixed(1) : '—'}</div><div class="lbl">EV/EBITDA</div></div>
+      <div class="indicator"><div class="val">${val.dividendYield ? (val.dividendYield*100).toFixed(1)+'%' : '—'}</div><div class="lbl">توزيعات</div></div>
+      <div class="indicator"><div class="val">${val.peg ? val.peg.toFixed(2) : '—'}</div><div class="lbl">PEG</div></div>
+    </div>
   </div>`;
-
-  document.getElementById('modalBody').innerHTML = html;
+  
+  // Financial health
+  body += `<div class="modal-section">
+    <h3>🏦 الصحة المالية</h3>
+    <div class="indicator-grid">
+      <div class="indicator ${fin.returnOnEquity > 12 ? 'green' : (fin.returnOnEquity > 0 ? 'yellow' : 'red')}"><div class="val">${fin.returnOnEquity != null ? fin.returnOnEquity+'%' : '—'}</div><div class="lbl">ROE</div></div>
+      <div class="indicator ${fin.profitMargins > 12 ? 'green' : (fin.profitMargins > 0 ? 'yellow' : 'red')}"><div class="val">${fin.profitMargins != null ? fin.profitMargins+'%' : '—'}</div><div class="lbl">هامش الربح</div></div>
+      <div class="indicator ${fin.revenueGrowth > 5 ? 'green' : (fin.revenueGrowth >= 0 ? 'yellow' : 'red')}"><div class="val">${fin.revenueGrowth != null ? fin.revenueGrowth+'%' : '—'}</div><div class="lbl">نمو الإيرادات</div></div>
+      <div class="indicator"><div class="val">${fin.debtToEquity != null ? fin.debtToEquity+'%' : '—'}</div><div class="lbl">دين/ملكية</div></div>
+      <div class="indicator"><div class="val">${fin.currentRatio != null ? fin.currentRatio : '—'}</div><div class="lbl">نسبة التداول</div></div>
+    </div>
+  </div>`;
+  
+  // Weekly Technical
+  body += `<div class="modal-section">
+    <h3>📈 الاتجاه الأسبوعي</h3>
+    <div class="indicator-grid">
+      <div class="indicator ${wt.sma200w && s.currentPrice > wt.sma200w ? 'green' : 'red'}"><div class="val">${wt.sma200w || '—'}</div><div class="lbl">SMA 200W</div></div>
+      <div class="indicator ${wt.ema40w && s.currentPrice > wt.ema40w ? 'green' : 'red'}"><div class="val">${wt.ema40w || '—'}</div><div class="lbl">EMA 40W</div></div>
+      <div class="indicator ${wt.rsi14w > 50 ? 'green' : 'red'}"><div class="val">${wt.rsi14w || '—'}</div><div class="lbl">RSI 14W</div></div>
+      <div class="indicator ${wt.macdW > 0 ? 'green' : 'red'}"><div class="val">${wt.macdW != null ? wt.macdW.toFixed(2) : '—'}</div><div class="lbl">MACD W</div></div>
+      <div class="indicator"><div class="val">${wt.sma200wSlope != null ? wt.sma200wSlope+'%' : '—'}</div><div class="lbl">ميل SMA200</div></div>
+    </div>
+  </div>`;
+  
+  // Relative Strength
+  body += `<div class="modal-section">
+    <h3>⚡ القوة النسبية مقابل TASI</h3>
+    <div class="indicator-grid">
+      <div class="indicator ${(rs.rsTasi3m||0) > 0 ? 'green' : 'red'}"><div class="val">${rs.rsTasi3m != null ? (rs.rsTasi3m>0?'+':'')+rs.rsTasi3m.toFixed(1)+'%' : '—'}</div><div class="lbl">3 أشهر</div></div>
+      <div class="indicator ${(rs.rsTasi6m||0) > 0 ? 'green' : 'red'}"><div class="val">${rs.rsTasi6m != null ? (rs.rsTasi6m>0?'+':'')+rs.rsTasi6m.toFixed(1)+'%' : '—'}</div><div class="lbl">6 أشهر</div></div>
+      <div class="indicator ${(rs.rsTasi12m||0) > 0 ? 'green' : 'red'}"><div class="val">${rs.rsTasi12m != null ? (rs.rsTasi12m>0?'+':'')+rs.rsTasi12m.toFixed(1)+'%' : '—'}</div><div class="lbl">12 شهر</div></div>
+    </div>
+  </div>`;
+  
+  // Risk
+  body += `<div class="modal-section">
+    <h3>🛡️ المخاطر</h3>
+    <div class="indicator-grid">
+      <div class="indicator ${(dt.atrPct||0) < 2.5 ? 'green' : 'red'}"><div class="val">${dt.atrPct != null ? dt.atrPct+'%' : '—'}</div><div class="lbl">التقلب ATR%</div></div>
+      <div class="indicator"><div class="val">${dt.high52w || '—'}</div><div class="lbl">أعلى 52 أسبوع</div></div>
+      <div class="indicator"><div class="val">${dt.low52w || '—'}</div><div class="lbl">أدنى 52 أسبوع</div></div>
+      <div class="indicator"><div class="val">${dt.avgVol20d ? (dt.avgVol20d/1000).toFixed(0)+'K' : '—'}</div><div class="lbl">متوسط حجم 20D</div></div>
+    </div>
+  </div>`;
+  
+  // Chart (simple)
+  let chartPrices = s.technical?.chartPrices || [];
+  if (chartPrices.length > 0) {
+    body += `<div class="modal-section">
+      <h3>📉 آخر 30 يوم</h3>
+      <div class="chart-container"><canvas id="priceChart"></canvas></div>
+    </div>`;
+  }
+  
+  // Info
+  body += `<div class="modal-section">
+    <h3>معلومات</h3>
+    <div style="font-size:0.85em;color:#94a3b8;line-height:1.8">
+      القطاع: ${SECTOR_AR[sc.sector] || sc.sector || '—'} | الصناعة: ${sc.industry || '—'}<br>
+      السعر: ${s.currentPrice} ر.س | التغير: ${s.dailyChange != null ? s.dailyChange+'%' : '—'}
+    </div>
+  </div>`;
+  
+  document.getElementById('modalBody').innerHTML = body;
   document.getElementById('stockModal').classList.add('active');
-  document.body.style.overflow = 'hidden';
-
+  
   // Draw chart
-  if (t.chartPrices && t.chartPrices.length > 5) {
-    setTimeout(() => drawChart(t.chartPrices, t.ma20, t.support, t.resistance), 100);
+  if (chartPrices.length > 0) {
+    setTimeout(() => drawChart('priceChart', chartPrices), 100);
   }
 }
 
 function closeModal() {
   document.getElementById('stockModal').classList.remove('active');
-  document.body.style.overflow = '';
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-// === DRAW MINI CHART ===
-function drawChart(prices, ma20, support, resistance) {
-  const canvas = document.getElementById('priceChart');
+function drawChart(id, prices) {
+  let canvas = document.getElementById(id);
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const rect = canvas.parentElement.getBoundingClientRect();
-  canvas.width = rect.width;
-  canvas.height = rect.height;
+  let ctx = canvas.getContext('2d');
+  let w = canvas.parentElement.clientWidth - 32;
+  let h = canvas.parentElement.clientHeight - 32;
+  canvas.width = w; canvas.height = h;
   
-  const w = canvas.width, h = canvas.height;
-  const pad = {top: 10, bottom: 20, left: 10, right: 50};
-  const cw = w - pad.left - pad.right;
-  const ch = h - pad.top - pad.bottom;
+  let min = Math.min(...prices) * 0.99;
+  let max = Math.max(...prices) * 1.01;
+  let range = max - min || 1;
   
-  const min = Math.min(...prices) * 0.995;
-  const max = Math.max(...prices) * 1.005;
-  const range = max - min || 1;
-  
-  const x = i => pad.left + (i / (prices.length - 1)) * cw;
-  const y = v => pad.top + (1 - (v - min) / range) * ch;
-  
-  // Grid
-  ctx.strokeStyle = '#334155';
-  ctx.lineWidth = 0.5;
-  for (let i = 0; i < 4; i++) {
-    const gy = pad.top + (i / 3) * ch;
-    ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(w - pad.right, gy); ctx.stroke();
-    const val = max - (i / 3) * range;
-    ctx.fillStyle = '#64748b';
-    ctx.font = '10px monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText(val.toFixed(1), w - pad.right + 4, gy + 4);
-  }
-
-  // Support line
-  if (support && support >= min && support <= max) {
-    ctx.strokeStyle = '#10b98160';
-    ctx.setLineDash([4,4]);
-    ctx.beginPath(); ctx.moveTo(pad.left, y(support)); ctx.lineTo(w-pad.right, y(support)); ctx.stroke();
-    ctx.fillStyle = '#10b981';
-    ctx.font = '9px sans-serif';
-    ctx.fillText('دعم', pad.left + 2, y(support) - 3);
-    ctx.setLineDash([]);
-  }
-  
-  // Resistance line
-  if (resistance && resistance >= min && resistance <= max) {
-    ctx.strokeStyle = '#ef444460';
-    ctx.setLineDash([4,4]);
-    ctx.beginPath(); ctx.moveTo(pad.left, y(resistance)); ctx.lineTo(w-pad.right, y(resistance)); ctx.stroke();
-    ctx.fillStyle = '#ef4444';
-    ctx.font = '9px sans-serif';
-    ctx.fillText('مقاومة', pad.left + 2, y(resistance) - 3);
-    ctx.setLineDash([]);
-  }
-
-  // Price line
-  const up = prices[prices.length-1] >= prices[0];
-  ctx.strokeStyle = up ? '#10b981' : '#ef4444';
+  ctx.beginPath();
+  ctx.strokeStyle = prices[prices.length-1] >= prices[0] ? '#10b981' : '#ef4444';
   ctx.lineWidth = 2;
-  ctx.beginPath();
-  prices.forEach((p, i) => { i === 0 ? ctx.moveTo(x(i), y(p)) : ctx.lineTo(x(i), y(p)); });
+  prices.forEach((p, i) => {
+    let x = (i / (prices.length - 1)) * w;
+    let y = h - ((p - min) / range) * h;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
   ctx.stroke();
-
-  // Fill gradient
-  const grad = ctx.createLinearGradient(0, pad.top, 0, h - pad.bottom);
-  grad.addColorStop(0, up ? '#10b98120' : '#ef444420');
-  grad.addColorStop(1, 'transparent');
-  ctx.fillStyle = grad;
-  ctx.beginPath();
-  prices.forEach((p, i) => { i === 0 ? ctx.moveTo(x(i), y(p)) : ctx.lineTo(x(i), y(p)); });
-  ctx.lineTo(x(prices.length-1), h - pad.bottom);
-  ctx.lineTo(x(0), h - pad.bottom);
+  
+  // Fill
+  ctx.lineTo(w, h);
+  ctx.lineTo(0, h);
   ctx.closePath();
-  ctx.fill();
-
-  // MA20 line
-  if (ma20 && ma20 >= min && ma20 <= max) {
-    ctx.strokeStyle = '#f59e0b80';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3,3]);
-    ctx.beginPath(); ctx.moveTo(pad.left, y(ma20)); ctx.lineTo(w-pad.right, y(ma20)); ctx.stroke();
-    ctx.setLineDash([]);
-  }
-
-  // Current price dot
-  const last = prices[prices.length-1];
-  ctx.fillStyle = up ? '#10b981' : '#ef4444';
-  ctx.beginPath();
-  ctx.arc(x(prices.length-1), y(last), 4, 0, Math.PI * 2);
+  let grad = ctx.createLinearGradient(0, 0, 0, h);
+  let baseColor = prices[prices.length-1] >= prices[0] ? '16,185,129' : '239,68,68';
+  grad.addColorStop(0, `rgba(${baseColor},0.3)`);
+  grad.addColorStop(1, `rgba(${baseColor},0.02)`);
+  ctx.fillStyle = grad;
   ctx.fill();
 }
 
-// ══════════════════════════════════════
-// WATCHLIST — قائمة المتابعة (localStorage)
-// ══════════════════════════════════════
-
-function getWatchlist() {
-  try { return JSON.parse(localStorage.getItem('saif_watchlist') || '[]'); } catch { return []; }
-}
-function saveWatchlist(list) {
-  localStorage.setItem('saif_watchlist', JSON.stringify(list));
-  updateWatchCount();
-}
-function toggleWatchlist(symbol) {
-  let list = getWatchlist();
-  if (list.includes(symbol)) list = list.filter(s => s !== symbol);
-  else list.push(symbol);
-  saveWatchlist(list);
-  renderWatchlist();
-  // Update button state
-  document.querySelectorAll(`.wl-${symbol}`).forEach(btn => {
-    btn.classList.toggle('active', list.includes(symbol));
-    btn.textContent = list.includes(symbol) ? '★' : '☆';
-  });
-}
-function isWatched(symbol) { return getWatchlist().includes(symbol); }
-function updateWatchCount() {
-  const el = document.getElementById('watchCount');
-  if (el) el.textContent = getWatchlist().length;
-}
-
-function renderWatchlist() {
-  const list = getWatchlist();
-  const el = document.getElementById('watchlistCards');
-  const emptyEl = document.getElementById('watchlistEmpty');
-  if (!el) return;
-
-  if (list.length === 0) {
-    el.innerHTML = '';
-    if (emptyEl) emptyEl.style.display = '';
-    return;
-  }
-  if (emptyEl) emptyEl.style.display = 'none';
-
-  el.innerHTML = list.map(sym => {
-    const s = stocksMap[sym];
-    if (!s) return '';
-    const sc = s.scoring;
-    const clr = sc ? sc.ratingColor : '#64748b';
-    return `<div class="card" style="cursor:pointer;border-right:3px solid ${clr};position:relative" onclick="openStock('${sym}')">
-      <button class="watchlist-btn active" onclick="event.stopPropagation();toggleWatchlist('${sym}')" title="إزالة من القائمة">★</button>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div><b>${s.name}</b> <span style="color:#94a3b8;font-size:0.8em">${sym}</span> ${healthIcon(s.health)}</div>
-        ${sc ? `<div style="font-size:1.3em;font-weight:800;color:${clr}">${sc.total}</div>` : ''}
-      </div>
-      <div style="color:#94a3b8;font-size:0.82em;margin-top:4px">${s.currentPrice} ر.س | ${(s.dailyChange||0)>0?'+':''}${(s.dailyChange||0).toFixed(1)}%</div>
-      ${sc ? `<div style="margin-top:4px"><span class="badge" style="background:${clr}22;color:${clr}">${sc.ratingEmoji} ${sc.ratingAr}</span></div>` : ''}
-    </div>`;
-  }).join('');
-}
-
-function showSection(sec) {
-  ['all','watchlist','compare'].forEach(s => {
-    const el = document.getElementById('section-' + s);
-    if (el) el.style.display = s === sec ? '' : 'none';
-    const btn = document.getElementById('btn-' + s);
-    if (btn) btn.classList.toggle('active', s === sec);
-  });
-  if (sec === 'watchlist') renderWatchlist();
-  if (sec === 'compare') populateCompareSelects();
-}
-
-function exportWatchlist() {
-  const list = getWatchlist();
-  if (list.length === 0) { alert('القائمة فارغة'); return; }
-  const text = list.map(sym => {
-    const s = stocksMap[sym];
-    if (!s) return sym;
-    const sc = s.scoring;
-    return `${s.name} (${sym}) — ${s.currentPrice} ر.س — تقييم: ${sc ? sc.total + ' ' + sc.ratingAr : '—'}`;
-  }).join('\n');
-  navigator.clipboard.writeText(text).then(() => alert('تم نسخ القائمة!')).catch(() => {
-    const w = window.open('', '_blank');
-    w.document.write('<pre dir="rtl">' + text + '</pre>');
-  });
-}
-
-// ══════════════════════════════════════
-// COMPARE — مقارنة أسهم
-// ══════════════════════════════════════
-
-function populateCompareSelects() {
-  const sorted = DATA.stocks.filter(s => s.scoring).sort((a,b) => b.scoring.total - a.scoring.total);
-  const opts = sorted.map(s => `<option value="${s.symbol}">${s.name} (${s.symbol}) — ${s.scoring.total}</option>`).join('');
-  const a = document.getElementById('cmp-stock-a');
-  const b = document.getElementById('cmp-stock-b');
-  if (a) a.innerHTML = opts;
-  if (b) { b.innerHTML = opts; if (sorted.length > 1) b.selectedIndex = 1; }
-}
-
-function compareStocks() {
-  const symA = document.getElementById('cmp-stock-a').value;
-  const symB = document.getElementById('cmp-stock-b').value;
-  const a = stocksMap[symA], b = stocksMap[symB];
-  if (!a || !b || !a.scoring || !b.scoring) return;
-
-  const metrics = [
-    { label: 'التقييم الشامل', key: 'total', fromScoring: true },
-    { label: 'الفني', key: 'techScore', fromBreakdown: true },
-    { label: 'المالي', key: 'finScore', fromBreakdown: true },
-    { label: 'الزخم', key: 'momScore', fromBreakdown: true },
-    { label: 'المخاطر', key: 'riskScore', fromBreakdown: true },
-    { label: 'القيمة', key: 'valScore', fromBreakdown: true }
-  ];
-
-  let html = `<div class="compare-grid">
-    <div class="card" style="border-top:3px solid ${a.scoring.ratingColor}">
-      <div style="text-align:center">
-        <div style="font-size:2em;font-weight:800;color:${a.scoring.ratingColor}">${a.scoring.total}</div>
-        <b>${a.name}</b> <span style="color:#94a3b8;font-size:0.8em">${symA}</span><br>
-        <span style="color:${a.scoring.ratingColor}">${a.scoring.ratingEmoji} ${a.scoring.ratingAr}</span>
-      </div>
-    </div>
-    <div class="card" style="border-top:3px solid ${b.scoring.ratingColor}">
-      <div style="text-align:center">
-        <div style="font-size:2em;font-weight:800;color:${b.scoring.ratingColor}">${b.scoring.total}</div>
-        <b>${b.name}</b> <span style="color:#94a3b8;font-size:0.8em">${symB}</span><br>
-        <span style="color:${b.scoring.ratingColor}">${b.scoring.ratingEmoji} ${b.scoring.ratingAr}</span>
-      </div>
-    </div>
-  </div>`;
-
-  html += '<table style="width:100%;margin-top:12px;font-size:0.88em;border-collapse:collapse">';
-  html += '<tr style="background:#1e293b"><th style="padding:8px;text-align:right">المعيار</th><th style="padding:8px;text-align:center">' + a.name + '</th><th style="padding:8px;text-align:center">' + b.name + '</th><th style="padding:8px;text-align:center">الفرق</th></tr>';
-
-  metrics.forEach(m => {
-    const va = m.fromScoring ? a.scoring[m.key] : (m.fromBreakdown ? a.scoring.breakdown[m.key] : 0);
-    const vb = m.fromScoring ? b.scoring[m.key] : (m.fromBreakdown ? b.scoring.breakdown[m.key] : 0);
-    const diff = va - vb;
-    const clr = diff > 0 ? '#00cec9' : diff < 0 ? '#ff6b6b' : '#64748b';
-    html += `<tr style="border-bottom:1px solid #334155"><td style="padding:8px">${m.label}</td><td style="padding:8px;text-align:center;font-weight:700">${va}</td><td style="padding:8px;text-align:center;font-weight:700">${vb}</td><td style="padding:8px;text-align:center;font-weight:700;color:${clr}">${diff > 0 ? '+' : ''}${diff}</td></tr>`;
-  });
-
-  // Extra info
-  const extras = [
-    { label: 'السعر', a: (a.currentPrice || 0) + ' ر.س', b: (b.currentPrice || 0) + ' ر.س' },
-    { label: 'التغير اليومي', a: ((a.dailyChange || 0) >= 0 ? '+' : '') + (a.dailyChange || 0).toFixed(1) + '%', b: ((b.dailyChange || 0) >= 0 ? '+' : '') + (b.dailyChange || 0).toFixed(1) + '%' },
-    { label: 'RSI', a: (a.technical || {}).rsi || '—', b: (b.technical || {}).rsi || '—' },
-    { label: 'الصحة المالية', a: a.health === 'green' ? '💚 قوية' : a.health === 'yellow' ? '🟡 متوسطة' : '🔴 ضعيفة', b: b.health === 'green' ? '💚 قوية' : b.health === 'yellow' ? '🟡 متوسطة' : '🔴 ضعيفة' }
-  ];
-  extras.forEach(e => {
-    html += `<tr style="border-bottom:1px solid #33415544"><td style="padding:8px;color:#94a3b8">${e.label}</td><td style="padding:8px;text-align:center">${e.a}</td><td style="padding:8px;text-align:center">${e.b}</td><td></td></tr>`;
-  });
-
-  html += '</table>';
-
-  // Winner
-  const winner = a.scoring.total > b.scoring.total ? a : b;
-  const diff = Math.abs(a.scoring.total - b.scoring.total);
-  html += `<div style="margin-top:14px;padding:12px;background:${winner.scoring.ratingColor}11;border:1px solid ${winner.scoring.ratingColor}33;border-radius:8px;text-align:center">
-    <b style="color:${winner.scoring.ratingColor}">${winner.name}</b> أفضل بـ <b>${diff}</b> نقطة
-    ${diff < 5 ? ' — الفرق بسيط، راجع التفاصيل' : diff < 15 ? '' : ' — فرق واضح ✅'}
-  </div>`;
-
-  document.getElementById('compareResult').innerHTML = html;
-}
-
-// ══════════════════════════════════════
-// DATA ADAPTER LAYER — جاهز لأي مصدر بيانات
-// ══════════════════════════════════════
-
-const DATA_PROVIDERS = {
-  yahoo: { id: 'yahoo', name: 'Yahoo Finance', nameAr: 'ياهو فاينانس', type: 'free', status: 'active', color: '#7c3aed', fields: ['price', 'volume', 'history'] },
-  spglobal: { id: 'spglobal', name: 'S&P Global', nameAr: 'S&P Global', type: 'free', status: 'active', color: '#ef4444', fields: ['financials'] },
-  // ── جاهزة للتفعيل عند الاشتراك ──
-  tradingview: { id: 'tradingview', name: 'TradingView', nameAr: 'تريدنج فيو', type: 'paid', status: 'ready', color: '#2962FF', fields: ['signals', 'screener', 'alerts'], apiDocs: 'https://www.tradingview.com/rest-api-spec/' },
-  polygonio: { id: 'polygonio', name: 'Polygon.io', nameAr: 'بوليغون', type: 'paid', status: 'ready', color: '#8b5cf6', fields: ['realtime', 'history', 'fundamentals', 'news'], apiDocs: 'https://polygon.io/docs' },
-  alphavantage: { id: 'alphavantage', name: 'Alpha Vantage', nameAr: 'ألفا فانتيج', type: 'freemium', status: 'ready', color: '#059669', fields: ['fundamentals', 'earnings', 'overview'], apiDocs: 'https://www.alphavantage.co/documentation/' },
-  fmp: { id: 'fmp', name: 'Financial Modeling Prep', nameAr: 'FMP', type: 'freemium', status: 'ready', color: '#f59e0b', fields: ['financials', 'ratios', 'dcf', 'peers'], apiDocs: 'https://financialmodelingprep.com/developer/docs/' },
-  twelvedata: { id: 'twelvedata', name: 'Twelve Data', nameAr: 'تويلف داتا', type: 'freemium', status: 'ready', color: '#06b6d4', fields: ['realtime', 'technical', 'fundamentals'], apiDocs: 'https://twelvedata.com/docs' },
-  argaam: { id: 'argaam', name: 'Argaam', nameAr: 'أرقام', type: 'paid', status: 'ready', color: '#dc2626', fields: ['saudi_market', 'news_ar', 'financials_ar'], apiDocs: 'https://www.argaam.com' },
-  tadawul: { id: 'tadawul', name: 'Tadawul API', nameAr: 'تداول', type: 'paid', status: 'ready', color: '#1e40af', fields: ['official_data', 'announcements', 'ownership'], apiDocs: 'https://www.saudiexchange.sa' }
-};
-
-/**
- * Data Adapter — نقطة واحدة لاستقبال بيانات من أي مصدر
- * عند إضافة API جديد: أضف adapter هنا وربطه بالـ provider
- */
-const DataAdapter = {
-  // ── تحويل بيانات أي مصدر لـ format المنصة ──
-  normalize(provider, rawData) {
-    const adapters = {
-      polygonio: (data) => ({
-        symbol: data.ticker?.replace('.SR',''),
-        currentPrice: data.results?.[0]?.c,
-        previousClose: data.results?.[0]?.o,
-        volume: data.results?.[0]?.v,
-        high: data.results?.[0]?.h,
-        low: data.results?.[0]?.l,
-        _source: 'polygonio'
-      }),
-      alphavantage: (data) => ({
-        symbol: data['Symbol'],
-        marketCap: data['MarketCapitalization'],
-        pe: data['PERatio'],
-        eps: data['EPS'],
-        dividendYield: data['DividendYield'],
-        _source: 'alphavantage'
-      }),
-      fmp: (data) => ({
-        symbol: data.symbol,
-        financials: {
-          currentRatio: data.currentRatio,
-          debtToEquity: data.debtEquityRatio,
-          profitMargins: data.netProfitMargin,
-          returnOnEquity: data.returnOnEquity,
-          revenueGrowth: data.revenueGrowth
-        },
-        _source: 'fmp'
-      }),
-      twelvedata: (data) => ({
-        symbol: data.symbol?.replace('.SR',''),
-        technical: {
-          rsi: data.rsi?.rsi,
-          macd: data.macd?.macd,
-          bbUpper: data.bbands?.upper_band,
-          bbLower: data.bbands?.lower_band
-        },
-        _source: 'twelvedata'
-      }),
-      generic: (data) => data // passthrough
-    };
-    return (adapters[provider] || adapters.generic)(rawData);
-  },
-
-  // ── دمج بيانات المصدر الجديد مع الموجود ──
-  merge(stock, newData) {
-    if (newData.currentPrice) stock.currentPrice = newData.currentPrice;
-    if (newData.financials) stock.financials = { ...stock.financials, ...newData.financials };
-    if (newData.technical) stock.technical = { ...stock.technical, ...newData.technical };
-    if (newData.marketCap) stock.marketCap = newData.marketCap;
-    if (newData.pe) stock.pe = newData.pe;
-    if (newData.eps) stock.eps = newData.eps;
-    if (newData._source) {
-      stock.dataSources = stock.dataSources || [];
-      if (!stock.dataSources.includes(newData._source)) stock.dataSources.push(newData._source);
-    }
-    return stock;
-  },
-
-  // ── استيراد بيانات من API خارجي (مستقبلي) ──
-  async fetchFromProvider(providerId, symbol) {
-    const provider = DATA_PROVIDERS[providerId];
-    if (!provider || provider.status !== 'active') {
-      return { ok: false, error: `المزود ${providerId} غير مفعّل` };
-    }
-    // placeholder — يُفعّل عند إضافة API key
-    return { ok: false, error: 'التكامل المباشر قيد التطوير — استخدم الاستيراد اليدوي حالياً' };
-  },
-
-  // ── قائمة المزودين النشطين ──
-  getActiveProviders() { return Object.values(DATA_PROVIDERS).filter(p => p.status === 'active'); },
-  getReadyProviders() { return Object.values(DATA_PROVIDERS).filter(p => p.status === 'ready'); }
-};
-
-// ══════════════════════════════════════
-// AI ANALYSIS LAYER
-// ══════════════════════════════════════
-
-const AI_STOCK_CONFIG = {
-  enabled: false,
-  provider: null,
-  model: null,
-  apiEndpoint: null,
-  maxTokens: 1500,
-  temperature: 0.3
-};
-
-function generateStockAnalysis(s) {
-  const t = s.technical || {};
-  const f = s.financials || {};
-  const sc = s.scoring;
-  if (!sc) return 'لا تقييم متاح';
-
-  const bd = sc.breakdown;
-  let text = `## ${s.name} (${s.symbol})\n\n`;
-  text += `**السعر:** ${s.currentPrice} ر.س | **التغير:** ${(s.dailyChange||0)>0?'+':''}${(s.dailyChange||0).toFixed(1)}% | **التقييم:** ${sc.total}/100 ${sc.ratingEmoji} ${sc.ratingAr}\n\n`;
-
-  // Strengths
-  text += `### ✅ نقاط القوة\n`;
-  if (bd.techScore >= 60) text += `- تحليل فني إيجابي (${bd.techScore}/100)\n`;
-  if (bd.finScore >= 60) text += `- صحة مالية جيدة (${bd.finScore}/100)\n`;
-  if (bd.momScore >= 60) text += `- زخم صاعد (${bd.momScore}/100)\n`;
-  if (bd.riskScore >= 60) text += `- مخاطر منخفضة (${bd.riskScore}/100)\n`;
-  if (bd.valScore >= 60) text += `- تقييم جاذب (${bd.valScore}/100)\n`;
-  if (t.macdCrossover === 'bullish') text += `- تقاطع MACD صاعد — إشارة شراء\n`;
-  if (t.rsi && t.rsi < 30) text += `- RSI منخفض (${t.rsi}) — فرصة شراء محتملة\n`;
-  if (f.revenueGrowth > 15) text += `- نمو إيرادات قوي (+${f.revenueGrowth}%)\n`;
-
-  // Weaknesses
-  text += `\n### ⚠️ نقاط الضعف\n`;
-  if (bd.techScore < 40) text += `- تحليل فني سلبي (${bd.techScore}/100)\n`;
-  if (bd.finScore < 40) text += `- صحة مالية ضعيفة (${bd.finScore}/100)\n`;
-  if (bd.momScore < 40) text += `- زخم هابط (${bd.momScore}/100)\n`;
-  if (bd.riskScore < 40) text += `- مخاطر عالية (${bd.riskScore}/100)\n`;
-  if (s.covidLow && s.currentPrice < s.covidLow) text += `- تحت قاع كورونا 2020 (${s.covidLow} ر.س)\n`;
-  if (f.debtToEquity > 150) text += `- ديون مرتفعة (${f.debtToEquity}%)\n`;
-  if (f.profitMargins < 0) text += `- هامش ربح سلبي (${f.profitMargins}%)\n`;
-
-  // Key indicators
-  text += `\n### 📊 المؤشرات الرئيسية\n`;
-  text += `- RSI: ${t.rsi || '—'} | MACD: ${t.macd || '—'} | الاتجاه: ${t.trend || '—'}\n`;
-  text += `- الدعم: ${t.support || '—'} | المقاومة: ${t.resistance || '—'}\n`;
-  if (f.currentRatio) text += `- نسبة التداول: ${f.currentRatio} | الديون: ${f.debtToEquity || '—'}%\n`;
-  if (f.profitMargins) text += `- هامش الربح: ${f.profitMargins}% | نمو الإيرادات: ${f.revenueGrowth || '—'}%\n`;
-
-  // Recommendation — نظام البوابتين (مطابق للتقييم الشامل)
-  text += `\n### 🎯 التوصية\n`;
-  text += `**${sc.ratingAr}** ${sc.ratingEmoji} — ${sc.logic}\n\n`;
-  if (sc.rating === 'watch') {
-    text += `الشركة ممتازة من ناحية الأساسيات (مالي: ${bd.finScore}/100) لكن المؤشرات الفنية سلبية حالياً (فني: ${bd.techScore}/100). الأفضل مراقبتها وانتظار إشارة ارتداد مثل: تقاطع MACD صاعد أو RSI يطلع من التشبع البيعي.\n`;
-  } else if (sc.rating === 'caution') {
-    text += `السهم يرتد فنياً لكن أساسيات الشركة ضعيفة. مناسب للمضاربة القصيرة فقط — لا تحتفظ.\n`;
-  } else if (sc.rating.includes('buy')) {
-    text += `الأساسيات والفنيات متوافقة — إشارة دخول. الدعم عند ${t.support || '—'} ر.س.\n`;
-  } else if (sc.rating.includes('sell')) {
-    text += `إشارات سلبية من الجانبين. إذا عندك السهم فكّر بالتخفيف أو الخروج.\n`;
-  } else {
-    text += `إشارات مختلطة. راقب وانتظر وضوح الاتجاه.\n`;
-  }
-
-  text += `\n---\n*تحليل آلي من بيانات ${new Date().toLocaleDateString('ar-SA')} — ليس توصية مالية نهائية*`;
-  return text;
-}
-
-function showStockAIAnalysis(symbol) {
-  const s = stocksMap[symbol];
-  if (!s) return;
-  const text = generateStockAnalysis(s);
-  const sc = s.scoring;
-
-  const html = text
-    .replace(/^## (.+)$/gm, '<h2 style="font-size:1.2em;margin:12px 0 6px;color:#f59e0b">$1</h2>')
-    .replace(/^### (.+)$/gm, '<h3 style="font-size:1em;margin:10px 0 4px;color:#e2e8f0">$1</h3>')
-    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
-    .replace(/^- (.+)$/gm, '<div style="padding:2px 0 2px 14px;font-size:0.88em">• $1</div>')
-    .replace(/\n\n/g, '<br>').replace(/\n/g, '<br>');
-
-  document.getElementById('modalTitle').innerHTML = `🤖 تحليل AI — ${s.name}`;
-  document.getElementById('modalBody').innerHTML = `
-    <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
-      <span class="badge" style="background:#1e293b;color:#94a3b8">📊 تحليل آلي (محلي)</span>
-      ${sc ? `<span style="font-size:1.5em;font-weight:800;color:${sc.ratingColor}">${sc.total} ${sc.ratingEmoji}</span>` : ''}
-    </div>
-    <div style="color:#cbd5e1;line-height:1.8;font-size:0.9em" dir="rtl">${html}</div>
-    <div style="margin-top:14px;padding:10px;background:#1e293b;border-radius:8px;font-size:0.8em;color:#64748b">
-      سيف تداول — تحليل آلي مبني على المؤشرات الفنية والمالية
-    </div>
-  `;
-  document.getElementById('stockModal').classList.add('active');
-}
-
-// === MAIN RENDER ===
-function render() {
-  const d = DATA;
-  document.getElementById('lastUpdate').textContent = d.lastUpdated || '';
-  const portfolio = d.portfolio || [];
-  const stocks = d.stocks || [];
-  const portfolioEl = document.getElementById('portfolioCards');
-  const brokenEl = document.getElementById('brokenCards');
-  const nearEl = document.getElementById('nearCards');
-  const tableEl = document.getElementById('tableBody');
-  const statsEl = document.getElementById('stats');
-  portfolioEl.innerHTML = ''; brokenEl.innerHTML = ''; nearEl.innerHTML = ''; tableEl.innerHTML = '';
-
-  // ── Render Top Opportunities ──
-  const topEl = document.getElementById('topOpportunities');
-  const worstEl = document.getElementById('worstStocks');
-  const sectorEl = document.getElementById('sectorAnalysis');
-
-  const topStocks = getTopStocks(8);
-  topEl.innerHTML = topStocks.map(s => {
-    const sc = s.scoring;
-    return `<div class="card" onclick="openStock('${s.symbol}')" style="cursor:pointer;border-right:3px solid ${sc.ratingColor}">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div><b>${s.name}</b> <span style="color:#94a3b8;font-size:0.8em">${s.symbol}</span> ${healthIcon(s.health)}</div>
-        <div style="font-size:1.3em;font-weight:800;color:${sc.ratingColor}">${sc.total}</div>
-      </div>
-      <div style="color:#94a3b8;font-size:0.82em;margin-top:4px">${s.currentPrice} ر.س | ${(s.dailyChange||0)>0?'+':''}${(s.dailyChange||0).toFixed(1)}%</div>
-      <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">
-        <span class="badge" style="background:${sc.ratingColor}22;color:${sc.ratingColor}">${sc.ratingEmoji} ${sc.ratingAr}</span>
-        ${sc.reasons.slice(0,2).map(r => `<span class="badge" style="background:#1e293b;color:#94a3b8;font-size:0.72em">${r}</span>`).join('')}
-      </div>
-      <div style="display:flex;gap:8px;margin-top:8px;font-size:0.75em;color:#64748b">
-        <span>فني ${sc.breakdown.techScore}</span>
-        <span>مالي ${sc.breakdown.finScore}</span>
-        <span>زخم ${sc.breakdown.momScore}</span>
-        <span>مخاطر ${sc.breakdown.riskScore}</span>
-        <span>قيمة ${sc.breakdown.valScore}</span>
-      </div>
-      <div style="margin-top:6px"><button onclick="event.stopPropagation();showStockAIAnalysis('${s.symbol}')" style="padding:4px 12px;background:#f59e0b33;color:#f59e0b;border:1px solid #f59e0b44;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.75em">🤖 تحليل</button></div>
-    </div>`;
-  }).join('');
-
-  // ── Render Worst Stocks ──
-  const worstStocks = getWorstStocks(5);
-  worstEl.innerHTML = worstStocks.map(s => {
-    const sc = s.scoring;
-    return `<div class="card" onclick="openStock('${s.symbol}')" style="cursor:pointer;border-right:3px solid ${sc.ratingColor}">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div><b>${s.name}</b> <span style="color:#94a3b8;font-size:0.8em">${s.symbol}</span> ${healthIcon(s.health)}</div>
-        <div style="font-size:1.3em;font-weight:800;color:${sc.ratingColor}">${sc.total}</div>
-      </div>
-      <div style="color:#94a3b8;font-size:0.82em;margin-top:4px">${s.currentPrice} ر.س | ${(s.dailyChange||0)>0?'+':''}${(s.dailyChange||0).toFixed(1)}%</div>
-      <div style="margin-top:6px">${sc.reasons.map(r => `<span class="badge" style="background:#ff6b6b22;color:#ff6b6b;font-size:0.72em">${r}</span>`).join(' ')}</div>
-    </div>`;
-  }).join('');
-
-  // ── Render Sector Analysis ──
-  const sectors = getSectorAnalysis();
-  sectorEl.innerHTML = sectors.map(sec => {
-    const clr = sec.avgScore >= 58 ? '#00cec9' : sec.avgScore >= 45 ? '#fdcb6e' : '#ff6b6b';
-    const top = sec.topStock;
-    return `<div class="card" style="border-right:3px solid ${clr}">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <b>${sec.name}</b>
-        <span style="font-size:1.2em;font-weight:800;color:${clr}">${sec.avgScore}</span>
-      </div>
-      <div style="color:#94a3b8;font-size:0.82em;margin-top:4px">${sec.stocks.length} سهم</div>
-      ${top ? `<div style="font-size:0.8em;color:#64748b;margin-top:4px">الأفضل: <b style="color:#e2e8f0">${top.name}</b> (${top.scoring.total})</div>` : ''}
-    </div>`;
-  }).join('');
-  let countBroken = 0, countNear = 0, countAbove = 0;
-
-  const sorted = [...stocks].sort((a, b) => {
-    const da = a.currentPrice && a.covidLow ? ((a.currentPrice - a.covidLow) / a.covidLow) : 999;
-    const db = b.currentPrice && b.covidLow ? ((b.currentPrice - b.covidLow) / b.covidLow) : 999;
-    return da - db;
-  });
-
-  sorted.forEach(s => {
-    const isPortfolio = portfolio.includes(s.name);
-    const hasData = s.covidLow && s.currentPrice;
-    let diffPct = hasData ? ((s.currentPrice - s.covidLow) / s.covidLow * 100) : null;
-    let isBroken = diffPct !== null && diffPct < 0;
-    let isNear = diffPct !== null && diffPct >= 0 && diffPct < 10;
-    if (isBroken) countBroken++; else if (isNear) countNear++; else if (hasData) countAbove++;
-    const sym = s.symbol || '?';
-    const yn = s.yahooName || '';
-    const h = s.health;
-    const alerts = s.alerts || [];
-    const t = s.technical || {};
-
-    function makeCard(s, cls, badges) {
-      let priceClass = diffPct !== null ? (diffPct < 0 ? 'down' : 'up') : '';
-      let alertBadge = alerts.length > 0 ? `<div class="alert-badge">⚠️</div>` : '';
-      const watched = isWatched(sym);
-      return `<div class="card ${cls}" onclick="openStock('${sym}')" style="position:relative">
-        <button class="watchlist-btn wl-${sym} ${watched?'active':''}" onclick="event.stopPropagation();toggleWatchlist('${sym}')" title="إضافة للمتابعة">${watched?'★':'☆'}</button>
-        ${alertBadge}
-        <div class="name">${healthIcon(h)} ${s.name} ${badges}</div>
-        <div class="symbol">${sym}.SR — ${yn}</div>
-        <div class="price ${priceClass}">${s.currentPrice ? s.currentPrice + ' ريال' : 'غير متوفر'}${s.dailyChange !== undefined ? ' <span style="font-size:0.5em;color:' + (s.dailyChange >= 0 ? '#10b981' : '#ef4444') + '">' + (s.dailyChange >= 0 ? '▲' : '▼') + Math.abs(s.dailyChange).toFixed(2) + '%</span>' : ''}</div>
-        <div class="detail">${s.previousClose ? 'إغلاق أمس: ' + s.previousClose + ' ريال | ' : ''}قاع كورونا: ${s.covidLow ? s.covidLow + ' ريال' : 'غير متوفر'}${diffPct !== null ? ' | الفرق: ' + diffPct.toFixed(1) + '%' : ''}</div>
-        ${recBadge(t, s.scoring)}
-        ${finBar(s.financials)}
-      </div>`;
-    }
-
-    if (isPortfolio) {
-      let cls = 'portfolio'; if (isBroken) cls += ' broken'; else if (isNear) cls += ' near';
-      let badges = '<span class="badge portfolio-badge">محفظتي</span>';
-      if (isBroken) badges += '<span class="badge broken-badge">كسر القاع!</span>';
-      if (isNear) badges += '<span class="badge near-badge">قريب</span>';
-      badges += healthBadge(h);
-      portfolioEl.innerHTML += makeCard(s, cls, badges);
-    }
-    if (isBroken && !isPortfolio) brokenEl.innerHTML += makeCard(s, 'broken', '<span class="badge broken-badge">كسر القاع!</span>' + healthBadge(h));
-    if (isNear && !isPortfolio) nearEl.innerHTML += makeCard(s, 'near', '<span class="badge near-badge">قريب</span>' + healthBadge(h));
-
-    // Table
-    let rowClass = isBroken ? 'broken-row' : (isNear ? 'near-row' : '');
-    let covidStatus = '';
-    if (isPortfolio) covidStatus += '⭐ ';
-    if (isBroken) covidStatus += '<span class="dot-red status-dot"></span>كسر';
-    else if (isNear) covidStatus += '<span class="dot-yellow status-dot"></span>قريب';
-    else if (hasData) covidStatus += '<span class="dot-green status-dot"></span>فوق';
-    else covidStatus += '—';
-
-    const alertIcon = alerts.length > 0 ? `<span style="cursor:pointer" title="${alerts.map(a=>a.text).join('\n')}">⚠️</span>` : '';
-    const recTd = recBadge(t, s.scoring);
-
-    tableEl.innerHTML += `<tr class="${rowClass}" onclick="openStock('${sym}')">
-      <td>${alertIcon}</td>
-      <td class="sym">${sym}</td>
-      <td>${s.name}</td>
-      <td class="en-name">${yn}</td>
-      <td>${healthIcon(h)}</td>
-      <td>${scoreBadge(s)}</td>
-      <td>${recTd}</td>
-      <td>${s.covidLow || '—'}</td>
-      <td>${s.currentPrice || '—'}</td>
-      <td>${s.previousClose || '—'}</td>
-      <td style="color:${s.dailyChange !== undefined ? (s.dailyChange >= 0 ? '#10b981' : '#ef4444') : '#64748b'}">${s.dailyChange !== undefined ? (s.dailyChange >= 0 ? '+' : '') + s.dailyChange.toFixed(2) + '%' : '—'}</td>
-      <td style="color:${diffPct !== null ? (diffPct < 0 ? '#ef4444' : diffPct < 10 ? '#f59e0b' : '#10b981') : '#64748b'}">${diffPct !== null ? diffPct.toFixed(1) + '%' : '—'}</td>
-      <td>${covidStatus}</td>
-    </tr>`;
-  });
-
-  let hGreen = stocks.filter(s=>s.health==='green').length;
-  let hYellow = stocks.filter(s=>s.health==='yellow').length;
-  let hRed = stocks.filter(s=>s.health==='red').length;
-  let alertsCount = stocks.filter(s=>(s.alerts||[]).length>0).length;
-
-  statsEl.innerHTML = `
-    <div class="stat blue"><div class="num">${stocks.length}</div><div class="label">إجمالي</div></div>
-    <div class="stat red"><div class="num">${countBroken}</div><div class="label">كسرت القاع</div></div>
-    <div class="stat yellow"><div class="num">${countNear}</div><div class="label">قريبة</div></div>
-    <div class="stat green"><div class="num">${countAbove}</div><div class="label">فوق القاع</div></div>
-    <div class="stat green"><div class="num">${hGreen}</div><div class="label">💰 صحة قوية</div></div>
-    <div class="stat yellow"><div class="num">${hYellow}</div><div class="label">💰 متوسطة</div></div>
-    <div class="stat red"><div class="num">${hRed}</div><div class="label">💰 ضعيفة</div></div>
-    <div class="stat yellow"><div class="num">${alertsCount}</div><div class="label">⚠️ تنبيهات</div></div>
-  `;
-
-  if (!brokenEl.innerHTML) brokenEl.innerHTML = '<div class="card"><div class="name">لا توجد أسهم كسرت القاع ✅</div></div>';
-  if (!nearEl.innerHTML) nearEl.innerHTML = '<div class="card"><div class="name">لا توجد أسهم قريبة من القاع</div></div>';
-}
-render();
-updateWatchCount();
-populateCompareSelects();
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+init();
 </script>
 </body>
 </html>
