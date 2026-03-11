@@ -216,17 +216,20 @@ function calculateStockScore(s) {
   const t = s.technical || {};
   const f = s.financials || {};
 
-  // 1. Technical Score (0-100)
+  // 1. Technical Score (0-100) — مع عقوبات كاملة للإشارات السلبية
   let techScore = 50;
   const rsi = t.rsi || 50;
   if (rsi >= 30 && rsi <= 70) techScore += 10;
   if (rsi < 30) techScore += 20; // oversold = فرصة
   if (rsi > 70) techScore -= 15;
   if (t.macd > 0) techScore += 10;
+  if (t.macd < 0) techScore -= 15; // ⚡ عقوبة MACD سلبي
   if (t.macdCrossover === 'bullish') techScore += 15;
   if (t.macdCrossover === 'bearish') techScore -= 15;
   if (t.trend && t.trend.includes('صاعد')) techScore += 15;
-  if (t.trend && t.trend.includes('هابط')) techScore -= 10;
+  if (t.trend && t.trend.includes('هابط')) techScore -= 15; // ⚡ عقوبة أقوى
+  // عقوبة: السعر تحت MA20
+  if (t.ma20 && s.currentPrice && s.currentPrice < t.ma20) techScore -= 10;
   techScore = Math.max(0, Math.min(100, techScore));
 
   // 2. Financial Score (0-100)
@@ -274,9 +277,9 @@ function calculateStockScore(s) {
   // 5. Value Score (0-100)
   let valScore = 50;
   const bbPos = t.bbPosition || 50;
-  if (bbPos < 25) valScore += 20; // near lower band = potential value
+  if (bbPos < 25) valScore += 20;
   if (bbPos > 80) valScore -= 15;
-  if (t.stochK && t.stochK < 20) valScore += 15; // oversold
+  if (t.stochK && t.stochK < 20) valScore += 15;
   if (t.stochK && t.stochK > 80) valScore -= 10;
   valScore = Math.max(0, Math.min(100, valScore));
 
@@ -289,20 +292,49 @@ function calculateStockScore(s) {
     valScore * SCORE_WEIGHTS.value
   );
 
-  // Rating
-  let rating, ratingAr, ratingColor, ratingEmoji;
-  if (total >= 70) { rating = 'strong-buy'; ratingAr = 'شراء قوي'; ratingColor = '#00cec9'; ratingEmoji = '🟢'; }
-  else if (total >= 58) { rating = 'buy'; ratingAr = 'شراء'; ratingColor = '#55efc4'; ratingEmoji = '🟢'; }
-  else if (total >= 45) { rating = 'hold'; ratingAr = 'انتظار'; ratingColor = '#fdcb6e'; ratingEmoji = '🟡'; }
-  else if (total >= 35) { rating = 'sell'; ratingAr = 'بيع'; ratingColor = '#f97316'; ratingEmoji = '🟠'; }
-  else { rating = 'strong-sell'; ratingAr = 'بيع قوي'; ratingColor = '#ff6b6b'; ratingEmoji = '🔴'; }
+  // ══════════════════════════════════════
+  // التوصية النهائية — نظام البوابتين
+  // الأساسيات تحدد "هل تستاهل؟"
+  // الفنيات تحدد "هل الوقت صح؟"
+  // ══════════════════════════════════════
+  const finOK = finScore >= 55;       // أساسيات مقبولة+
+  const finStrong = finScore >= 70;   // أساسيات قوية
+  const techOK = techScore >= 50;     // فنيات إيجابية
+  const techStrong = techScore >= 65; // فنيات قوية
+
+  let rating, ratingAr, ratingColor, ratingEmoji, logic;
+
+  if (finStrong && techStrong) {
+    rating = 'strong-buy'; ratingAr = 'شراء قوي'; ratingColor = '#00cec9'; ratingEmoji = '🟢';
+    logic = 'شركة ممتازة + توقيت ممتاز';
+  } else if (finOK && techOK) {
+    rating = 'buy'; ratingAr = 'شراء'; ratingColor = '#55efc4'; ratingEmoji = '🟢';
+    logic = 'أساسيات جيدة + إشارات فنية إيجابية';
+  } else if (finStrong && !techOK) {
+    // ⚡ الحالة المهمة: شركة ممتازة لكن فنياً هابطة = راقب
+    rating = 'watch'; ratingAr = 'راقب'; ratingColor = '#74b9ff'; ratingEmoji = '🔵';
+    logic = 'شركة ممتازة — انتظر إشارة ارتداد';
+  } else if (finOK && !techOK) {
+    rating = 'hold'; ratingAr = 'انتظار'; ratingColor = '#fdcb6e'; ratingEmoji = '🟡';
+    logic = 'أساسيات مقبولة — لا إشارة فنية واضحة';
+  } else if (!finOK && techOK) {
+    rating = 'caution'; ratingAr = 'حذر'; ratingColor = '#f97316'; ratingEmoji = '🟠';
+    logic = 'ارتداد فني لكن أساسيات ضعيفة — مضاربة فقط';
+  } else if (!finOK && !techOK && finScore <= 35) {
+    rating = 'strong-sell'; ratingAr = 'بيع قوي'; ratingColor = '#ff6b6b'; ratingEmoji = '🔴';
+    logic = 'أساسيات ضعيفة + فنيات سلبية';
+  } else {
+    rating = 'sell'; ratingAr = 'بيع'; ratingColor = '#f97316'; ratingEmoji = '🟠';
+    logic = 'إشارات سلبية — يُنصح بالحذر';
+  }
 
   // Generate reasons
   const reasons = [];
-  if (techScore >= 70) reasons.push('تحليل فني إيجابي');
-  if (techScore <= 30) reasons.push('تحليل فني سلبي');
-  if (finScore >= 70) reasons.push('صحة مالية قوية');
-  if (finScore <= 30) reasons.push('صحة مالية ضعيفة');
+  reasons.push(logic);
+  if (finStrong) reasons.push('صحة مالية قوية');
+  else if (finScore <= 35) reasons.push('صحة مالية ضعيفة');
+  if (techStrong) reasons.push('تحليل فني إيجابي');
+  else if (techScore <= 30) reasons.push('تحليل فني سلبي');
   if (momScore >= 70) reasons.push('زخم صاعد');
   if (momScore <= 30) reasons.push('زخم هابط');
   if (riskScore <= 35) reasons.push('مخاطر عالية');
@@ -310,7 +342,7 @@ function calculateStockScore(s) {
   if (t.macdCrossover === 'bullish') reasons.push('تقاطع MACD صاعد');
 
   return {
-    total, rating, ratingAr, ratingColor, ratingEmoji,
+    total, rating, ratingAr, ratingColor, ratingEmoji, logic,
     breakdown: { techScore, finScore, momScore, riskScore, valScore },
     reasons
   };
@@ -395,7 +427,12 @@ function finBar(f) {
   if (f.revenueGrowth !== undefined) { let c = f.revenueGrowth > 5 ? 'g' : f.revenueGrowth >= 0 ? 'y' : 'r'; items.push(`<span class="fin-item ${c}">نمو: ${f.revenueGrowth}%</span>`); }
   return '<div class="fin-bar">' + items.join('') + '</div>';
 }
-function recBadge(t) {
+function recBadge(t, scoring) {
+  // يستخدم التقييم الشامل بدل التوصية الفنية القديمة
+  if (scoring) {
+    const r = scoring.rating.includes('buy') ? 'buy' : scoring.rating.includes('sell') ? 'sell' : 'hold';
+    return `<span class="badge rec-badge rec-${r}" style="background:${scoring.ratingColor}22;color:${scoring.ratingColor}">${scoring.ratingAr}</span>`;
+  }
   if (!t) return '';
   const r = t.recommendation || 'hold';
   return `<span class="badge rec-badge rec-${r}">${t.recommendationText || '—'}</span>`;
@@ -440,15 +477,17 @@ function openStock(symbol) {
     </div>`;
   }
 
-  // === RECOMMENDATION ===
-  const rec = t.recommendation || 'hold';
-  const recText = t.recommendationText || 'انتظار';
-  const recIcon = rec.includes('buy') ? '📈' : rec.includes('sell') ? '📉' : '⏸️';
-  html += `<div class="modal-section">
-    <div class="rec-box ${rec}">${recIcon} ${recText}
-      <div class="rec-reasons">${(t.reasons||[]).join(' • ')}</div>
-    </div>
-  </div>`;
+  // === RECOMMENDATION (من التقييم الشامل — نظام واحد موحد) ===
+  if (sc) {
+    const recIcon = sc.rating.includes('buy') ? '📈' : sc.rating === 'watch' ? '🔍' : sc.rating.includes('sell') ? '📉' : sc.rating === 'caution' ? '⚠️' : '⏸️';
+    const recClass = sc.rating.includes('buy') ? 'buy' : sc.rating.includes('sell') ? 'sell' : 'hold';
+    html += `<div class="modal-section">
+      <div class="rec-box ${recClass}" style="background:${sc.ratingColor}20;color:${sc.ratingColor};border:1px solid ${sc.ratingColor}40">
+        ${recIcon} ${sc.ratingAr}
+        <div class="rec-reasons">${sc.logic || ''}</div>
+      </div>
+    </div>`;
+  }
 
   // === FORECAST ===
   if (t.forecast) {
@@ -1146,7 +1185,7 @@ function render() {
         <div class="symbol">${sym}.SR — ${yn}</div>
         <div class="price ${priceClass}">${s.currentPrice ? s.currentPrice + ' ريال' : 'غير متوفر'}${s.dailyChange !== undefined ? ' <span style="font-size:0.5em;color:' + (s.dailyChange >= 0 ? '#10b981' : '#ef4444') + '">' + (s.dailyChange >= 0 ? '▲' : '▼') + Math.abs(s.dailyChange).toFixed(2) + '%</span>' : ''}</div>
         <div class="detail">${s.previousClose ? 'إغلاق أمس: ' + s.previousClose + ' ريال | ' : ''}قاع كورونا: ${s.covidLow ? s.covidLow + ' ريال' : 'غير متوفر'}${diffPct !== null ? ' | الفرق: ' + diffPct.toFixed(1) + '%' : ''}</div>
-        ${recBadge(t)}
+        ${recBadge(t, s.scoring)}
         ${finBar(s.financials)}
       </div>`;
     }
@@ -1172,7 +1211,7 @@ function render() {
     else covidStatus += '—';
 
     const alertIcon = alerts.length > 0 ? `<span style="cursor:pointer" title="${alerts.map(a=>a.text).join('\n')}">⚠️</span>` : '';
-    const recTd = recBadge(t);
+    const recTd = recBadge(t, s.scoring);
 
     tableEl.innerHTML += `<tr class="${rowClass}" onclick="openStock('${sym}')">
       <td>${alertIcon}</td>
