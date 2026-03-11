@@ -122,12 +122,12 @@ tr:hover{background:#1e293b88}
 <div class="stats" id="stats"></div>
 
 <div class="filter-bar" id="filterBar">
-  <button class="active" onclick="filterBy('all')">📊 الكل</button>
-  <button onclick="filterBy('strong_buy')">⭐ شراء قوي</button>
-  <button onclick="filterBy('buy')">✅ شراء</button>
-  <button onclick="filterBy('hold')">⏳ انتظار</button>
-  <button onclick="filterBy('sell')">❌ بيع</button>
-  <button onclick="filterBy('filtered')">⛔ لم يعدّ الفلتر</button>
+  <button class="active" onclick="filterBy('all',this)">📊 الكل</button>
+  <button onclick="filterBy('strong_buy',this)">⭐ شراء قوي</button>
+  <button onclick="filterBy('buy',this)">✅ شراء</button>
+  <button onclick="filterBy('hold',this)">⏳ انتظار</button>
+  <button onclick="filterBy('sell',this)">❌ بيع</button>
+  <button onclick="filterBy('filtered',this)">⛔ لم يعدّ الفلتر</button>
   <select id="sectorFilter" onchange="filterBySector(this.value)">
     <option value="all">كل القطاعات</option>
   </select>
@@ -270,6 +270,8 @@ function getFiltered() {
   let list = stocks;
   if (currentFilter === 'filtered') {
     list = list.filter(s => s.investmentScore?.filtered);
+  } else if (currentFilter === 'sell') {
+    list = list.filter(s => !s.investmentScore?.filtered && (s.investmentScore?.classCode === 'sell' || s.investmentScore?.classCode === 'strong_sell'));
   } else if (currentFilter !== 'all') {
     list = list.filter(s => !s.investmentScore?.filtered && s.investmentScore?.classCode === currentFilter);
   }
@@ -325,10 +327,10 @@ function renderTable() {
   document.getElementById('tableBody').innerHTML = html;
 }
 
-function filterBy(f) {
+function filterBy(f, btn) {
   currentFilter = f;
   document.querySelectorAll('.filter-bar button').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  if (btn) btn.classList.add('active');
   renderTable();
 }
 
