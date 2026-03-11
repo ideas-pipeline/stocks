@@ -88,7 +88,7 @@ tr:hover{background:#1e293b88}
 .indicator .val{font-size:1.3em;font-weight:bold}
 .indicator .lbl{font-size:0.7em;color:#94a3b8;margin-top:4px}
 .indicator.green .val{color:#10b981}.indicator.red .val{color:#ef4444}.indicator.yellow .val{color:#f59e0b}.indicator.blue .val{color:#60a5fa}
-.chart-container{background:#0f172a;border-radius:10px;padding:16px;height:160px;position:relative;overflow:hidden}
+.chart-container{background:#0f172a;border-radius:10px;padding:16px;height:200px;position:relative;overflow:hidden}
 
 /* Pillar detail bars */
 .pillar-bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:0.85em}
@@ -487,29 +487,62 @@ function drawChart(id, prices) {
   let canvas = document.getElementById(id);
   if (!canvas) return;
   let ctx = canvas.getContext('2d');
-  let w = canvas.parentElement.clientWidth - 32;
-  let h = canvas.parentElement.clientHeight - 32;
-  canvas.width = w; canvas.height = h;
+  let padL = 50, padR = 10, padT = 10, padB = 24;
+  let totalW = canvas.parentElement.clientWidth - 32;
+  let totalH = canvas.parentElement.clientHeight - 32;
+  canvas.width = totalW; canvas.height = totalH;
+  let w = totalW - padL - padR;
+  let h = totalH - padT - padB;
   
   let min = Math.min(...prices) * 0.99;
   let max = Math.max(...prices) * 1.01;
   let range = max - min || 1;
   
+  // Y-axis labels (price)
+  ctx.fillStyle = '#64748b';
+  ctx.font = '10px Segoe UI, sans-serif';
+  ctx.textAlign = 'right';
+  let ySteps = 4;
+  for (let i = 0; i <= ySteps; i++) {
+    let val = min + (range * i / ySteps);
+    let y = padT + h - (i / ySteps) * h;
+    ctx.fillText(val.toFixed(1), padL - 6, y + 3);
+    // grid line
+    ctx.beginPath();
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 0.5;
+    ctx.moveTo(padL, y);
+    ctx.lineTo(padL + w, y);
+    ctx.stroke();
+  }
+  
+  // X-axis labels (days ago)
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#64748b';
+  let xLabels = [0, Math.floor(prices.length/3), Math.floor(2*prices.length/3), prices.length-1];
+  xLabels.forEach(i => {
+    let x = padL + (i / (prices.length - 1)) * w;
+    let daysAgo = prices.length - 1 - i;
+    let label = daysAgo === 0 ? 'اليوم' : ('-' + daysAgo + 'ي');
+    ctx.fillText(label, x, totalH - 4);
+  });
+  
+  // Price line
   ctx.beginPath();
   ctx.strokeStyle = prices[prices.length-1] >= prices[0] ? '#10b981' : '#ef4444';
   ctx.lineWidth = 2;
   prices.forEach((p, i) => {
-    let x = (i / (prices.length - 1)) * w;
-    let y = h - ((p - min) / range) * h;
+    let x = padL + (i / (prices.length - 1)) * w;
+    let y = padT + h - ((p - min) / range) * h;
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   });
   ctx.stroke();
   
   // Fill
-  ctx.lineTo(w, h);
-  ctx.lineTo(0, h);
+  ctx.lineTo(padL + w, padT + h);
+  ctx.lineTo(padL, padT + h);
   ctx.closePath();
-  let grad = ctx.createLinearGradient(0, 0, 0, h);
+  let grad = ctx.createLinearGradient(0, 0, 0, padT + h);
   let baseColor = prices[prices.length-1] >= prices[0] ? '16,185,129' : '239,68,68';
   grad.addColorStop(0, `rgba(${baseColor},0.3)`);
   grad.addColorStop(1, `rgba(${baseColor},0.02)`);
