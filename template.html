@@ -1044,13 +1044,20 @@ function generateStockAnalysis(s) {
   if (f.currentRatio) text += `- نسبة التداول: ${f.currentRatio} | الديون: ${f.debtToEquity || '—'}%\n`;
   if (f.profitMargins) text += `- هامش الربح: ${f.profitMargins}% | نمو الإيرادات: ${f.revenueGrowth || '—'}%\n`;
 
-  // Recommendation
+  // Recommendation — نظام البوابتين (مطابق للتقييم الشامل)
   text += `\n### 🎯 التوصية\n`;
-  if (sc.total >= 70) text += `**شراء قوي** — السهم يظهر مؤشرات ممتازة على كل المعايير. فرصة قوية.\n`;
-  else if (sc.total >= 58) text += `**شراء** — مؤشرات إيجابية بشكل عام. تستحق المتابعة والدخول.\n`;
-  else if (sc.total >= 45) text += `**انتظار** — إشارات مختلطة. راقب المؤشرات قبل اتخاذ قرار.\n`;
-  else if (sc.total >= 35) text += `**بيع/تخفيف** — مؤشرات سلبية. إذا عندك السهم فكّر بالتخفيف.\n`;
-  else text += `**بيع قوي** — مؤشرات سلبية على كل المعايير. تجنّب.\n`;
+  text += `**${sc.ratingAr}** ${sc.ratingEmoji} — ${sc.logic}\n\n`;
+  if (sc.rating === 'watch') {
+    text += `الشركة ممتازة من ناحية الأساسيات (مالي: ${bd.finScore}/100) لكن المؤشرات الفنية سلبية حالياً (فني: ${bd.techScore}/100). الأفضل مراقبتها وانتظار إشارة ارتداد مثل: تقاطع MACD صاعد أو RSI يطلع من التشبع البيعي.\n`;
+  } else if (sc.rating === 'caution') {
+    text += `السهم يرتد فنياً لكن أساسيات الشركة ضعيفة. مناسب للمضاربة القصيرة فقط — لا تحتفظ.\n`;
+  } else if (sc.rating.includes('buy')) {
+    text += `الأساسيات والفنيات متوافقة — إشارة دخول. الدعم عند ${t.support || '—'} ر.س.\n`;
+  } else if (sc.rating.includes('sell')) {
+    text += `إشارات سلبية من الجانبين. إذا عندك السهم فكّر بالتخفيف أو الخروج.\n`;
+  } else {
+    text += `إشارات مختلطة. راقب وانتظر وضوح الاتجاه.\n`;
+  }
 
   text += `\n---\n*تحليل آلي من بيانات ${new Date().toLocaleDateString('ar-SA')} — ليس توصية مالية نهائية*`;
   return text;
