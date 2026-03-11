@@ -106,7 +106,59 @@ tr.near-row{background:#1a1500}
 .watchlist-bar button.active{background:#f59e0b;color:#000;border-color:#f59e0b}
 .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:700px){.compare-grid{grid-template-columns:1fr}}
-@media(max-width:600px){.cards{grid-template-columns:1fr}h1{font-size:1.2em}body{padding:8px}table{font-size:0.7em}.stats{gap:8px}.stat{padding:6px 10px}.modal{max-height:95vh;border-radius:12px}.indicator-grid{grid-template-columns:1fr 1fr}}
+
+/* ══════ MOBILE RESPONSIVE ══════ */
+@media(max-width:768px){
+  body{padding:10px;font-size:0.95em}
+  h1{font-size:1.3em;margin:12px 0 6px}
+  .subtitle{font-size:0.8em}
+  .cards{grid-template-columns:1fr}
+  .card{padding:12px}
+  .card .name{font-size:1em}
+  .card .price{font-size:1.4em}
+  .card .detail{font-size:0.8em}
+  .card .fin-bar{gap:4px}
+  .card .fin-item{font-size:0.65em;padding:2px 4px}
+  .stats{gap:6px;flex-wrap:wrap}
+  .stat{padding:6px 10px;min-width:70px}
+  .stat .num{font-size:1.1em}
+  .stat .label{font-size:0.65em}
+  .legend{font-size:0.7em;line-height:1.6}
+  .watchlist-bar{gap:6px}
+  .watchlist-bar button{padding:5px 10px;font-size:0.8em}
+  .section-title{font-size:1em;margin:16px 0 8px}
+
+  /* الجدول — scroll أفقي */
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;font-size:0.72em}
+  thead{position:static}
+  th{padding:8px 4px;font-size:0.78em}
+  td{padding:5px 4px}
+
+  /* Modal */
+  .modal-overlay{padding:8px}
+  .modal{max-width:100%;max-height:95vh;border-radius:12px}
+  .modal-header{padding:14px}
+  .modal-header h2{font-size:1em}
+  .modal-body{padding:14px}
+  .indicator-grid{grid-template-columns:1fr 1fr}
+  .indicator{padding:8px}
+  .indicator .val{font-size:1.1em}
+  .indicator .lbl{font-size:0.7em}
+  .rec-box{padding:12px;font-size:1em}
+  .chart-container{height:140px}
+  .news-item .news-title{font-size:0.85em}
+}
+
+@media(max-width:400px){
+  body{padding:6px}
+  h1{font-size:1.1em}
+  .stats{justify-content:space-around}
+  .stat{flex:1;min-width:60px}
+  .card .price{font-size:1.2em}
+  table{font-size:0.65em}
+  .indicator-grid{grid-template-columns:1fr 1fr}
+  .modal-body{padding:10px}
+}
 </style>
 </head>
 <body>
