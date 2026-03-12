@@ -513,6 +513,21 @@ function openModal(sym) {
     </div>`;
   }
   
+  // Sector comparison
+  if (!sc.filtered && sc.sectorRank) {
+    body += `<div class="modal-section">
+      <h3>المقارنة القطاعية — ${SECTOR_AR[sc.sector] || sc.sector}</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="indicator"><div class="val" style="color:#60a5fa">${sc.sectorRank}/${sc.sectorTotal}</div><div class="lbl">الترتيب</div></div>
+        <div class="indicator"><div class="val" style="color:#60a5fa">${sc.sectorPercentile}%</div><div class="lbl">Percentile</div></div>
+        <div class="indicator"><div class="val" style="color:#94a3b8">${sc.sectorAvgScore}</div><div class="lbl">متوسط القطاع</div></div>
+      </div>
+      <div style="font-size:0.8em;color:#94a3b8;margin-top:8px;text-align:center">
+        ${sc.total > sc.sectorAvgScore ? '<span style="color:#10b981">أعلى من متوسط القطاع بـ '+(sc.total - sc.sectorAvgScore).toFixed(0)+' نقطة</span>' : '<span style="color:#ef4444">أقل من متوسط القطاع بـ '+(sc.sectorAvgScore - sc.total).toFixed(0)+' نقطة</span>'}
+      </div>
+    </div>`;
+  }
+  
   // Info
   body += `<div class="modal-section">
     <h3>معلومات</h3>
