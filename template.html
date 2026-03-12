@@ -259,7 +259,16 @@ function renderTopCards() {
           <div style="margin-top:4px"><span class="conf-badge ${sc.confidenceCode||''}" style="font-size:0.6em">ثقة: ${sc.confidence||''}</span></div>
         </div>
       </div>
-      <div class="score-bar"><div class="score-fill ${scClass}" style="width:${sc.total}%"></div></div>
+      <div style="display:flex;gap:8px;margin:6px 0;font-size:0.75em">
+        <div style="flex:1">
+          <div style="color:#94a3b8;margin-bottom:2px">استثمار</div>
+          <div class="score-bar"><div class="score-fill ${scClass}" style="width:${sc.total}%"></div></div>
+        </div>
+        <div style="flex:1">
+          <div style="color:#94a3b8;margin-bottom:2px">مخاطر ${sc.riskScore||0}/100</div>
+          <div class="score-bar"><div class="score-fill ${(sc.riskScore||0)<=25?'high':(sc.riskScore||0)<=50?'mid':'low'}" style="width:${sc.riskScore||0}%"></div></div>
+        </div>
+      </div>
       <div class="pillars">
         <span class="pillar ${sc.financial>=20?'g':(sc.financial>=12?'y':'r')}">مالية ${sc.financial}/30</span>
         <span class="pillar ${sc.trend>=17?'g':(sc.trend>=10?'y':'r')}">اتجاه ${sc.trend}/25</span>
@@ -377,7 +386,18 @@ function openModal(sym) {
     <div style="text-align:center;margin:16px 0">
       <div class="score-num ${scClass}" style="font-size:2.5em">${sc.filtered ? '—' : sc.total}<span style="font-size:0.4em;color:#94a3b8">/100</span></div>
       <div class="class-badge ${sc.classCode}" style="font-size:1em;margin:8px 0">${sc.classification}</div>
-      <div style="margin-top:6px"><span class="conf-badge ${sc.confidenceCode||''}">ثقة: ${sc.confidence||'—'} (${sc.confidencePct||0}%)</span></div>
+      <div style="display:flex;justify-content:center;gap:12px;margin-top:8px;flex-wrap:wrap">
+        <div style="background:#0f172a;border-radius:8px;padding:8px 14px;text-align:center">
+          <div style="font-size:0.7em;color:#94a3b8">المخاطر</div>
+          <div style="font-size:1.2em;font-weight:bold;color:${(sc.riskScore||0)<=25?'#10b981':(sc.riskScore||0)<=50?'#f59e0b':'#ef4444'}">${sc.riskScore||0}/100</div>
+          <div style="font-size:0.7em;color:${(sc.riskScore||0)<=25?'#10b981':(sc.riskScore||0)<=50?'#f59e0b':'#ef4444'}">${sc.riskLevel||''}</div>
+        </div>
+        <div style="background:#0f172a;border-radius:8px;padding:8px 14px;text-align:center">
+          <div style="font-size:0.7em;color:#94a3b8">الثقة</div>
+          <div style="font-size:1.2em;font-weight:bold;color:${sc.confidenceCode==='high'?'#10b981':sc.confidenceCode==='medium'?'#f59e0b':'#ef4444'}">${sc.confidencePct||0}%</div>
+          <div style="font-size:0.7em;color:#94a3b8">${sc.confidence||''}</div>
+        </div>
+      </div>
       ${sc.filtered ? '<div style="color:#f59e0b;margin-top:8px">لم يعدّ الفلتر: ' + (sc.filterReason||'') + '</div>' : ''}
     </div>`;
   
@@ -416,6 +436,16 @@ function openModal(sym) {
     </div>`;
   }
   body += '</div>';
+  
+  // Risk reasons
+  if (!sc.filtered && sc.riskReasons && sc.riskReasons.length > 0) {
+    body += `<div class="modal-section">
+      <h3>أهم المخاطر</h3>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        ${sc.riskReasons.map(r => '<div style="padding:6px 10px;background:#ef444410;border-radius:6px;font-size:0.85em;color:#f87171;border-right:3px solid #ef4444">' + r + '</div>').join('')}
+      </div>
+    </div>`;
+  }
   
   // Valuation
   body += `<div class="modal-section">
