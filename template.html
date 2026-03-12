@@ -97,6 +97,16 @@ tr:hover{background:#1e293b88}
 .pillar-bar .bar-fill{height:100%;border-radius:5px}
 .pillar-bar .bar-val{min-width:40px;text-align:left;font-weight:bold}
 
+.conf-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.65em}
+.conf-badge.high{background:#10b98120;color:#10b981}
+.conf-badge.medium{background:#f59e0b20;color:#f59e0b}
+.conf-badge.low{background:#ef444420;color:#ef4444}
+.class-badge.buy_conditional{background:#3b82f625;color:#60a5fa;border:1px dashed #3b82f6}
+.interp{font-size:0.8em;color:#94a3b8;margin-top:8px;line-height:1.5;padding:8px;background:#0f172a;border-radius:8px}
+.interp .exec{color:#f59e0b;font-weight:bold;margin-top:4px}
+.driver{display:inline-block;font-size:0.7em;padding:2px 6px;border-radius:4px;margin:2px}
+.driver.positive{background:#10b98115;color:#10b981}
+.driver.negative{background:#ef444415;color:#ef4444}
 .footer{text-align:center;color:#475569;margin-top:32px;font-size:0.8em;padding:16px}
 
 /* Mobile */
@@ -167,9 +177,9 @@ tr:hover{background:#1e293b88}
 </div>
 
 <div class="footer">
-  النموذج الاستثماري: صحة مالية 30% | اتجاه فني أسبوعي 25% | زخم نسبي 15% | مخاطر 15% | تقييم 15%<br>
-  التوقيت: EMA50D + RSI Daily + MACD Daily + Volume — لا يؤثر على النقاط، يحدد وقت الدخول فقط<br>
-  ⚠️ ليست نصيحة استثمارية | أبوسيف
+  سيف تداول V2.0 | الأوزان: مالية 30% • اتجاه 25% • زخم 15% • مخاطر 15% • تقييم 15%<br>
+  التوقيت مستقل عن النقاط | شراء مشروط = السهم جيد لكن يفضّل دخول تدريجي<br>
+  ليست نصيحة استثمارية | أبوسيف
 </div>
 
 <script>
@@ -246,6 +256,7 @@ function renderTopCards() {
         <div style="text-align:left">
           <div class="score-num ${scClass}">${sc.total}</div>
           <div class="class-badge ${sc.classCode}">${sc.classification}</div>
+          <div style="margin-top:4px"><span class="conf-badge ${sc.confidenceCode||''}" style="font-size:0.6em">ثقة: ${sc.confidence||''}</span></div>
         </div>
       </div>
       <div class="score-bar"><div class="score-fill ${scClass}" style="width:${sc.total}%"></div></div>
@@ -366,8 +377,17 @@ function openModal(sym) {
     <div style="text-align:center;margin:16px 0">
       <div class="score-num ${scClass}" style="font-size:2.5em">${sc.filtered ? '—' : sc.total}<span style="font-size:0.4em;color:#94a3b8">/100</span></div>
       <div class="class-badge ${sc.classCode}" style="font-size:1em;margin:8px 0">${sc.classification}</div>
-      ${sc.filtered ? '<div style="color:#f59e0b;margin-top:8px">⛔ ' + (sc.filterReason||'') + '</div>' : ''}
+      <div style="margin-top:6px"><span class="conf-badge ${sc.confidenceCode||''}">ثقة: ${sc.confidence||'—'} (${sc.confidencePct||0}%)</span></div>
+      ${sc.filtered ? '<div style="color:#f59e0b;margin-top:8px">لم يعدّ الفلتر: ' + (sc.filterReason||'') + '</div>' : ''}
     </div>`;
+  
+  if (!sc.filtered && sc.interpretation) {
+    body += `<div class="interp">
+      ${sc.interpretation}
+      <div class="exec">${sc.execInterpretation||''}</div>
+      <div style="margin-top:6px">${(sc.topDrivers||[]).map(d => '<span class="driver '+d.type+'">'+d.text+'</span>').join(' ')}</div>
+    </div>`;
+  }
   
   if (!sc.filtered) {
     // Pillar bars
