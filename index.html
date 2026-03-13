@@ -269,6 +269,10 @@ function renderTopCards() {
           <div class="score-bar"><div class="score-fill ${(sc.riskScore||0)<=25?'high':(sc.riskScore||0)<=50?'mid':'low'}" style="width:${sc.riskScore||0}%"></div></div>
         </div>
       </div>
+      <div style="display:flex;gap:6px;margin:4px 0;font-size:0.65em;flex-wrap:wrap">
+        ${s.liquidityScore ? `<span style="padding:2px 6px;border-radius:4px;background:${s.liquidityScore.color==='green'?'#065f46':s.liquidityScore.color==='yellow'?'#78350f':'#7f1d1d'};color:${s.liquidityScore.color==='green'?'#6ee7b7':s.liquidityScore.color==='yellow'?'#fcd34d':'#fca5a5'}">🔄 ${s.liquidityScore.turnoverPct != null ? s.liquidityScore.turnoverPct+'%' : '—'} ${s.liquidityScore.label}</span>` : ''}
+        ${s.debtHealth ? `<span style="padding:2px 6px;border-radius:4px;background:${s.debtHealth.color==='green'?'#065f46':s.debtHealth.color==='yellow'?'#78350f':s.debtHealth.color==='red'?'#7f1d1d':'#374151'};color:${s.debtHealth.color==='green'?'#6ee7b7':s.debtHealth.color==='yellow'?'#fcd34d':s.debtHealth.color==='red'?'#fca5a5':'#9ca3af'}">💰 ${s.debtHealth.type==='bank' ? (s.debtHealth.costToIncome ? 'C/I '+s.debtHealth.costToIncome+'%' : '—') : (s.debtHealth.netDebtToEbitda != null ? 'ND/E '+s.debtHealth.netDebtToEbitda+'x' : (s.debtHealth.netDebt != null && s.debtHealth.netDebt < 0 ? 'فوائض' : '—'))} ${s.debtHealth.label}</span>` : ''}
+      </div>
       <div class="pillars">
         <span class="pillar ${sc.financial>=20?'g':(sc.financial>=12?'y':'r')}">مالية ${sc.financial}/30</span>
         <span class="pillar ${sc.trend>=17?'g':(sc.trend>=10?'y':'r')}">اتجاه ${sc.trend}/25</span>
