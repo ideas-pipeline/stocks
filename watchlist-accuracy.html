@@ -401,7 +401,7 @@ function calcReturn(entry, current, type) {
 /** هل التوصية ناجحة؟ */
 function isSuccess(ret) {
   if (ret === null) return null;
-  return ret > 0;
+  return ret >= 0;   // التعادل (0%) يُعدّ ناجحاً
 }
 
 function fmt(n, dec = 2) {
@@ -422,7 +422,7 @@ function returnClass(ret) {
 
 function statusBadge(ret) {
   if (ret === null) return `<span class="status-badge status-pending">⏳ معلّق</span>`;
-  if (ret >= 0)    return `<span class="status-badge status-success">✅ ناجح</span>`;
+  if (ret >= 0)    return `<span class="status-badge status-success">✅ ناجح</span>`;  // التعادل = ناجح
   return                   `<span class="status-badge status-fail">❌ فشل</span>`;
 }
 
