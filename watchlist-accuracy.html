@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watchlist Accuracy — دقة التوصيات</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0d1117;
+      --surface:     #161b22;
+      --border:      #30363d;
+      --text:        #e6edf3;
+      --muted:       #8b949e;
+      --accent:      #58a6ff;
+      --green:       #3fb950;
+      --green-bg:    rgba(63,185,80,.12);
+      --red:         #f85149;
+      --red-bg:      rgba(248,81,73,.12);
+      --yellow:      #d29922;
+      --yellow-bg:   rgba(210,153,34,.12);
+      --buy-color:   #2ea043;
+      --sell-color:  #da3633;
+      --radius:      8px;
+      --radius-lg:   12px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Arabic",
+                   Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-left h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .header-left p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .badge-date {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* ── Stats Cards ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-card .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .stat-card .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .stat-card.green  .stat-value { color: var(--green); }
+    .stat-card.red    .stat-value { color: var(--red); }
+    .stat-card.accent .stat-value { color: var(--accent); }
+    .stat-card.yellow .stat-value { color: var(--yellow); }
+
+    /* ── Filters ── */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+    .filter-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 16px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all .15s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(88,166,255,.08);
+    }
+    .last-updated {
+      margin-right: auto;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* ── Table Wrapper ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* ── Table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 640px;
+    }
+    thead th {
+      padding: 12px 16px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      background: rgba(255,255,255,.02);
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .12s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,.03); }
+    tbody td {
+      padding: 14px 16px;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    /* ── Cell Helpers ── */
+    .symbol {
+      font-weight: 700;
+      color: var(--accent);
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.85rem;
+    }
+    .company-name { font-weight: 600; color: var(--text); }
+    .sector       { font-size: 0.78rem; color: var(--muted); }
+
+    .type-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .type-buy  { background: rgba(46,160,67,.18);  color: #3fb950; border: 1px solid rgba(46,160,67,.4); }
+    .type-sell { background: rgba(218,54,51,.18);  color: #f85149; border: 1px solid rgba(218,54,51,.4); }
+
+    .price { font-family: "SF Mono", "Fira Code", monospace; font-size: 0.88rem; }
+    .current-price { font-weight: 700; }
+
+    .return-positive { color: var(--green); font-weight: 700; }
+    .return-negative { color: var(--red);   font-weight: 700; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .status-success {
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid rgba(63,185,80,.3);
+    }
+    .status-fail {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid rgba(248,81,73,.3);
+    }
+    .status-pending {
+      background: var(--yellow-bg);
+      color: var(--yellow);
+      border: 1px solid rgba(210,153,34,.3);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .footer .dot { color: var(--border); }
+
+    /* ── Responsive: mobile cards ── */
+    @media (max-width: 640px) {
+      .table-wrap { border-radius: var(--radius); }
+
+      /* hide table, show cards */
+      .desktop-table { display: none; }
+
+      .mobile-cards { display: block; }
+      .mobile-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 14px 16px;
+        margin-bottom: 10px;
+      }
+      .mc-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+      .mc-symbol { font-weight: 700; color: var(--accent); font-size: 1rem; font-family: monospace; }
+      .mc-name   { font-weight: 600; margin-top: 1px; }
+      .mc-sector { font-size: 0.76rem; color: var(--muted); }
+      .mc-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 16px;
+        margin-top: 10px;
+      }
+      .mc-item label { display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 2px; }
+      .mc-item span  { font-size: 0.9rem; font-weight: 600; }
+    }
+
+    @media (min-width: 641px) {
+      .mobile-cards { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ── Header ── -->
+  <div class="header">
+    <div class="header-left">
+      <h1>📊 Watchlist Accuracy</h1>
+      <p>دقة التوصيات — متابعة الأداء الفعلي للتوصيات</p>
+    </div>
+    <span class="badge-date" id="entry-date-badge">دخول: 13 مارس 2025</span>
+  </div>
+
+  <!-- ── Stats ── -->
+  <div class="stats-grid" id="stats-grid">
+    <!-- populated by JS -->
+  </div>
+
+  <!-- ── Filters ── -->
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">الكل</button>
+    <button class="filter-btn" data-filter="buy">شراء قوي</button>
+    <button class="filter-btn" data-filter="sell">بيع قوي</button>
+    <button class="filter-btn" data-filter="success">ناجح ✅</button>
+    <button class="filter-btn" data-filter="fail">فشل ❌</button>
+    <span class="last-updated" id="last-updated-label"></span>
+  </div>
+
+  <!-- ── Desktop Table ── -->
+  <div class="table-wrap desktop-table">
+    <table id="main-table">
+      <thead>
+        <tr>
+          <th>الرمز</th>
+          <th>الشركة</th>
+          <th>القطاع</th>
+          <th>النوع</th>
+          <th>سعر الدخول</th>
+          <th>السعر الحالي</th>
+          <th>العائد %</th>
+          <th>الحالة</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <!-- ── Mobile Cards ── -->
+  <div class="mobile-cards" id="mobile-cards"></div>
+
+  <!-- ── Footer ── -->
+  <div class="footer">
+    <span>بيانات للأغراض التعليمية فقط — لا تُعدّ نصيحة استثمارية</span>
+    <span>
+      <span class="dot">●</span>
+      تاريخ الدخول: 13 مارس 2025
+      <span class="dot"> ● </span>
+      <span id="footer-updated"></span>
+    </span>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+/* ══════════════════════════════════════════════════════
+   DATA — يمكن تحديثه عبر JSON أو API مستقبلاً
+   ══════════════════════════════════════════════════════ */
+const CONFIG = {
+  entryDate:   "2025-03-13",
+  updatedAt:   "2026-03-17T21:32:00+01:00",  // آخر تحديث يدوي للأسعار
+};
+
+/*
+  currentPrice: null → يُعرض كـ "—" (لم يجلب بعد)
+  اجعله رقماً لتفعيل الحساب التلقائي
+*/
+const WATCHLIST = [
+  {
+    symbol:        "1010.SR",
+    name:          "بنك الرياض",
+    sector:        "البنوك",
+    type:          "buy",          // "buy" | "sell"
+    entryPrice:    28.86,
+    currentPrice:  28.66,           // ✅ confirmed 2026-03-17
+  },
+  {
+    symbol:        "4030.SR",
+    name:          "البحري",
+    sector:        "النقل البحري",
+    type:          "buy",
+    entryPrice:    32.00,
+    currentPrice:  31.66,  // ✅ confirmed 2026-03-17
+  },
+  {
+    symbol:        "2287",
+    name:          "العربية للزراعة",
+    sector:        "الإنتاج الغذائي",
+    type:          "sell",
+    entryPrice:    25.08,
+    currentPrice:  25.08,  // ✅ confirmed 2026-03-17
+  },
+  {
+    symbol:        "4264",
+    name:          "طيران ناس",
+    sector:        "النقل الجوي",
+    type:          "sell",
+    entryPrice:    50.95,
+    currentPrice:  50.95,   // ✅ confirmed 2026-03-17
+  },
+];
+
+/* ══════════════════════════════════════════════════════
+   HELPERS
+   ══════════════════════════════════════════════════════ */
+
+/** حساب العائد % مع مراعاة نوع التوصية */
+function calcReturn(entry, current, type) {
+  if (current === null || current === undefined) return null;
+  const raw = ((current - entry) / entry) * 100;
+  // للبيع: الربح عكسي (السعر انخفض = ناجح)
+  return type === "sell" ? -raw : raw;
+}
+
+/** هل التوصية ناجحة؟ */
+function isSuccess(ret) {
+  if (ret === null) return null;
+  return ret > 0;
+}
+
+function fmt(n, dec = 2) {
+  if (n === null || n === undefined) return "—";
+  return Number(n).toFixed(dec);
+}
+
+function fmtReturn(ret) {
+  if (ret === null) return "—";
+  const sign = ret >= 0 ? "+" : "";
+  return `${sign}${fmt(ret)}%`;
+}
+
+function returnClass(ret) {
+  if (ret === null) return "";
+  return ret >= 0 ? "return-positive" : "return-negative";
+}
+
+function statusBadge(ret) {
+  if (ret === null) return `<span class="status-badge status-pending">⏳ معلّق</span>`;
+  if (ret >= 0)    return `<span class="status-badge status-success">✅ ناجح</span>`;
+  return                   `<span class="status-badge status-fail">❌ فشل</span>`;
+}
+
+function typeBadge(type) {
+  return type === "buy"
+    ? `<span class="type-badge type-buy">📈 شراء قوي</span>`
+    : `<span class="type-badge type-sell">📉 بيع قوي</span>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   ENRICHED DATA
+   ══════════════════════════════════════════════════════ */
+const rows = WATCHLIST.map(item => {
+  const ret = calcReturn(item.entryPrice, item.currentPrice, item.type);
+  return { ...item, ret, success: isSuccess(ret) };
+});
+
+/* ══════════════════════════════════════════════════════
+   STATS
+   ══════════════════════════════════════════════════════ */
+function renderStats(data) {
+  const total   = data.length;
+  const pending = data.filter(r => r.ret === null).length;
+  const done    = data.filter(r => r.ret !== null);
+  const success = done.filter(r => r.success).length;
+  const fail    = done.length - success;
+  const accuracy = done.length ? Math.round((success / done.length) * 100) : null;
+
+  const rets = done.map(r => r.ret);
+  const avgRet = rets.length ? rets.reduce((a,b) => a+b, 0) / rets.length : null;
+
+  const g = document.getElementById("stats-grid");
+  g.innerHTML = `
+    <div class="stat-card accent">
+      <div class="stat-value">${total}</div>
+      <div class="stat-label">إجمالي التوصيات</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-value">${accuracy !== null ? accuracy + "%" : "—"}</div>
+      <div class="stat-label">نسبة الدقة</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-value">${success}</div>
+      <div class="stat-label">ناجح ✅</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-value">${fail}</div>
+      <div class="stat-label">فشل ❌</div>
+    </div>
+    <div class="stat-card ${avgRet === null ? "accent" : avgRet >= 0 ? "green" : "red"}">
+      <div class="stat-value">${avgRet !== null ? (avgRet >= 0 ? "+" : "") + fmt(avgRet) + "%" : "—"}</div>
+      <div class="stat-label">متوسط العائد</div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════════════════
+   TABLE
+   ══════════════════════════════════════════════════════ */
+function renderTable(data) {
+  const tbody = document.getElementById("table-body");
+  tbody.innerHTML = data.map(r => `
+    <tr data-type="${r.type}" data-status="${r.ret === null ? "pending" : r.success ? "success" : "fail"}">
+      <td class="symbol">${r.symbol}</td>
+      <td>
+        <div class="company-name">${r.name}</div>
+        <div class="sector">${r.sector}</div>
+      </td>
+      <td class="sector">${r.sector}</td>
+      <td>${typeBadge(r.type)}</td>
+      <td class="price">${fmt(r.entryPrice)}</td>
+      <td class="price current-price">${r.currentPrice !== null ? fmt(r.currentPrice) : "—"}</td>
+      <td class="${returnClass(r.ret)}">${fmtReturn(r.ret)}</td>
+      <td>${statusBadge(r.ret)}</td>
+    </tr>
+  `).join("");
+}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE CARDS
+   ══════════════════════════════════════════════════════ */
+function renderCards(data) {
+  const wrap = document.getElementById("mobile-cards");
+  wrap.innerHTML = data.map(r => `
+    <div class="mobile-card" data-type="${r.type}" data-status="${r.ret === null ? "pending" : r.success ? "success" : "fail"}">
+      <div class="mc-header">
+        <div>
+          <div class="mc-symbol">${r.symbol}</div>
+          <div class="mc-sector">${r.sector}</div>
+        </div>
+        <div style="text-align:left">${statusBadge(r.ret)}</div>
+      </div>
+      <div class="mc-name">${r.name}</div>
+      <div class="mc-grid">
+        <div class="mc-item">
+          <label>النوع</label>
+          ${typeBadge(r.type)}
+        </div>
+        <div class="mc-item">
+          <label>سعر الدخول</label>
+          <span class="price">${fmt(r.entryPrice)}</span>
+        </div>
+        <div class="mc-item">
+          <label>السعر الحالي</label>
+          <span class="price">${r.currentPrice !== null ? fmt(r.currentPrice) : "—"}</span>
+        </div>
+        <div class="mc-item">
+          <label>العائد %</label>
+          <span class="${returnClass(r.ret)}">${fmtReturn(r.ret)}</span>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+/* ══════════════════════════════════════════════════════
+   FILTERS
+   ══════════════════════════════════════════════════════ */
+function applyFilter(filter) {
+  let data = rows;
+  if (filter === "buy")     data = rows.filter(r => r.type === "buy");
+  if (filter === "sell")    data = rows.filter(r => r.type === "sell");
+  if (filter === "success") data = rows.filter(r => r.success === true);
+  if (filter === "fail")    data = rows.filter(r => r.success === false);
+
+  renderTable(data);
+  renderCards(data);
+  renderStats(data);
+}
+
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    applyFilter(btn.dataset.filter);
+  });
+});
+
+/* ══════════════════════════════════════════════════════
+   TIMESTAMPS
+   ══════════════════════════════════════════════════════ */
+function formatDateAr(isoStr) {
+  const d = new Date(isoStr);
+  return d.toLocaleString("ar-SA", {
+    year: "numeric", month: "long", day: "numeric",
+    hour: "2-digit", minute: "2-digit"
+  });
+}
+
+document.getElementById("last-updated-label").textContent =
+  "آخر تحديث: " + formatDateAr(CONFIG.updatedAt);
+document.getElementById("footer-updated").textContent =
+  "آخر تحديث: " + formatDateAr(CONFIG.updatedAt);
+
+/* ══════════════════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════════════════ */
+renderStats(rows);
+renderTable(rows);
+renderCards(rows);
+
+/*
+  ════════════════════════════════════════
+  🔌 JSON UPDATE HOOK — للتحديث مستقبلاً
+  ════════════════════════════════════════
+  استدعِ هذه الدالة لتحديث الأسعار من مصدر خارجي:
+
+  function updatePrices(priceMap) {
+    // priceMap = { "1010.SR": 30.5, "4030.SR": 33.1, ... }
+    WATCHLIST.forEach(item => {
+      if (priceMap[item.symbol] !== undefined) {
+        item.currentPrice = priceMap[item.symbol];
+      }
+    });
+    rows.length = 0;
+    WATCHLIST.forEach(item => {
+      const ret = calcReturn(item.entryPrice, item.currentPrice, item.type);
+      rows.push({ ...item, ret, success: isSuccess(ret) });
+    });
+    renderStats(rows);
+    renderTable(rows);
+    renderCards(rows);
+    CONFIG.updatedAt = new Date().toISOString();
+    document.getElementById("last-updated-label").textContent =
+      "آخر تحديث: " + formatDateAr(CONFIG.updatedAt);
+  }
+
+  مثال:
+  updatePrices({ "1010.SR": 30.5, "4030.SR": 31.2, "2287": 23.5, "4264": 48.0 });
+*/
+</script>
+</body>
+</html>
