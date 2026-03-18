@@ -390,18 +390,19 @@ const WATCHLIST = [
    HELPERS
    ══════════════════════════════════════════════════════ */
 
-/** حساب العائد % مع مراعاة نوع التوصية */
+/** حساب العائد % الفعلي (حركة السعر بدون عكس) */
 function calcReturn(entry, current, type) {
   if (current === null || current === undefined) return null;
-  const raw = ((current - entry) / entry) * 100;
-  // للبيع: الربح عكسي (السعر انخفض = ناجح)
-  return type === "sell" ? -raw : raw;
+  return ((current - entry) / entry) * 100;
+  // raw = العائد الفعلي للسعر (موجب = ارتفع، سالب = انخفض)
 }
 
-/** هل التوصية ناجحة؟ */
-function isSuccess(ret) {
+/** هل التوصية ناجحة؟ حسب نوعها */
+function isSuccess(ret, type) {
   if (ret === null) return null;
-  return ret >= 0;   // التعادل (0%) يُعدّ ناجحاً
+  if (type === "buy")  return ret >= 0;  // BUY: نجاح = السعر ارتفع
+  if (type === "sell") return ret <= 0;  // SELL: نجاح = السعر انخفض
+  return false;
 }
 
 function fmt(n, dec = 2) {
@@ -415,15 +416,15 @@ function fmtReturn(ret) {
   return `${sign}${fmt(ret)}%`;
 }
 
-function returnClass(ret) {
-  if (ret === null) return "";
-  return ret >= 0 ? "return-positive" : "return-negative";
+function returnClass(ret, success) {
+  if (ret === null || success === null) return "";
+  return success ? "return-positive" : "return-negative";
 }
 
-function statusBadge(ret) {
-  if (ret === null) return `<span class="status-badge status-pending">⏳ معلّق</span>`;
-  if (ret >= 0)    return `<span class="status-badge status-success">✅ ناجح</span>`;  // التعادل = ناجح
-  return                   `<span class="status-badge status-fail">❌ فشل</span>`;
+function statusBadge(success) {
+  if (success === null) return `<span class="status-badge status-pending">⏳ معلّق</span>`;
+  if (success)          return `<span class="status-badge status-success">✅ ناجح</span>`;
+  return                        `<span class="status-badge status-fail">❌ فشل</span>`;
 }
 
 function typeBadge(type) {
@@ -437,7 +438,7 @@ function typeBadge(type) {
    ══════════════════════════════════════════════════════ */
 const rows = WATCHLIST.map(item => {
   const ret = calcReturn(item.entryPrice, item.currentPrice, item.type);
-  return { ...item, ret, success: isSuccess(ret) };
+  return { ...item, ret, success: isSuccess(ret, item.type) };
 });
 
 /* ══════════════════════════════════════════════════════
@@ -472,7 +473,7 @@ function renderStats(data) {
       <div class="stat-value">${fail}</div>
       <div class="stat-label">فشل ❌</div>
     </div>
-    <div class="stat-card ${avgRet === null ? "accent" : avgRet >= 0 ? "green" : "red"}">
+    <div class="stat-card ${avgRet === null ? "accent" : success >= fail ? "green" : "red"}">
       <div class="stat-value">${avgRet !== null ? (avgRet >= 0 ? "+" : "") + fmt(avgRet) + "%" : "—"}</div>
       <div class="stat-label">متوسط العائد</div>
     </div>
@@ -495,8 +496,8 @@ function renderTable(data) {
       <td>${typeBadge(r.type)}</td>
       <td class="price">${fmt(r.entryPrice)}</td>
       <td class="price current-price">${r.currentPrice !== null ? fmt(r.currentPrice) : "—"}</td>
-      <td class="${returnClass(r.ret)}">${fmtReturn(r.ret)}</td>
-      <td>${statusBadge(r.ret)}</td>
+      <td class="${returnClass(r.ret, r.success)}">${fmtReturn(r.ret)}</td>
+      <td>${statusBadge(r.success)}</td>
     </tr>
   `).join("");
 }
@@ -513,7 +514,7 @@ function renderCards(data) {
           <div class="mc-symbol">${r.symbol}</div>
           <div class="mc-sector">${r.sector}</div>
         </div>
-        <div style="text-align:left">${statusBadge(r.ret)}</div>
+        <div style="text-align:left">${statusBadge(r.success)}</div>
       </div>
       <div class="mc-name">${r.name}</div>
       <div class="mc-grid">
@@ -531,7 +532,7 @@ function renderCards(data) {
         </div>
         <div class="mc-item">
           <label>العائد %</label>
-          <span class="${returnClass(r.ret)}">${fmtReturn(r.ret)}</span>
+          <span class="${returnClass(r.ret, r.success)}">${fmtReturn(r.ret)}</span>
         </div>
       </div>
     </div>
@@ -600,7 +601,7 @@ renderCards(rows);
     rows.length = 0;
     WATCHLIST.forEach(item => {
       const ret = calcReturn(item.entryPrice, item.currentPrice, item.type);
-      rows.push({ ...item, ret, success: isSuccess(ret) });
+      rows.push({ ...item, ret, success: isSuccess(ret, item.type) });
     });
     renderStats(rows);
     renderTable(rows);
