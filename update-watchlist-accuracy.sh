@@ -9,16 +9,23 @@ set -euo pipefail
 
 FILE="$(dirname "$0")/watchlist-accuracy.html"
 NOW_UTC=$(date -u +"%Y-%m-%dT%H:%M:%S+03:00")
+
+# التاريخ بالعربي (بتوقيت الرياض)
+#_months_ar=(يناير فبراير مارس أبريل مايو يونيو يوليو أغسطس سبتمبر أكتوبر نوفمبر ديسمبر)
+MONTHS=(يناير فبراير مارس أبريل مايو يونيو يوليو أغسطس سبتمبر أكتوبر نوفمبر ديسمبر)
 NOW_DATE=$(date -u +"%Y-%m-%d")
+YEAR=$(echo $NOW_DATE | cut -d'-' -f1)
+MONTH=$(echo $NOW_DATE | cut -d'-' -f2 | sed 's/^0//')
+DAY=$(echo $NOW_DATE | cut -d'-' -f3)
 NOW_TIME=$(date -u +"%H:%M")
 
-# تنسيق: YYYY-MM-DD HH:MM (بتوقيت الرياض)
-DATETIME="${NOW_DATE} ${NOW_TIME}"
+# تنسيق التاريخ بالعربي
+DATETIME_AR="${DAY} ${MONTHS[$((MONTH-1))]} ${YEAR} في ${NOW_TIME} (بتوقيت الرياض)"
+DATETIME_SHORT="${YEAR}-${MONTH}-${DAY} ${NOW_TIME}"
 
-echo "⏱️  وقت التحديث (الرياض): ${DATETIME}"
+echo "⏱️  وقت التحديث (الرياض): ${DATETIME_AR}"
 
 # ── تحديث CONFIG.updatedAt ──
-# الصيغة المطلوبة: "2025-03-17T21:32:00+01:00"
 if grep -q "updatedAt.*\".*\"" "$FILE"; then
     sed -i "s/updatedAt:.*\"\([^\"]*\)\"/updatedAt:   \"${NOW_UTC}\"/" "$FILE"
     echo "✅ تم تحديث CONFIG.updatedAt"
@@ -27,13 +34,8 @@ else
     exit 1
 fi
 
-# ── تحديث التاريخ المعروض في footer ──
-# تحديث badge-date و footer
-sed -i "s/تاريخ الدخول:.*/تاريخ الدخول: ${DATETIME}/" "$FILE"
-echo "✅ تم تحديث التاريخ في Footer"
-
 echo ""
 echo "📋 ملخص:"
 echo "   - الملف: $FILE"
-echo "   - تاريخ التحديث: $DATETIME"
+echo "   - آخر تحديث: $DATETIME_AR"
 echo "   - ISO: $NOW_UTC"
