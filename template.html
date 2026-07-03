@@ -177,7 +177,7 @@ tr:hover{background:#1e293b88}
 </div>
 
 <div class="footer">
-  سيف تداول V2.0 | الأوزان: مالية 30% • اتجاه 25% • زخم 15% • مخاطر 15% • تقييم 15%<br>
+  سيف تداول V2.0 | الأوزان: مالية 30 • اتجاه 25 • زخم 15 • مخاطر 20 • تقييم 15 نقطة (مجموع 105 يُعاير إلى 100)<br>
   التوقيت مستقل عن النقاط | شراء مشروط = السهم جيد لكن يفضّل دخول تدريجي<br>
   ليست نصيحة استثمارية | أبوسيف
 </div>
@@ -277,7 +277,7 @@ function renderTopCards() {
         <span class="pillar ${sc.financial>=20?'g':(sc.financial>=12?'y':'r')}">مالية ${sc.financial}/30</span>
         <span class="pillar ${sc.trend>=17?'g':(sc.trend>=10?'y':'r')}">اتجاه ${sc.trend}/25</span>
         <span class="pillar ${sc.relativeStrength>=10?'g':(sc.relativeStrength>=5?'y':'r')}">زخم ${sc.relativeStrength}/15</span>
-        <span class="pillar ${sc.risk>=10?'g':(sc.risk>=5?'y':'r')}">مخاطر ${sc.risk}/15</span>
+        <span class="pillar ${sc.risk>=10?'g':(sc.risk>=5?'y':'r')}">مخاطر ${sc.risk}/20</span>
         <span class="pillar ${sc.valuation>=10?'g':(sc.valuation>=5?'y':'r')}">تقييم ${sc.valuation}/15</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
@@ -419,7 +419,7 @@ function openModal(sym) {
       ['المالية', sc.financial, 30],
       ['الاتجاه', sc.trend, 25],
       ['الزخم', sc.relativeStrength, 15],
-      ['المخاطر', sc.risk, 15],
+      ['المخاطر', sc.risk, 20],
       ['التقييم', sc.valuation, 15],
     ];
     pillars.forEach(([label, val, max]) => {
