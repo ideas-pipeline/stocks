@@ -9,6 +9,11 @@
 body{font-family:'Segoe UI',Tahoma,sans-serif;background:#0f172a;color:#e2e8f0;padding:16px;max-width:1400px;margin:0 auto}
 h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .subtitle{text-align:center;color:#94a3b8;margin-bottom:8px;font-size:0.9em}
+.regime-banner{display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 20px;border-radius:8px;margin:6px auto 10px;max-width:750px;font-size:0.9em;font-weight:600;border:1px solid;flex-wrap:wrap;text-align:center}
+.regime-red{background:#7f1d1d22;border-color:#dc2626;color:#fca5a5}
+.regime-yellow{background:#78350f22;border-color:#d97706;color:#fcd34d}
+.regime-green{background:#14532d22;border-color:#16a34a;color:#86efac}
+.data-age{text-align:center;color:#475569;font-size:0.76em;margin-bottom:6px;letter-spacing:0.01em}
 .section-title{color:#f59e0b;font-size:1.2em;margin:24px 0 12px;padding-bottom:6px;border-bottom:2px solid #f59e0b33}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:24px}
 .card{background:#1e293b;border-radius:12px;padding:16px;border:1px solid #334155;position:relative;cursor:pointer;transition:transform .2s,box-shadow .2s}
@@ -129,6 +134,8 @@ tr:hover{background:#1e293b88}
 <h1>سيف تداول — النموذج الاستثماري</h1>\n
 <div class="subtitle">تقييم استثماري متوسط المدى (6-12 شهر) | 5 محاور | 100 نقطة</div>
 <div class="subtitle" style="margin-top:-4px">آخر تحديث: <span id="lastUpdate">—</span></div>
+<div id="regimeBanner" class="regime-banner" style="display:none"></div>
+<div id="dataAge" class="data-age"></div>
 <div class="stats" id="stats"></div>
 
 <div class="filter-bar" id="filterBar">
@@ -195,6 +202,32 @@ let sortAsc = false;
 
 function init() {
   document.getElementById('lastUpdate').textContent = DATA.lastUpdated || DATA.analysisUpdated || '';
+
+  // بانر نظام السوق
+  const mr = DATA.marketRegime || {};
+  if (mr.regime) {
+    const cls = mr.mood==='Bearish'?'regime-red':mr.mood==='Bullish'?'regime-green':'regime-yellow';
+    const b = document.getElementById('regimeBanner');
+    b.className = 'regime-banner ' + cls;
+    const arrow = mr.change !== undefined ? (mr.change >= 0 ? '▲' : '▼') : '';
+    const chgAbs = mr.change !== undefined ? Math.abs(mr.change).toFixed(2) : '';
+    const chgPct = mr.changePct !== undefined ? '(' + (mr.changePct >= 0 ? '+' : '') + mr.changePct + '%)' : '';
+    const idxFmt = mr.indexValue ? mr.indexValue.toLocaleString('en',{maximumFractionDigits:0}) : '';
+    const smaStr = mr.pctVsSma !== undefined ? ' | ' + (mr.pctVsSma >= 0 ? '+' : '') + mr.pctVsSma + '% من SMA200' : '';
+    b.innerHTML = mr.icon + ' نظام السوق: ' + mr.regime + ' — ' + mr.advice +
+      ' &nbsp;|&nbsp; TASI ' + idxFmt +
+      (arrow ? ' ' + arrow + ' ' + chgAbs + ' ' + chgPct : '') + smaStr;
+    b.style.display = 'flex';
+  }
+
+  // مؤشر عمر البيانات
+  const _priceAge = (DATA.lastUpdated || '').slice(0,10);
+  const _dailyAge = ((DATA.stocks[0] && DATA.stocks[0].dailyExtra && DATA.stocks[0].dailyExtra.updatedAt) || '').slice(0,10);
+  const _weeklyAge = (DATA.weeklyTechnicalUpdated || '').slice(0,10);
+  if (_priceAge || _dailyAge || _weeklyAge) {
+    document.getElementById('dataAge').textContent =
+      'عمر البيانات — أسعار: ' + _priceAge + '  |  يومية: ' + _dailyAge + '  |  أسبوعية: ' + _weeklyAge;
+  }
   
   // Stats
   let counts = {strong_buy:0, buy:0, hold:0, sell:0, strong_sell:0, filtered:0};
