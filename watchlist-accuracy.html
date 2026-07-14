@@ -344,7 +344,7 @@
    ══════════════════════════════════════════════════════ */
 const CONFIG = {
   entryDate:   "2025-03-13",
-  updatedAt:   "2026-07-13T16:28:34+03:00",  // آخر تحديث يدوي للأسعار
+  updatedAt:   "2026-07-14T16:28:29+03:00",  // آخر تحديث يدوي للأسعار
 };
 
 /*
@@ -357,135 +357,165 @@ const WATCHLIST = [
     name:          "بنك الرياض",
     sector:        "البنوك",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    21.64,
+    entryPrice:    20.63,      // adjclose | يدوي أصلي: 21.64
+    entrySource:   "adjclose",
     entryDate:     "2025-03-13",
-    currentPrice:  20.48,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  20.08,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "4030.SR",
     name:          "البحري",
     sector:        "النقل البحري",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    32.0,
+    entryPrice:    21.79,      // adjclose | يدوي أصلي: 32.0
+    entrySource:   "adjclose",
     entryDate:     "2025-03-13",
-    currentPrice:  31.92,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  32.02,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "2287.SR",
     name:          "العربية للزراعة",
     sector:        "الإنتاج الغذائي",
     type:          "sell",          // "buy" | "sell"
-    entryPrice:    25.8,
+    entryPrice:    64.25,      // adjclose | يدوي أصلي: 25.8
+    entrySource:   "adjclose",
     entryDate:     "2025-03-13",
-    currentPrice:  26.34,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  28.96,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "4264.SR",
     name:          "طيران ناس",
     sector:        "النقل الجوي",
     type:          "sell",          // "buy" | "sell"
-    entryPrice:    50.5,
+    entryPrice:    50.5,      // manual-fallback | يدوي أصلي: 50.5
+    entrySource:   "manual-fallback",
     entryDate:     "2025-03-13",
-    currentPrice:  51.9,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  50.5,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "2020.SR",
     name:          "سابك للمغذيات الزراعية",
     sector:        "المواد الأساسية",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    145.0,
+    entryPrice:    149.9,      // adjclose | يدوي أصلي: 145.0
+    entrySource:   "adjclose",
     entryDate:     "2026-04-02",
-    currentPrice:  125.5,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  125.7,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "1060.SR",
     name:          "البنك الأول",
     sector:        "البنوك",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    37.3,
+    entryPrice:    35.82,      // adjclose | يدوي أصلي: 37.3
+    entrySource:   "adjclose",
     entryDate:     "2026-04-02",
-    currentPrice:  32.04,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  31.74,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "1120.SR",
     name:          "مصرف الراجحي",
     sector:        "البنوك",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    106.6,
+    entryPrice:    69.77,      // adjclose | يدوي أصلي: 106.6
+    entrySource:   "adjclose",
     entryDate:     "2026-04-02",
-    currentPrice:  65.55,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  64.45,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "1180.SR",
     name:          "البنك الأهلي السعودي",
     sector:        "البنوك",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    41.82,
+    entryPrice:    41.35,      // adjclose | يدوي أصلي: 41.82
+    entrySource:   "adjclose",
     entryDate:     "2026-04-02",
-    currentPrice:  38.26,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  37.32,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "4190.SR",
     name:          "جرير",
     sector:        "السلع الاستهلاكية",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    14.12,
+    entryPrice:    13.68,      // adjclose | يدوي أصلي: 14.12
+    entrySource:   "adjclose",
     entryDate:     "2026-04-02",
-    currentPrice:  17.81,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  17.85,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "1303.SR",
     name:          "الصناعات الكهربائية",
     sector:        "الصناعية",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    16.7,
+    entryPrice:    16.45,      // adjclose | يدوي أصلي: 16.7
+    entrySource:   "adjclose",
     entryDate:     "2026-04-02",
-    currentPrice:  14.92,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  14.6,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "1323.SR",
     name:          "الورق المتحدة",
     sector:        "السلع الاستهلاكية",
     type:          "sell",          // "buy" | "sell"
-    entryPrice:    24.47,
+    entryPrice:    24.42,      // adjclose | يدوي أصلي: 24.47
+    entrySource:   "adjclose",
     entryDate:     "2026-04-02",
-    currentPrice:  25.64,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  25.4,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "2300.SR",
     name:          "صناعة الورق",
     sector:        "السلع الأساسية",
     type:          "sell",          // "buy" | "sell"
-    entryPrice:    56.35,
+    entryPrice:    57.89,      // adjclose | يدوي أصلي: 56.35
+    entrySource:   "adjclose",
     entryDate:     "2026-04-02",
-    currentPrice:  64.0,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  64.1,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "4018.SR",
     name:          "الموسى الصحية",
     sector:        "الرعاية الصحية",
     type:          "sell",          // "buy" | "sell"
-    entryPrice:    138.2,
+    entryPrice:    135.61,      // adjclose | يدوي أصلي: 138.2
+    entrySource:   "adjclose",
     entryDate:     "2026-04-02",
-    currentPrice:  119.6,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  119.7,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "2083.SR",
     name:          "مرافق",
     sector:        "المرافق",
     type:          "sell",          // "buy" | "sell"
-    entryPrice:    31.68,
+    entryPrice:    31.94,      // adjclose | يدوي أصلي: 31.68
+    entrySource:   "adjclose",
     entryDate:     "2026-04-02",
-    currentPrice:  37.72,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  37.04,           // ✅ confirmed 2026-07-14
   },
   {
     symbol:        "4019.SR",
     name:          "المتخصصة الطبية",
     sector:        "الرعاية الصحية",
     type:          "sell",          // "buy" | "sell"
-    entryPrice:    18.54,
+    entryPrice:    18.21,      // adjclose | يدوي أصلي: 18.54
+    entrySource:   "adjclose",
     entryDate:     "2026-04-02",
-    currentPrice:  16.16,           // ✅ confirmed 2026-07-13
+    track:         "legacy",
+    currentPrice:  16.06,           // ✅ confirmed 2026-07-14
   },
 ];
 
