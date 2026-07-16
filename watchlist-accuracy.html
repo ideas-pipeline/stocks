@@ -189,6 +189,7 @@
     }
     .type-buy  { background: rgba(46,160,67,.18);  color: #3fb950; border: 1px solid rgba(46,160,67,.4); }
     .type-sell { background: rgba(218,54,51,.18);  color: #f85149; border: 1px solid rgba(218,54,51,.4); }
+    .type-wait { background: rgba(210,153,34,.15); color: #d29922; border: 1px solid rgba(210,153,34,.4); }
 
     .price { font-family: "SF Mono", "Fira Code", monospace; font-size: 0.88rem; }
     .current-price { font-weight: 700; }
@@ -297,7 +298,7 @@
   <!-- ── Filters ── -->
   <div class="filters">
     <button class="filter-btn active" data-filter="all">الكل</button>
-    <button class="filter-btn" data-filter="buy">شراء قوي</button>
+    <button class="filter-btn" data-filter="buy">شراء</button>
     <button class="filter-btn" data-filter="sell">بيع قوي</button>
     <button class="filter-btn" data-filter="success">ناجح ✅</button>
     <button class="filter-btn" data-filter="fail">فشل ❌</button>
@@ -345,7 +346,7 @@
    ══════════════════════════════════════════════════════ */
 const CONFIG = {
   entryDate:   "2025-03-13",
-  updatedAt:   "2026-07-15T16:28:28+03:00",  // آخر تحديث يدوي للأسعار
+  updatedAt:   "2026-07-16T16:29:10+03:00",  // آخر تحديث يدوي للأسعار
 };
 
 /*
@@ -362,7 +363,7 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2025-03-13",
     track:         "legacy",
-    currentPrice:  20.57,           // ✅ confirmed 2026-07-15
+    currentPrice:  20.7,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "4030.SR",
@@ -373,7 +374,7 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2025-03-13",
     track:         "legacy",
-    currentPrice:  32.68,           // ✅ confirmed 2026-07-15
+    currentPrice:  33.14,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "2287.SR",
@@ -384,7 +385,7 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2025-03-13",
     track:         "legacy",
-    currentPrice:  27.12,           // ✅ confirmed 2026-07-15
+    currentPrice:  27.84,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "4264.SR",
@@ -395,7 +396,7 @@ const WATCHLIST = [
     entrySource:   "manual-fallback",
     entryDate:     "2025-03-13",
     track:         "legacy",
-    currentPrice:  50.65,           // ✅ confirmed 2026-07-15
+    currentPrice:  50.65,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "2020.SR",
@@ -406,7 +407,7 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2026-04-02",
     track:         "legacy",
-    currentPrice:  124.4,           // ✅ confirmed 2026-07-15
+    currentPrice:  124.0,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1060.SR",
@@ -417,7 +418,7 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2026-04-02",
     track:         "legacy",
-    currentPrice:  32.04,           // ✅ confirmed 2026-07-15
+    currentPrice:  32.18,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1120.SR",
@@ -428,7 +429,7 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2026-04-02",
     track:         "legacy",
-    currentPrice:  64.3,           // ✅ confirmed 2026-07-15
+    currentPrice:  64.45,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1180.SR",
@@ -439,7 +440,7 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2026-04-02",
     track:         "legacy",
-    currentPrice:  37.8,           // ✅ confirmed 2026-07-15
+    currentPrice:  38.14,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "4190.SR",
@@ -450,7 +451,7 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2026-04-02",
     track:         "legacy",
-    currentPrice:  18.1,           // ✅ confirmed 2026-07-15
+    currentPrice:  17.92,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1303.SR",
@@ -461,7 +462,7 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2026-04-02",
     track:         "legacy",
-    currentPrice:  14.79,           // ✅ confirmed 2026-07-15
+    currentPrice:  13.84,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1323.SR",
@@ -472,7 +473,7 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2026-04-02",
     track:         "legacy",
-    currentPrice:  25.22,           // ✅ confirmed 2026-07-15
+    currentPrice:  25.08,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "2300.SR",
@@ -483,7 +484,7 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2026-04-02",
     track:         "legacy",
-    currentPrice:  63.7,           // ✅ confirmed 2026-07-15
+    currentPrice:  62.35,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "4018.SR",
@@ -494,7 +495,7 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2026-04-02",
     track:         "legacy",
-    currentPrice:  118.0,           // ✅ confirmed 2026-07-15
+    currentPrice:  118.3,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "2083.SR",
@@ -505,7 +506,7 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2026-04-02",
     track:         "legacy",
-    currentPrice:  37.08,           // ✅ confirmed 2026-07-15
+    currentPrice:  36.66,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "4019.SR",
@@ -516,355 +517,367 @@ const WATCHLIST = [
     entrySource:   "adjclose",
     entryDate:     "2026-04-02",
     track:         "legacy",
-    currentPrice:  16.09,           // ✅ confirmed 2026-07-15
+    currentPrice:  16.0,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1010.SR",
     name:          "بنك الرياض",
     sector:        "Financials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    20.57,      // same-day-close | يدوي أصلي: 20.57
-    entrySource:   "same-day-close",
+    entryPrice:    20.57,      // adjclose | يدوي أصلي: 20.57
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  20.57,           // ✅ confirmed 2026-07-15
+    currentPrice:  20.7,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1030.SR",
     name:          "البنك السعودي للاستثمار",
     sector:        "Financials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    13.41,      // same-day-close | يدوي أصلي: 13.41
-    entrySource:   "same-day-close",
+    entryPrice:    13.41,      // adjclose | يدوي أصلي: 13.41
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  13.41,           // ✅ confirmed 2026-07-15
+    currentPrice:  13.55,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1050.SR",
     name:          "البنك السعودي الفرنسي",
     sector:        "Financials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    19.41,      // same-day-close | يدوي أصلي: 19.41
-    entrySource:   "same-day-close",
+    entryPrice:    19.41,      // adjclose | يدوي أصلي: 19.41
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  19.41,           // ✅ confirmed 2026-07-15
+    currentPrice:  19.46,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1150.SR",
     name:          "بنك الإنماء",
     sector:        "Financials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    24.0,      // same-day-close | يدوي أصلي: 24.0
-    entrySource:   "same-day-close",
+    entryPrice:    24.0,      // adjclose | يدوي أصلي: 24.0
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy_wait",
-    currentPrice:  24.0,           // ✅ confirmed 2026-07-15
+    currentPrice:  24.2,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1303.SR",
     name:          "الصناعات الكهربائية",
     sector:        "Industrials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    14.79,      // same-day-close | يدوي أصلي: 14.79
-    entrySource:   "same-day-close",
+    entryPrice:    14.79,      // adjclose | يدوي أصلي: 14.79
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy_wait",
-    currentPrice:  14.79,           // ✅ confirmed 2026-07-15
+    currentPrice:  13.84,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1321.SR",
     name:          "الشرقية للأنابيب المتكاملة",
     sector:        "Materials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    223.4,      // same-day-close | يدوي أصلي: 223.4
-    entrySource:   "same-day-close",
+    entryPrice:    223.4,      // adjclose | يدوي أصلي: 223.4
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "strong_buy",
-    currentPrice:  223.4,           // ✅ confirmed 2026-07-15
+    currentPrice:  223.0,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1831.SR",
     name:          "مهارة",
     sector:        "Industrials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    5.42,      // same-day-close | يدوي أصلي: 5.42
-    entrySource:   "same-day-close",
+    entryPrice:    5.42,      // adjclose | يدوي أصلي: 5.42
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  5.42,           // ✅ confirmed 2026-07-15
+    currentPrice:  5.51,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1833.SR",
     name:          "الموارد البشرية",
     sector:        "Industrials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    109.4,      // same-day-close | يدوي أصلي: 109.4
-    entrySource:   "same-day-close",
+    entryPrice:    109.4,      // adjclose | يدوي أصلي: 109.4
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy_wait",
-    currentPrice:  109.4,           // ✅ confirmed 2026-07-15
+    currentPrice:  109.9,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "1834.SR",
     name:          "سمسكو",
     sector:        "Industrials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    6.32,      // same-day-close | يدوي أصلي: 6.32
-    entrySource:   "same-day-close",
+    entryPrice:    6.32,      // adjclose | يدوي أصلي: 6.32
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  6.32,           // ✅ confirmed 2026-07-15
+    currentPrice:  6.45,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "2020.SR",
     name:          "سابك للمغذيات الزراعية",
     sector:        "Materials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    124.4,      // same-day-close | يدوي أصلي: 124.4
-    entrySource:   "same-day-close",
+    entryPrice:    124.4,      // adjclose | يدوي أصلي: 124.4
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy_wait",
-    currentPrice:  124.4,           // ✅ confirmed 2026-07-15
+    currentPrice:  124.0,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "2050.SR",
     name:          "مجموعة صافولا",
     sector:        "Consumer Staples",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    26.66,      // same-day-close | يدوي أصلي: 26.66
-    entrySource:   "same-day-close",
+    entryPrice:    26.66,      // adjclose | يدوي أصلي: 26.66
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy_wait",
-    currentPrice:  26.66,           // ✅ confirmed 2026-07-15
+    currentPrice:  26.92,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "2190.SR",
     name:          "مستدام",
     sector:        "Industrials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    35.76,      // same-day-close | يدوي أصلي: 35.76
-    entrySource:   "same-day-close",
+    entryPrice:    35.76,      // adjclose | يدوي أصلي: 35.76
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  35.76,           // ✅ confirmed 2026-07-15
+    currentPrice:  36.2,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "2200.SR",
     name:          "الأنابيب العربية",
     sector:        "Materials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    6.95,      // same-day-close | يدوي أصلي: 6.95
-    entrySource:   "same-day-close",
+    entryPrice:    6.95,      // adjclose | يدوي أصلي: 6.95
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy_wait",
-    currentPrice:  6.95,           // ✅ confirmed 2026-07-15
+    currentPrice:  6.92,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "2222.SR",
     name:          "أرامكو السعودية",
     sector:        "Energy",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    26.64,      // same-day-close | يدوي أصلي: 26.64
-    entrySource:   "same-day-close",
+    entryPrice:    26.64,      // adjclose | يدوي أصلي: 26.64
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy_wait",
-    currentPrice:  26.64,           // ✅ confirmed 2026-07-15
+    currentPrice:  26.68,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "2230.SR",
     name:          "الكيميائية السعودية",
     sector:        "Industrials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    8.45,      // same-day-close | يدوي أصلي: 8.45
-    entrySource:   "same-day-close",
+    entryPrice:    8.45,      // adjclose | يدوي أصلي: 8.45
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy_wait",
-    currentPrice:  8.45,           // ✅ confirmed 2026-07-15
+    currentPrice:  8.46,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "2286.SR",
     name:          "المطاحن الرابعة",
     sector:        "Consumer Staples",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    4.08,      // same-day-close | يدوي أصلي: 4.08
-    entrySource:   "same-day-close",
+    entryPrice:    4.08,      // adjclose | يدوي أصلي: 4.08
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy_wait",
-    currentPrice:  4.08,           // ✅ confirmed 2026-07-15
+    currentPrice:  4.12,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "2370.SR",
     name:          "مسك",
     sector:        "Industrials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    33.22,      // same-day-close | يدوي أصلي: 33.22
-    entrySource:   "same-day-close",
+    entryPrice:    33.22,      // adjclose | يدوي أصلي: 33.22
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  33.22,           // ✅ confirmed 2026-07-15
+    currentPrice:  32.5,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "3005.SR",
     name:          "أسمنت أم القرى",
     sector:        "Materials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    14.1,      // same-day-close | يدوي أصلي: 14.1
-    entrySource:   "same-day-close",
+    entryPrice:    14.1,      // adjclose | يدوي أصلي: 14.1
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  14.1,           // ✅ confirmed 2026-07-15
+    currentPrice:  13.99,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "3040.SR",
     name:          "أسمنت القصيم",
     sector:        "Materials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    45.06,      // same-day-close | يدوي أصلي: 45.06
-    entrySource:   "same-day-close",
+    entryPrice:    45.06,      // adjclose | يدوي أصلي: 45.06
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  45.06,           // ✅ confirmed 2026-07-15
+    currentPrice:  45.58,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "3080.SR",
     name:          "أسمنت الشرقية",
     sector:        "Materials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    26.58,      // same-day-close | يدوي أصلي: 26.58
-    entrySource:   "same-day-close",
+    entryPrice:    26.58,      // adjclose | يدوي أصلي: 26.58
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  26.58,           // ✅ confirmed 2026-07-15
+    currentPrice:  26.72,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "4012.SR",
     name:          "ثوب الأصيل",
     sector:        "Consumer Discretionary",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    3.66,      // same-day-close | يدوي أصلي: 3.66
-    entrySource:   "same-day-close",
+    entryPrice:    3.66,      // adjclose | يدوي أصلي: 3.66
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy_wait",
-    currentPrice:  3.66,           // ✅ confirmed 2026-07-15
+    currentPrice:  3.64,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "4030.SR",
     name:          "البحري",
     sector:        "Industrials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    32.68,      // same-day-close | يدوي أصلي: 32.68
-    entrySource:   "same-day-close",
+    entryPrice:    32.68,      // adjclose | يدوي أصلي: 32.68
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  32.68,           // ✅ confirmed 2026-07-15
+    currentPrice:  33.14,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "4100.SR",
     name:          "مكة للإنشاء",
     sector:        "Industrials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    85.3,      // same-day-close | يدوي أصلي: 85.3
-    entrySource:   "same-day-close",
+    entryPrice:    85.3,      // adjclose | يدوي أصلي: 85.3
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy_wait",
-    currentPrice:  85.3,           // ✅ confirmed 2026-07-15
+    currentPrice:  85.3,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "4146.SR",
     name:          "خدمات الغاز العربية",
     sector:        "Energy",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    16.85,      // same-day-close | يدوي أصلي: 16.85
-    entrySource:   "same-day-close",
+    entryPrice:    16.85,      // adjclose | يدوي أصلي: 16.85
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  16.85,           // ✅ confirmed 2026-07-15
+    currentPrice:  16.77,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "4190.SR",
     name:          "جرير",
     sector:        "Consumer Discretionary",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    18.1,      // same-day-close | يدوي أصلي: 18.1
-    entrySource:   "same-day-close",
+    entryPrice:    18.1,      // adjclose | يدوي أصلي: 18.1
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  18.1,           // ✅ confirmed 2026-07-15
+    currentPrice:  17.92,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "5110.SR",
     name:          "الكهرباء السعودية",
     sector:        "Utilities",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    17.62,      // same-day-close | يدوي أصلي: 17.62
-    entrySource:   "same-day-close",
+    entryPrice:    17.62,      // adjclose | يدوي أصلي: 17.62
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  17.62,           // ✅ confirmed 2026-07-15
+    currentPrice:  17.59,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "7010.SR",
     name:          "إس تي سي",
     sector:        "Communication Services",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    43.3,      // same-day-close | يدوي أصلي: 43.3
-    entrySource:   "same-day-close",
+    entryPrice:    43.3,      // adjclose | يدوي أصلي: 43.3
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy_wait",
-    currentPrice:  43.3,           // ✅ confirmed 2026-07-15
+    currentPrice:  43.18,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "8010.SR",
     name:          "التعاونية للتأمين",
     sector:        "Financials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    135.4,      // same-day-close | يدوي أصلي: 135.4
-    entrySource:   "same-day-close",
+    entryPrice:    135.4,      // adjclose | يدوي أصلي: 135.4
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy_wait",
-    currentPrice:  135.4,           // ✅ confirmed 2026-07-15
+    currentPrice:  137.3,           // ✅ confirmed 2026-07-16
   },
   {
     symbol:        "8250.SR",
     name:          "الخليج للتأمين",
     sector:        "Financials",
     type:          "buy",          // "buy" | "sell"
-    entryPrice:    31.24,      // same-day-close | يدوي أصلي: 31.24
-    entrySource:   "same-day-close",
+    entryPrice:    31.24,      // adjclose | يدوي أصلي: 31.24
+    entrySource:   "adjclose",
     entryDate:     "2026-07-15",
     track:         "auto",
     category:      "buy",
-    currentPrice:  31.24,           // ✅ confirmed 2026-07-15
+    currentPrice:  30.76,           // ✅ confirmed 2026-07-16
+  },
+  {
+    symbol:        "1831.SR",
+    name:          "مهارة",
+    sector:        "Industrials",
+    type:          "buy",          // "buy" | "sell"
+    entryPrice:    5.51,      // same-day-close | يدوي أصلي: 5.51
+    entrySource:   "same-day-close",
+    entryDate:     "2026-07-16",
+    track:         "auto",
+    category:      "buy_wait",
+    currentPrice:  5.51,           // ✅ confirmed 2026-07-16
   },
 ];
 
@@ -909,10 +922,13 @@ function statusBadge(success) {
   return                        `<span class="status-badge status-fail">❌ فشل</span>`;
 }
 
-function typeBadge(type) {
+function typeBadge(type, category) {
+  if (category === "strong_buy") return `<span class="type-badge type-buy">📈 شراء قوي</span>`;
+  if (category === "buy")        return `<span class="type-badge type-buy">📈 شراء</span>`;
+  if (category === "buy_wait")   return `<span class="type-badge type-wait">👁 ظل (مراقبة توقيت)</span>`;
   return type === "buy"
-    ? `<span class="type-badge type-buy">📈 شراء قوي</span>`
-    : `<span class="type-badge type-sell">📉 بيع قوي</span>`;
+    ? `<span class="type-badge type-buy">📈 شراء</span>`
+    : `<span class="type-badge type-sell">📉 بيع</span>`;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -975,7 +991,7 @@ function renderTable(data) {
         <div class="sector">${r.sector}</div>
       </td>
       <td class="sector">${r.sector}</td>
-      <td>${typeBadge(r.type)}</td>
+      <td>${typeBadge(r.type, r.category)}</td>
       <td class="price">${fmt(r.entryPrice)}</td>
       <td class="price current-price">${r.currentPrice !== null ? fmt(r.currentPrice) : "—"}</td>
       <td class="${returnClass(r.ret, r.success)}">${fmtReturn(r.ret)}</td>
@@ -1002,7 +1018,7 @@ function renderCards(data) {
       <div class="mc-grid">
         <div class="mc-item">
           <label>النوع</label>
-          ${typeBadge(r.type)}
+          ${typeBadge(r.type, r.category)}
         </div>
         <div class="mc-item">
           <label>سعر الدخول</label>
