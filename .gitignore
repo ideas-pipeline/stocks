@@ -1,0 +1,6 @@
+# بيئة الاختبار المحلية — لا تُدفع للمستودع (CLAUDE.md)
+sample-data.json
+dev/preview.html
+
+# إعدادات محلية بمسارات مطلقة خاصة بالجهاز
+.claude/settings.local.json

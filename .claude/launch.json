@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "saif-ui-preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["dev/serve.js"],
+      "port": 8123
+    }
+  ]
+}
