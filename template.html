@@ -67,6 +67,18 @@ h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .filter-bar button:hover{border-color:#f59e0b}
 .filter-bar button.active{background:#f59e0b;color:#000;border-color:#f59e0b}
 .filter-bar select{padding:6px;background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:8px;font-family:inherit}
+.filter-bar input[type=search]{padding:6px 10px;background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:8px;font-family:inherit;min-width:190px}
+.filter-bar input[type=search]:focus{outline:none;border-color:#f59e0b}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:4px 12px;border-radius:20px;font-size:0.8em;cursor:pointer;border:1px solid #334155;background:#1e293b;color:#94a3b8;transition:all .15s;user-select:none}
+.chip.active.strong_buy{background:#10b98140;color:#10b981;border-color:#10b981}
+.chip.active.buy{background:#10b98125;color:#10b981;border-color:#10b98188}
+.chip.active.conditional_buy{background:#3b82f625;color:#60a5fa;border-color:#3b82f6}
+.chip.active.hold{background:#f59e0b25;color:#f59e0b;border-color:#f59e0b}
+.chip.active.sell{background:#ef444425;color:#ef4444;border-color:#ef444488}
+.chip.active.strong_sell{background:#ef444440;color:#ef4444;border-color:#ef4444}
+.chip.active.filtered{background:#47556940;color:#cbd5e1;border-color:#64748b}
+.class-badge.filtered{background:#47556940;color:#94a3b8}
 
 /* Table */
 table{width:100%;border-collapse:collapse;margin-top:16px;font-size:0.8em}
@@ -116,6 +128,8 @@ tr:hover{background:#1e293b88}
   .cards{grid-template-columns:1fr}
   .filter-bar{gap:6px}
   .filter-bar button{padding:5px 10px;font-size:0.8em}
+  .filter-bar input[type=search]{flex:1 1 100%;min-width:0}
+  .chip{padding:4px 10px;font-size:0.75em}
   table{display:block;overflow-x:auto;font-size:0.72em}
   .modal{max-width:100%;max-height:95vh;border-radius:12px}
   .modal-body{padding:14px}
@@ -134,15 +148,18 @@ tr:hover{background:#1e293b88}
 <div class="stats" id="stats"></div>
 
 <div class="filter-bar" id="filterBar">
-  <button class="active" onclick="filterBy('all',this)">📊 الكل</button>
-  <button onclick="filterBy('strong_buy',this)">⭐ شراء قوي</button>
-  <button onclick="filterBy('buy',this)">✅ شراء</button>
-  <button onclick="filterBy('hold',this)">⏳ انتظار</button>
-  <button onclick="filterBy('sell',this)">❌ بيع</button>
-  <button onclick="filterBy('filtered',this)">⛔ لم يعدّ الفلتر</button>
+  <input id="searchBox" type="search" placeholder="🔍 بحث بالاسم أو الرمز" oninput="setSearch(this.value)">
+  <span class="chips" id="classChips"></span>
   <select id="sectorFilter" onchange="filterBySector(this.value)">
     <option value="all">كل القطاعات</option>
   </select>
+  <span class="chips" id="scoreBtns">
+    <button class="active" onclick="setMinScore(0,this)">كل النقاط</button>
+    <button onclick="setMinScore(80,this)">80+</button>
+    <button onclick="setMinScore(65,this)">65+</button>
+    <button onclick="setMinScore(50,this)">50+</button>
+  </span>
+  <span id="resultCount" style="font-size:0.75em;color:#64748b"></span>
 </div>
 
 <div class="section-title">🏆 أفضل الفرص الاستثمارية</div>
@@ -190,10 +207,22 @@ const DATA = __STOCKS_DATA__;
 const SECTOR_AR = {"Financials": "المالية", "Materials": "المواد الأساسية", "Industrials": "الصناعية", "Consumer Discretionary": "السلع الاستهلاكية", "Consumer Staples": "السلع الأساسية", "Healthcare": "الرعاية الصحية", "Real Estate": "العقارية", "Energy": "الطاقة", "Technology": "التقنية", "Communication Services": "الاتصالات", "Utilities": "المرافق", "Unknown": "غير مصنف"};
 
 const stocks = DATA.stocks;
-let currentFilter = 'all';
+const CLASS_LABELS = {strong_buy:'⭐ شراء قوي', buy:'✅ شراء', conditional_buy:'☑️ شراء مشروط', hold:'⏳ انتظار', sell:'❌ بيع', strong_sell:'⛔ بيع قوي', filtered:'🚫 لم يعدّ الفلتر'};
+let activeClasses = new Set(); // فارغة = الكل
 let currentSector = 'all';
+let minScore = 0;
+let searchQ = '';
 let sortKey = 'score';
 let sortAsc = false;
+let rowRefs = []; // {el, s} — الصفوف تُبنى مرة واحدة ثم تُخفى/تُرتب دون إعادة بناء
+
+// classCode هو المرجع الوحيد للتصنيف (قرار المالك) — classification للمفلتر يقول "انتظار" زوراً
+const classCodeOf = (s) => (s.investmentScore && (s.investmentScore.filtered ? 'filtered' : s.investmentScore.classCode)) || '';
+const classLabelOf = (sc) => sc.filtered ? 'لم يعدّ الفلتر' : (sc.classification || '');
+
+// تطبيع عربي للبحث: همزات، تاء مربوطة، ألف مقصورة، تطويل
+const normalizeAr = (t) => String(t).toLowerCase()
+  .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ـ/g, '');
 
 function init() {
   document.getElementById('lastUpdate').textContent = DATA.lastUpdated || DATA.analysisUpdated || '';
@@ -241,9 +270,12 @@ function init() {
     <div class="stat"><div class="num">${stocks.length}</div><div class="label">إجمالي</div></div>
   `;
   
-  // Sector filter
-  let secs = new Set();
-  stocks.forEach(s => { if(s.investmentScore?.sector) secs.add(s.investmentScore.sector); });
+  // Sector filter — يشمل الأسهم بلا قطاع (موجودة في البيانات الحقيقية)
+  let secs = new Set(), hasNoSector = false;
+  stocks.forEach(s => {
+    const sec = s.investmentScore?.sector || s.sector;
+    if (sec) secs.add(sec); else hasNoSector = true;
+  });
   let sel = document.getElementById('sectorFilter');
   [...secs].sort().forEach(sec => {
     let o = document.createElement('option');
@@ -251,7 +283,17 @@ function init() {
     o.textContent = SECTOR_AR[sec] || sec;
     sel.appendChild(o);
   });
-  
+  if (hasNoSector) {
+    let o = document.createElement('option');
+    o.value = '__none__';
+    o.textContent = 'غير مصنف';
+    sel.appendChild(o);
+  }
+
+  // شرائح التصنيف — متعددة الاختيار
+  document.getElementById('classChips').innerHTML = Object.entries(CLASS_LABELS)
+    .map(([cc, lb]) => `<span class="chip ${cc}" onclick="toggleClass('${cc}',this)">${lb}</span>`).join('');
+
   renderTopCards();
   renderTable();
 }
@@ -311,40 +353,10 @@ function renderTopCards() {
   document.getElementById('topCards').innerHTML = html || '<div style="color:#64748b;padding:20px;text-align:center">لا توجد أسهم تعدت حاجز 65 نقطة</div>';
 }
 
-function getFiltered() {
-  let list = stocks;
-  if (currentFilter === 'filtered') {
-    list = list.filter(s => s.investmentScore?.filtered);
-  } else if (currentFilter === 'sell') {
-    list = list.filter(s => !s.investmentScore?.filtered && (s.investmentScore?.classCode === 'sell' || s.investmentScore?.classCode === 'strong_sell'));
-  } else if (currentFilter !== 'all') {
-    list = list.filter(s => !s.investmentScore?.filtered && s.investmentScore?.classCode === currentFilter);
-  }
-  if (currentSector !== 'all') {
-    list = list.filter(s => s.investmentScore?.sector === currentSector);
-  }
-  // Sort
-  list.sort((a,b) => {
-    let va, vb;
-    switch(sortKey) {
-      case 'score': va = a.investmentScore?.total||0; vb = b.investmentScore?.total||0; break;
-      case 'price': va = a.currentPrice||0; vb = b.currentPrice||0; break;
-      case 'change': va = a.dailyChange||0; vb = b.dailyChange||0; break;
-      case 'pe': va = a.valuation?.pe||999; vb = b.valuation?.pe||999; break;
-      case 'pb': va = a.valuation?.pb||999; vb = b.valuation?.pb||999; break;
-      case 'roe': va = a.financials?.returnOnEquity||0; vb = b.financials?.returnOnEquity||0; break;
-      case 'rs6m': va = a.relativeStrength?.rsTasi6m||0; vb = b.relativeStrength?.rsTasi6m||0; break;
-      default: va = a.investmentScore?.total||0; vb = b.investmentScore?.total||0;
-    }
-    return sortAsc ? va - vb : vb - va;
-  });
-  return list;
-}
-
+// يُبنى الجدول كاملاً مرة واحدة — الفلترة إخفاءً والفرز إعادة ترتيب للعقد نفسها (248 صفاً)
 function renderTable() {
-  let list = getFiltered();
   let html = '';
-  list.forEach(s => {
+  stocks.forEach((s, i) => {
     let sc = s.investmentScore || {};
     let scClass = getScoreClass(sc.total);
     let chClass = (s.dailyChange||0) >= 0 ? 'up' : 'down';
@@ -353,10 +365,10 @@ function renderTable() {
     let pb = s.valuation?.pb ? s.valuation.pb.toFixed(2) : '—';
     let roe = s.financials?.returnOnEquity != null ? s.financials.returnOnEquity + '%' : '—';
     let rs6 = s.relativeStrength?.rsTasi6m != null ? (s.relativeStrength.rsTasi6m > 0 ? '+' : '') + s.relativeStrength.rsTasi6m.toFixed(1) + '%' : '—';
-    
-    html += `<tr onclick="openModal('${s.symbol}')">
+
+    html += `<tr onclick="openModal('${s.symbol}')" data-i="${i}">
       <td><span class="score-num ${scClass}" style="font-size:1em">${sc.filtered ? '—' : sc.total}</span></td>
-      <td><span class="class-badge ${sc.classCode}" style="font-size:0.7em;padding:2px 8px">${sc.classification}</span></td>
+      <td><span class="class-badge ${classCodeOf(s)}" style="font-size:0.7em;padding:2px 8px">${classLabelOf(sc)}</span></td>
       <td>${sc.filtered ? '' : '<span class=\'dot '+timingDot+'\'></span> '+sc.timing}</td>
       <td style="font-family:monospace;color:#64748b;text-align:center">${s.symbol}</td>
       <td style="font-weight:600">${s.name}</td>
@@ -369,25 +381,81 @@ function renderTable() {
       <td style="color:${(s.relativeStrength?.rsTasi6m||0) > 0 ? '#10b981' : '#ef4444'}">${rs6}</td>
     </tr>`;
   });
-  document.getElementById('tableBody').innerHTML = html;
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = html;
+  rowRefs = [...tbody.children].map(el => {
+    const s = stocks[+el.dataset.i];
+    el.dataset.search = normalizeAr(s.name + ' ' + s.symbol + ' ' + (s.yahooName || ''));
+    return { el, s };
+  });
+  sortRows();
+  applyFilters();
 }
 
-function filterBy(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-bar button').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  renderTable();
+function sortRows() {
+  const val = (s) => {
+    switch(sortKey) {
+      case 'score': return s.investmentScore?.total||0;
+      case 'price': return s.currentPrice||0;
+      case 'change': return s.dailyChange||0;
+      case 'pe': return s.valuation?.pe||999;
+      case 'pb': return s.valuation?.pb||999;
+      case 'roe': return s.financials?.returnOnEquity||0;
+      case 'rs6m': return s.relativeStrength?.rsTasi6m||0;
+      default: return s.investmentScore?.total||0;
+    }
+  };
+  rowRefs.sort((a,b) => sortAsc ? val(a.s) - val(b.s) : val(b.s) - val(a.s));
+  const tbody = document.getElementById('tableBody');
+  rowRefs.forEach(r => tbody.appendChild(r.el)); // appendChild ينقل العقدة — لا إعادة بناء
+}
+
+function applyFilters() {
+  const q = normalizeAr(searchQ.trim());
+  let visible = 0;
+  rowRefs.forEach(({el, s}) => {
+    const sc = s.investmentScore || {};
+    const cls = classCodeOf(s);
+    const sec = sc.sector || s.sector || '__none__';
+    const score = sc.filtered ? -1 : (sc.total || 0);
+    const ok =
+      (!activeClasses.size || activeClasses.has(cls)) &&
+      (currentSector === 'all' || sec === currentSector) &&
+      (minScore === 0 || score >= minScore) &&
+      (!q || el.dataset.search.includes(q));
+    el.style.display = ok ? '' : 'none';
+    if (ok) visible++;
+  });
+  document.getElementById('resultCount').textContent = visible + ' / ' + stocks.length;
+}
+
+function toggleClass(cc, el) {
+  if (activeClasses.has(cc)) { activeClasses.delete(cc); el.classList.remove('active'); }
+  else { activeClasses.add(cc); el.classList.add('active'); }
+  applyFilters();
+}
+
+function setMinScore(v, btn) {
+  minScore = v;
+  document.querySelectorAll('#scoreBtns button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function setSearch(v) {
+  searchQ = v;
+  applyFilters();
 }
 
 function filterBySector(s) {
   currentSector = s;
-  renderTable();
+  applyFilters();
 }
 
 function sortTable(key) {
   if (sortKey === key) sortAsc = !sortAsc;
   else { sortKey = key; sortAsc = false; }
-  renderTable();
+  sortRows();
 }
 
 function openModal(sym) {
@@ -410,7 +478,7 @@ function openModal(sym) {
     <h3>📊 التقييم الاستثماري</h3>
     <div style="text-align:center;margin:16px 0">
       <div class="score-num ${scClass}" style="font-size:2.5em">${sc.filtered ? '—' : sc.total}<span style="font-size:0.4em;color:#94a3b8">/100</span></div>
-      <div class="class-badge ${sc.classCode}" style="font-size:1em;margin:8px 0">${sc.classification}</div>
+      <div class="class-badge ${classCodeOf(s)}" style="font-size:1em;margin:8px 0">${classLabelOf(sc)}</div>
       ${sc.filtered ? '<div style="color:#f59e0b;margin-top:8px">لم يعدّ الفلتر: ' + (sc.filterReason||'') + '</div>' : ''}
     </div>`;
   
