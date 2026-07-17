@@ -54,12 +54,11 @@ h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .timing .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:4px}
 .timing .dot.g{background:#10b981}.timing .dot.y{background:#f59e0b}.timing .dot.r{background:#ef4444}
 
-/* Stats */
-.stats{display:flex;justify-content:center;gap:12px;margin:16px 0;flex-wrap:wrap}
-.stat{text-align:center;padding:8px 14px;background:#1e293b;border-radius:8px}
-.stat .num{font-size:1.3em;font-weight:bold}
-.stat .label{font-size:0.7em;color:#94a3b8;margin-top:2px}
-.stat.green .num{color:#10b981}.stat.yellow .num{color:#f59e0b}.stat.red .num{color:#ef4444}.stat.blue .num{color:#3b82f6}
+/* قرارات اليوم */
+.count-bar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px;justify-content:center}
+.count-chip{font-size:0.78em;padding:4px 10px;border-radius:14px;background:#1e293b;border:1px solid #334155;color:#94a3b8}
+.count-chip b{color:#e2e8f0}
+.bear-note{text-align:center;color:#fca5a5;background:#7f1d1d22;border:1px solid #dc262666;border-radius:8px;padding:8px 14px;margin:6px auto;max-width:600px;font-size:0.85em}
 
 /* Filter bar */
 .filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
@@ -145,7 +144,7 @@ tr:hover{background:#1e293b88}
 <div class="subtitle" style="margin-top:-4px">آخر تحديث: <span id="lastUpdate">—</span></div>
 <div id="regimeBanner" class="regime-banner" style="display:none"></div>
 <div id="dataAge" class="data-age"></div>
-<div class="stats" id="stats"></div>
+<div id="decisions"></div>
 
 <div class="filter-bar" id="filterBar">
   <input id="searchBox" type="search" placeholder="🔍 بحث بالاسم أو الرمز" oninput="setSearch(this.value)">
@@ -253,23 +252,8 @@ function init() {
       'عمر البيانات — أسعار: ' + _priceAge + '  |  يومية: ' + _dailyAge + '  |  أسبوعية: ' + _weeklyAge;
   }
   
-  // Stats
-  let counts = {strong_buy:0, buy:0, hold:0, sell:0, strong_sell:0, filtered:0};
-  stocks.forEach(s => {
-    let sc = s.investmentScore || {};
-    if (sc.filtered) counts.filtered++;
-    else counts[sc.classCode] = (counts[sc.classCode]||0) + 1;
-  });
-  
-  document.getElementById('stats').innerHTML = `
-    <div class="stat green"><div class="num">${counts.strong_buy}</div><div class="label">شراء قوي</div></div>
-    <div class="stat green"><div class="num">${counts.buy}</div><div class="label">شراء</div></div>
-    <div class="stat yellow"><div class="num">${counts.hold}</div><div class="label">انتظار</div></div>
-    <div class="stat red"><div class="num">${counts.sell + counts.strong_sell}</div><div class="label">بيع</div></div>
-    <div class="stat blue"><div class="num">${counts.filtered}</div><div class="label">فلتر</div></div>
-    <div class="stat"><div class="num">${stocks.length}</div><div class="label">إجمالي</div></div>
-  `;
-  
+  renderDecisions();
+
   // Sector filter — يشمل الأسهم بلا قطاع (موجودة في البيانات الحقيقية)
   let secs = new Set(), hasNoSector = false;
   stocks.forEach(s => {
@@ -296,6 +280,52 @@ function init() {
 
   renderTopCards();
   renderTable();
+}
+
+// شاشة قرارات اليوم: أعلى 5 فرص من عائلة الشراء + عدّ التصنيفات السبعة + تنبيه البيئة الهابطة
+function renderDecisions() {
+  const mr = DATA.marketRegime || {};
+  const BUY_FAMILY = ['strong_buy', 'buy', 'conditional_buy'];
+  const top5 = stocks.filter(s => BUY_FAMILY.includes(classCodeOf(s)))
+    .sort((a,b) => (b.investmentScore?.total||0) - (a.investmentScore?.total||0))
+    .slice(0, 5);
+
+  const counts = {};
+  stocks.forEach(s => { const c = classCodeOf(s); counts[c] = (counts[c]||0) + 1; });
+
+  let html = '<div class="section-title">🎯 قرارات اليوم</div>';
+  if (mr.mood === 'Bearish') {
+    html += `<div class="bear-note">⚠️ ${mr.advice || 'بيئة ضاغطة'}</div>`;
+  }
+  html += '<div class="count-bar">' +
+    Object.entries(CLASS_LABELS).map(([cc, lb]) =>
+      `<span class="count-chip">${lb} <b>${counts[cc]||0}</b></span>`).join('') +
+    `<span class="count-chip">📊 الإجمالي <b>${stocks.length}</b></span></div>`;
+
+  if (top5.length) {
+    html += '<div class="cards">' + top5.map(s => {
+      const sc = s.investmentScore || {};
+      const timingDot = sc.timing === 'ممتاز' ? 'g' : (sc.timing === 'مقبول' ? 'y' : 'r');
+      return `<div class="card" onclick="openModal('${s.symbol}')">
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div>
+            <div class="name">${s.name}</div>
+            <div class="symbol">${s.symbol}</div>
+            <div class="sector-tag">${SECTOR_AR[sc.sector] || sc.sector || 'غير مصنف'}</div>
+          </div>
+          <div style="text-align:left">
+            <div class="score-num ${getScoreClass(sc.total)}">${sc.total}<span style="font-size:0.5em;color:#94a3b8">/100</span></div>
+            <div class="class-badge ${sc.classCode}">${sc.classification}</div>
+          </div>
+        </div>
+        <div style="margin:6px 0">${(sc.topDrivers||[]).slice(0,3).map(d => `<span class="driver ${d.type}">${d.text}</span>`).join(' ')}</div>
+        <div class="timing"><span class="dot ${timingDot}"></span> توقيت: ${sc.timing || '—'}${sc.timingSignals != null ? ' (' + sc.timingSignals + '/4)' : ''}</div>
+      </div>`;
+    }).join('') + '</div>';
+  } else {
+    html += '<div style="color:#64748b;padding:16px;text-align:center">لا فرص شراء اليوم وفق النموذج</div>';
+  }
+  document.getElementById('decisions').innerHTML = html;
 }
 
 function getScoreClass(score) {
