@@ -69,7 +69,7 @@ h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .filter-bar input[type=search]{padding:6px 10px;background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:8px;font-family:inherit;min-width:190px}
 .filter-bar input[type=search]:focus{outline:none;border-color:#f59e0b}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{padding:4px 12px;border-radius:20px;font-size:0.8em;cursor:pointer;border:1px solid #334155;background:#1e293b;color:#94a3b8;transition:all .15s;user-select:none}
+.chip{display:inline-flex;align-items:center;min-height:32px;padding:4px 12px;border-radius:20px;font-size:0.8em;cursor:pointer;border:1px solid #334155;background:#1e293b;color:#94a3b8;transition:all .15s;user-select:none}
 .chip.active.strong_buy{background:#10b98140;color:#10b981;border-color:#10b981}
 .chip.active.buy{background:#10b98125;color:#10b981;border-color:#10b98188}
 .chip.active.conditional_buy{background:#3b82f625;color:#60a5fa;border-color:#3b82f6}
@@ -147,7 +147,7 @@ tr:hover{background:#1e293b88}
 </style>
 </head>
 <body>
-<h1>سيف تداول — النموذج الاستثماري</h1>\n
+<h1>سيف تداول — النموذج الاستثماري</h1>
 <div class="subtitle">تقييم استثماري متوسط المدى (6-12 شهر) | 5 محاور | 100 نقطة</div>
 <div class="subtitle" style="margin-top:-4px">آخر تحديث: <span id="lastUpdate">—</span></div>
 <div id="regimeBanner" class="regime-banner" style="display:none"></div>
@@ -231,6 +231,9 @@ const classLabelOf = (sc) => sc.filtered ? 'لم يعدّ الفلتر' : (sc.cl
 const normalizeAr = (t) => String(t).toLowerCase()
   .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ـ/g, '');
 
+// عزل الأرقام السالبة عن انعكاس RTL — "‎-14.4%" كانت تُرسم "14.4-%" فتُقرأ الخسارة ربحاً
+const ltrNums = (t) => String(t).replace(/-\d[\d.,]*x?%?/g, m => '<span dir="ltr">' + m + '</span>');
+
 function init() {
   document.getElementById('lastUpdate').textContent = DATA.lastUpdated || DATA.analysisUpdated || '';
 
@@ -242,9 +245,9 @@ function init() {
     b.className = 'regime-banner ' + cls;
     const arrow = mr.change !== undefined ? (mr.change >= 0 ? '▲' : '▼') : '';
     const chgAbs = mr.change !== undefined ? Math.abs(mr.change).toFixed(2) : '';
-    const chgPct = mr.changePct !== undefined ? '(' + (mr.changePct >= 0 ? '+' : '') + mr.changePct + '%)' : '';
+    const chgPct = mr.changePct !== undefined ? '(<span dir="ltr">' + (mr.changePct >= 0 ? '+' : '') + mr.changePct + '%</span>)' : '';
     const idxFmt = mr.indexValue ? mr.indexValue.toLocaleString('en',{maximumFractionDigits:0}) : '';
-    const smaStr = mr.pctVsSma !== undefined ? ' | ' + (mr.pctVsSma >= 0 ? '+' : '') + mr.pctVsSma + '% من SMA200' : '';
+    const smaStr = mr.pctVsSma !== undefined ? ' | <span dir="ltr">' + (mr.pctVsSma >= 0 ? '+' : '') + mr.pctVsSma + '%</span> من SMA200' : '';
     b.innerHTML = mr.icon + ' نظام السوق: ' + mr.regime + ' — ' + mr.advice +
       ' &nbsp;|&nbsp; TASI ' + idxFmt +
       (arrow ? ' ' + arrow + ' ' + chgAbs + ' ' + chgPct : '') + smaStr;
@@ -301,7 +304,7 @@ function renderDecisions() {
   const counts = {};
   stocks.forEach(s => { const c = classCodeOf(s); counts[c] = (counts[c]||0) + 1; });
 
-  let html = '<div class="section-title">🎯 قرارات اليوم</div>';
+  let html = '<div class="section-title">🎯 قرارات اليوم <span style="font-size:0.6em;color:#64748b;font-weight:normal">وفق النموذج — ليست نصيحة استثمارية</span></div>';
   if (mr.mood === 'Bearish') {
     html += `<div class="bear-note">⚠️ ${mr.advice || 'بيئة ضاغطة'}</div>`;
   }
@@ -412,11 +415,11 @@ function renderTable() {
       <td style="font-weight:600">${s.name}</td>
       <td style="font-size:0.75em;color:#94a3b8">${SECTOR_AR[sc.sector] || sc.sector || ''}</td>
       <td class="${chClass}">${s.currentPrice || '—'}</td>
-      <td class="${chClass}">${s.dailyChange != null ? (s.dailyChange > 0 ? '+' : '') + s.dailyChange + '%' : '—'}</td>
+      <td class="${chClass}" dir="ltr">${s.dailyChange != null ? (s.dailyChange > 0 ? '+' : '') + s.dailyChange + '%' : '—'}</td>
       <td>${pe}</td>
       <td>${pb}</td>
       <td>${roe}</td>
-      <td style="color:${(s.relativeStrength?.rsTasi6m||0) > 0 ? '#10b981' : '#ef4444'}">${rs6}</td>
+      <td dir="ltr" style="color:${(s.relativeStrength?.rsTasi6m||0) > 0 ? '#10b981' : '#ef4444'}">${rs6}</td>
     </tr>`;
   });
   const tbody = document.getElementById('tableBody');
@@ -492,7 +495,7 @@ function filterBySector(s) {
 
 function sortTable(key) {
   if (sortKey === key) sortAsc = !sortAsc;
-  else { sortKey = key; sortAsc = false; }
+  else { sortKey = key; sortAsc = (key === 'pe' || key === 'pb'); } // للمضاعفات: الأصغر أفضل، والغائب (999) يهبط للقاع
   sortRows();
 }
 
@@ -568,8 +571,8 @@ function openModal(sym) {
       const rows = lines.map(l => {
         const i = l.lastIndexOf(' → ');
         return i === -1
-          ? `<div class="why-line"><span>${l}</span></div>`
-          : `<div class="why-line"><span>${l.slice(0, i)}</span><b>${l.slice(i + 3)}</b></div>`;
+          ? `<div class="why-line"><span>${ltrNums(l)}</span></div>`
+          : `<div class="why-line"><span>${ltrNums(l.slice(0, i))}</span><b>${l.slice(i + 3)}</b></div>`;
       }).join('');
       return `<div class="why-pillar"><h4><span>${label}</span><span>${pts != null ? pts + '/' + max : ''}</span></h4>${rows}</div>`;
     }).join('') + '</div>';
