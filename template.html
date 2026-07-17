@@ -106,6 +106,14 @@ tr:hover{background:#1e293b88}
 .indicator.green .val{color:#10b981}.indicator.red .val{color:#ef4444}.indicator.yellow .val{color:#f59e0b}.indicator.blue .val{color:#60a5fa}
 .chart-container{background:#0f172a;border-radius:10px;padding:16px;height:200px;position:relative;overflow:hidden}
 
+/* بطاقة لماذا هذا التقييم */
+.why-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.why-pillar{background:#0f172a;border-radius:10px;padding:10px}
+.why-pillar h4{font-size:0.8em;color:#f59e0b;margin-bottom:6px;display:flex;justify-content:space-between;font-weight:600}
+.why-line{font-size:0.74em;color:#94a3b8;padding:2px 0;display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #1e293b66}
+.why-line:last-child{border-bottom:none}
+.why-line b{color:#cbd5e1;white-space:nowrap}
+
 /* Pillar detail bars */
 .pillar-bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:0.85em}
 .pillar-bar .bar-label{min-width:80px;color:#94a3b8}
@@ -511,13 +519,7 @@ function openModal(sym) {
       <div class="class-badge ${classCodeOf(s)}" style="font-size:1em;margin:8px 0">${classLabelOf(sc)}</div>
       ${sc.filtered ? '<div style="color:#f59e0b;margin-top:8px">لم يعدّ الفلتر: ' + (sc.filterReason||'') + '</div>' : ''}
     </div>`;
-  
-  if (!sc.filtered && (sc.topDrivers||[]).length) {
-    body += `<div class="interp">
-      <div>${sc.topDrivers.map(d => '<span class="driver '+d.type+'">'+d.text+'</span>').join(' ')}</div>
-    </div>`;
-  }
-  
+
   if (!sc.filtered) {
     // Pillar bars
     let pillars = [
@@ -545,7 +547,37 @@ function openModal(sym) {
     </div>`;
   }
   body += '</div>';
-  
+
+  // بطاقة "لماذا هذا التقييم؟" — تفسير كل محور بنقاطه من details + topDrivers
+  body += `<div class="modal-section"><h3>❓ لماذا هذا التقييم؟</h3>`;
+  const det = sc.details;
+  if (det) {
+    if ((sc.topDrivers||[]).length) {
+      body += `<div class="interp" style="margin:0 0 10px">${sc.topDrivers.map(d => '<span class="driver '+d.type+'">'+d.text+'</span>').join(' ')}</div>`;
+    }
+    const whyPillars = [
+      ['المالية', det.financial, sc.financial, 30],
+      ['الاتجاه', det.trend, sc.trend, 25],
+      ['الزخم', det.relativeStrength, sc.relativeStrength, 15],
+      ['المخاطر', det.risk, sc.risk, 20],
+      ['التقييم', det.valuation, sc.valuation, 15],
+      ['التوقيت', det.timing, sc.timingSignals, 4],
+    ];
+    body += '<div class="why-grid">' + whyPillars.map(([label, lines, pts, max]) => {
+      if (!lines || !lines.length) return '';
+      const rows = lines.map(l => {
+        const i = l.lastIndexOf(' → ');
+        return i === -1
+          ? `<div class="why-line"><span>${l}</span></div>`
+          : `<div class="why-line"><span>${l.slice(0, i)}</span><b>${l.slice(i + 3)}</b></div>`;
+      }).join('');
+      return `<div class="why-pillar"><h4><span>${label}</span><span>${pts != null ? pts + '/' + max : ''}</span></h4>${rows}</div>`;
+    }).join('') + '</div>';
+  } else {
+    body += '<div style="color:#64748b;padding:12px;text-align:center">التفاصيل غير متاحة حالياً</div>';
+  }
+  body += '</div>';
+
   // Risk reasons
   if (!sc.filtered && sc.riskReasons && sc.riskReasons.length > 0) {
     body += `<div class="modal-section">
