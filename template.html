@@ -102,13 +102,8 @@ tr:hover{background:#1e293b88}
 .pillar-bar .bar-fill{height:100%;border-radius:5px}
 .pillar-bar .bar-val{min-width:40px;text-align:left;font-weight:bold}
 
-.conf-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.65em}
-.conf-badge.high{background:#10b98120;color:#10b981}
-.conf-badge.medium{background:#f59e0b20;color:#f59e0b}
-.conf-badge.low{background:#ef444420;color:#ef4444}
-.class-badge.buy_conditional{background:#3b82f625;color:#60a5fa;border:1px dashed #3b82f6}
+.class-badge.conditional_buy{background:#3b82f625;color:#60a5fa;border:1px dashed #3b82f6}
 .interp{font-size:0.8em;color:#94a3b8;margin-top:8px;line-height:1.5;padding:8px;background:#0f172a;border-radius:8px}
-.interp .exec{color:#f59e0b;font-weight:bold;margin-top:4px}
 .driver{display:inline-block;font-size:0.7em;padding:2px 6px;border-radius:4px;margin:2px}
 .driver.positive{background:#10b98115;color:#10b981}
 .driver.negative{background:#ef444415;color:#ef4444}
@@ -289,18 +284,11 @@ function renderTopCards() {
         <div style="text-align:left">
           <div class="score-num ${scClass}">${sc.total}</div>
           <div class="class-badge ${sc.classCode}">${sc.classification}</div>
-          <div style="margin-top:4px"><span class="conf-badge ${sc.confidenceCode||''}" style="font-size:0.6em">ثقة: ${sc.confidence||''}</span></div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;margin:6px 0;font-size:0.75em">
-        <div style="flex:1">
-          <div style="color:#94a3b8;margin-bottom:2px">استثمار</div>
-          <div class="score-bar"><div class="score-fill ${scClass}" style="width:${sc.total}%"></div></div>
-        </div>
-        <div style="flex:1">
-          <div style="color:#94a3b8;margin-bottom:2px">مخاطر ${sc.riskScore||0}/100</div>
-          <div class="score-bar"><div class="score-fill ${(sc.riskScore||0)<=25?'high':(sc.riskScore||0)<=50?'mid':'low'}" style="width:${sc.riskScore||0}%"></div></div>
-        </div>
+      <div style="margin:6px 0;font-size:0.75em">
+        <div style="color:#94a3b8;margin-bottom:2px">استثمار</div>
+        <div class="score-bar"><div class="score-fill ${scClass}" style="width:${sc.total}%"></div></div>
       </div>
       <div style="display:flex;gap:6px;margin:4px 0;font-size:0.65em;flex-wrap:wrap">
         ${s.liquidityScore ? `<span style="padding:2px 6px;border-radius:4px;background:${s.liquidityScore.color==='green'?'#065f46':s.liquidityScore.color==='yellow'?'#78350f':'#7f1d1d'};color:${s.liquidityScore.color==='green'?'#6ee7b7':s.liquidityScore.color==='yellow'?'#fcd34d':'#fca5a5'}">🔄 ${s.liquidityScore.turnoverPct != null ? s.liquidityScore.turnoverPct+'%' : '—'} ${s.liquidityScore.label}</span>` : ''}
@@ -423,26 +411,12 @@ function openModal(sym) {
     <div style="text-align:center;margin:16px 0">
       <div class="score-num ${scClass}" style="font-size:2.5em">${sc.filtered ? '—' : sc.total}<span style="font-size:0.4em;color:#94a3b8">/100</span></div>
       <div class="class-badge ${sc.classCode}" style="font-size:1em;margin:8px 0">${sc.classification}</div>
-      <div style="display:flex;justify-content:center;gap:12px;margin-top:8px;flex-wrap:wrap">
-        <div style="background:#0f172a;border-radius:8px;padding:8px 14px;text-align:center">
-          <div style="font-size:0.7em;color:#94a3b8">المخاطر</div>
-          <div style="font-size:1.2em;font-weight:bold;color:${(sc.riskScore||0)<=25?'#10b981':(sc.riskScore||0)<=50?'#f59e0b':'#ef4444'}">${sc.riskScore||0}/100</div>
-          <div style="font-size:0.7em;color:${(sc.riskScore||0)<=25?'#10b981':(sc.riskScore||0)<=50?'#f59e0b':'#ef4444'}">${sc.riskLevel||''}</div>
-        </div>
-        <div style="background:#0f172a;border-radius:8px;padding:8px 14px;text-align:center">
-          <div style="font-size:0.7em;color:#94a3b8">الثقة</div>
-          <div style="font-size:1.2em;font-weight:bold;color:${sc.confidenceCode==='high'?'#10b981':sc.confidenceCode==='medium'?'#f59e0b':'#ef4444'}">${sc.confidencePct||0}%</div>
-          <div style="font-size:0.7em;color:#94a3b8">${sc.confidence||''}</div>
-        </div>
-      </div>
       ${sc.filtered ? '<div style="color:#f59e0b;margin-top:8px">لم يعدّ الفلتر: ' + (sc.filterReason||'') + '</div>' : ''}
     </div>`;
   
-  if (!sc.filtered && sc.interpretation) {
+  if (!sc.filtered && (sc.topDrivers||[]).length) {
     body += `<div class="interp">
-      ${sc.interpretation}
-      <div class="exec">${sc.execInterpretation||''}</div>
-      <div style="margin-top:6px">${(sc.topDrivers||[]).map(d => '<span class="driver '+d.type+'">'+d.text+'</span>').join(' ')}</div>
+      <div>${sc.topDrivers.map(d => '<span class="driver '+d.type+'">'+d.text+'</span>').join(' ')}</div>
     </div>`;
   }
   
