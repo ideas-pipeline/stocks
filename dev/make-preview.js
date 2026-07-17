@@ -1,17 +1,23 @@
-// dev/make-preview.js — يحقن sample-data.json في template.html وينتج dev/preview.html للمعاينة
+// dev/make-preview.js — يحقن البيانات في template.html وينتج dev/preview.html للمعاينة
 // الاستخدام:
-//   node dev/make-preview.js                → معاينة بالعينة كما هي
+//   node dev/make-preview.js                → معاينة بالعينة (sample-data.json)
+//   node dev/make-preview.js --full         → معاينة بالبيانات الكاملة مستخرجةً من index.html (248 سهماً)
 //   node dev/make-preview.js --regime=هابط  → فرض نظام هابط (لقطة حقيقية من بيانات 2026-07-16 حرفياً)
 //   node dev/make-preview.js --regime=محايد → فرض نظام غير هابط (تركيبي — لاختبار غياب تنبيه البيئة الضاغطة)
 //   node dev/make-preview.js --regime=صاعد  → كذلك
-//   (--bearish اختصار قديم لـ --regime=هابط)
+//   (--bearish اختصار قديم لـ --regime=هابط، ويجوز جمع --full مع --regime)
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const { extractFromIndex } = require('./lib-extract');
 
 const ROOT = path.join(__dirname, '..');
 const template = fs.readFileSync(path.join(ROOT, 'template.html'), 'utf8');
-const data = JSON.parse(fs.readFileSync(path.join(ROOT, 'sample-data.json'), 'utf8'));
+const useFull = process.argv.includes('--full');
+const data = useFull
+  ? extractFromIndex(path.join(ROOT, 'index.html'))
+  : JSON.parse(fs.readFileSync(path.join(ROOT, 'sample-data.json'), 'utf8'));
+console.log(useFull ? `المصدر: index.html كاملاً (${data.stocks.length} سهماً)` : `المصدر: العينة (${data.stocks.length} سهماً)`);
 
 // لقطة حقيقية حرفية من marketRegime يوم 2026-07-16 (نظام هابط) — لا نص مفبرك
 const REAL_BEARISH = {

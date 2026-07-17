@@ -4,34 +4,12 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const { extractFromIndex } = require('./lib-extract');
 
 const ROOT = path.join(__dirname, '..');
-const INDEX = path.join(ROOT, 'index.html');
 const OUT = path.join(ROOT, 'sample-data.json');
 
-const html = fs.readFileSync(INDEX, 'utf8');
-const marker = 'const DATA = ';
-const start = html.indexOf(marker);
-if (start === -1) throw new Error('لم أجد علامة const DATA في index.html');
-
-// مسح يدوي بعدّاد أقواس واعٍ بالنصوص — الكائن أضخم من أن يُلتقط بـ regex
-const jsonStart = start + marker.length;
-let depth = 0, inStr = false, esc = false, end = -1;
-for (let i = jsonStart; i < html.length; i++) {
-  const c = html[i];
-  if (inStr) {
-    if (esc) esc = false;
-    else if (c === '\\') esc = true;
-    else if (c === '"') inStr = false;
-  } else {
-    if (c === '"') inStr = true;
-    else if (c === '{') depth++;
-    else if (c === '}') { depth--; if (depth === 0) { end = i + 1; break; } }
-  }
-}
-if (end === -1) throw new Error('فشل تحديد نهاية كائن DATA');
-
-const data = JSON.parse(html.slice(jsonStart, end));
+const data = extractFromIndex(path.join(ROOT, 'index.html'));
 const stocks = data.stocks;
 
 // إحصاء توزيع التصنيفات وحالات غياب details
