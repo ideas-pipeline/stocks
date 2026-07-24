@@ -656,15 +656,16 @@ function openModal(sym) {
     </div>
   </div>`;
   
-  // Financial health
+  // Financial health — دين/ملكية ونسبة التداول مقياسان مضللان للبنوك فيُخفيان لقطاع Financials (عرض فقط)
+  const isFinSector = (sc.sector || s.sector) === 'Financials';
   body += `<div class="modal-section">
     <h3>🏦 الصحة المالية</h3>
     <div class="indicator-grid">
       <div class="indicator ${fin.returnOnEquity > 12 ? 'green' : (fin.returnOnEquity > 0 ? 'yellow' : 'red')}"><div class="val">${fin.returnOnEquity != null ? fin.returnOnEquity+'%' : '—'}</div><div class="lbl">ROE</div></div>
       <div class="indicator ${fin.profitMargins > 12 ? 'green' : (fin.profitMargins > 0 ? 'yellow' : 'red')}"><div class="val">${fin.profitMargins != null ? fin.profitMargins+'%' : '—'}</div><div class="lbl">هامش الربح</div></div>
       <div class="indicator ${fin.revenueGrowth > 5 ? 'green' : (fin.revenueGrowth >= 0 ? 'yellow' : 'red')}"><div class="val">${fin.revenueGrowth != null ? fin.revenueGrowth+'%' : '—'}</div><div class="lbl">نمو الإيرادات</div></div>
-      <div class="indicator"><div class="val">${fin.debtToEquity != null ? fin.debtToEquity+'%' : '—'}</div><div class="lbl">دين/ملكية</div></div>
-      <div class="indicator"><div class="val">${fin.currentRatio != null ? fin.currentRatio : '—'}</div><div class="lbl">نسبة التداول</div></div>
+      ${isFinSector ? '' : `<div class="indicator"><div class="val">${fin.debtToEquity != null ? fin.debtToEquity+'%' : '—'}</div><div class="lbl">دين/ملكية</div></div>
+      <div class="indicator"><div class="val">${fin.currentRatio != null ? fin.currentRatio : '—'}</div><div class="lbl">نسبة التداول</div></div>`}
     </div>
   </div>`;
   
