@@ -1188,7 +1188,7 @@ function renderTable(data) {
       <td class="sector">${r.sector}</td>
       <td>${typeBadge(r.type, r.category)}</td>
       <td class="price">${fmt(r.entryPrice)}</td>
-      <td class="price current-price">${r.currentPrice !== null ? fmt(r.currentPrice) : "—"}</td>
+      <td class="price current-price"${r.status === "closed" ? ` title="سعر الإغلاق${r.closeDate ? " — " + r.closeDate : ""}"` : ""}>${r.status === "closed" ? fmt(r.closePrice) + " 🔒" : (r.currentPrice !== null ? fmt(r.currentPrice) : "—")}</td>
       <td class="${returnClass(r.ret, r.success)}">${fmtReturn(r.ret)}</td>
       <td>${statusBadge(r.success, r)}</td>
     </tr>
@@ -1221,7 +1221,7 @@ function renderCards(data) {
         </div>
         <div class="mc-item">
           <label>السعر الحالي</label>
-          <span class="price">${r.currentPrice !== null ? fmt(r.currentPrice) : "—"}</span>
+          <span class="price"${r.status === "closed" ? ` title="سعر الإغلاق${r.closeDate ? " — " + r.closeDate : ""}"` : ""}>${r.status === "closed" ? fmt(r.closePrice) + " 🔒" : (r.currentPrice !== null ? fmt(r.currentPrice) : "—")}</span>
         </div>
         <div class="mc-item">
           <label>العائد %</label>

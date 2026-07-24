@@ -59895,7 +59895,8 @@ function openModal(sym) {
     </div>
   </div>`;
   
-  // Financial health — دين/ملكية ونسبة التداول مقياسان مضللان للبنوك فيُخفيان لقطاع Financials (عرض فقط)
+  // Financial health — دين/ملكية ونسبة التداول يُخفيان لقطاع Financials كله (بنوك وتأمين وتمويل):
+  // هيكل ميزانيات القطاع يجعل المقياسين مضللين كمؤشري صحة مستقلين (عرض فقط — التقييم لا يتغير)
   const isFinSector = (sc.sector || s.sector) === 'Financials';
   body += `<div class="modal-section">
     <h3>🏦 الصحة المالية</h3>
