@@ -114,6 +114,22 @@ tr:hover{background:#1e293b88}
 .why-line:last-child{border-bottom:none}
 .why-line b{color:#cbd5e1;white-space:nowrap}
 
+/* شريط الدعم والمقاومة (تقريبي) */
+.levels-block{margin-top:10px;padding:10px;background:#0f172a;border-radius:10px}
+.levels-head{display:flex;justify-content:space-between;align-items:center;font-size:0.75em;margin-bottom:6px}
+.levels-head .lv-title{color:#f59e0b;font-weight:600}
+.approx-tag{font-size:0.85em;padding:1px 8px;border-radius:10px;background:#47556933;color:#94a3b8;border:1px dashed #64748b}
+.levels-track{position:relative;height:48px;direction:ltr;margin:0 10px}
+.levels-line{position:absolute;top:26px;left:0;right:0;height:4px;background:#334155;border-radius:2px}
+.lv-mark{position:absolute;top:20px;width:2px;height:16px;transform:translateX(-50%)}
+.lv-mark.sup{background:#10b981}.lv-mark.res{background:#ef4444}
+.lv-mark .lv-val{position:absolute;top:17px;left:50%;transform:translateX(-50%);font-size:0.6em;white-space:nowrap}
+.lv-mark.sup .lv-val{color:#34d399}.lv-mark.res .lv-val{color:#f87171}
+.lv-price{position:absolute;top:22px;width:12px;height:12px;border-radius:50%;background:#f59e0b;border:2px solid #1e293b;transform:translateX(-50%);z-index:2}
+.lv-price .lv-val{position:absolute;bottom:13px;left:50%;transform:translateX(-50%);font-size:0.66em;color:#fbbf24;font-weight:700;white-space:nowrap}
+.levels-text{font-size:0.74em;color:#94a3b8;margin-top:4px;text-align:center}
+.levels-text b{color:#cbd5e1}
+
 /* Pillar detail bars */
 .pillar-bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:0.85em}
 .pillar-bar .bar-label{min-width:80px;color:#94a3b8}
@@ -499,6 +515,37 @@ function sortTable(key) {
   sortRows();
 }
 
+// شريط الدعم/المقاومة (عقد levels اعتباراً من 30-07) — عرض فقط
+// يُرجع '' عند غياب levels أو أي قيمة غير صالحة: لا undefined/NaN ولا استثناء يعطل المودال
+function renderLevelsBlock(s) {
+  const lv = s.levels;
+  const price = s.currentPrice;
+  const num = (x) => typeof x === 'number' && isFinite(x) && x > 0;
+  if (!lv || !num(price)) return '';
+  const sup = Array.isArray(lv.support) ? lv.support.filter(num) : [];
+  const res = Array.isArray(lv.resistance) ? lv.resistance.filter(num) : [];
+  if (!sup.length || !res.length) return '';
+  // المقياس يضم السعر نفسه — كسر دعم/مقاومة بين حسابين الأسبوعيين لا يخرج العلامة عن الشريط
+  const all = sup.concat(res, [price]);
+  const lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+  const span = hi - lo;
+  if (!(span > 0)) return '';
+  const pad = span * 0.07;
+  const pos = (v) => (((v - lo + pad) / (span + pad * 2)) * 100).toFixed(1);
+  const fmtL = (v) => v >= 100 ? v.toFixed(1) : v.toFixed(2);
+  const pct = (v) => { const p = (v / price - 1) * 100; return (p >= 0 ? '+' : '') + p.toFixed(1) + '%'; };
+  const method = String(lv.method || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  let marks = '';
+  sup.forEach(v => { marks += `<div class="lv-mark sup" style="left:${pos(v)}%"><span class="lv-val">${fmtL(v)}</span></div>`; });
+  res.forEach(v => { marks += `<div class="lv-mark res" style="left:${pos(v)}%"><span class="lv-val">${fmtL(v)}</span></div>`; });
+  marks += `<div class="lv-price" style="left:${pos(price)}%"><span class="lv-val">${fmtL(price)}</span></div>`;
+  return `<div class="levels-block">
+    <div class="levels-head"><span class="lv-title">🧭 الدعم والمقاومة</span><span class="approx-tag"${method ? ' title="طريقة الحساب: ' + method + '"' : ''}>تقريبي</span></div>
+    <div class="levels-track"><div class="levels-line"></div>${marks}</div>
+    <div class="levels-text">أقرب دعم <b>${fmtL(sup[0])}</b> (<span dir="ltr">${pct(sup[0])}</span>) / أقرب مقاومة <b>${fmtL(res[0])}</b> (<span dir="ltr">${pct(res[0])}</span>)</div>
+  </div>`;
+}
+
 function openModal(sym) {
   let s = stocks.find(x => x.symbol === sym);
   if (!s) return;
@@ -583,6 +630,8 @@ function openModal(sym) {
   } else {
     body += '<div style="color:#64748b;padding:12px;text-align:center">التفاصيل غير متاحة حالياً</div>';
   }
+  // مستقل عن details — يظهر متى صحّت levels لغير المفلترين (داخل القسم، خارج why-grid)
+  if (!sc.filtered) body += renderLevelsBlock(s);
   body += '</div>';
 
   // Risk reasons
