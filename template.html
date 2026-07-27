@@ -115,6 +115,8 @@ tr:hover{background:#1e293b88}
 .indicator .val{font-size:1.3em;font-weight:bold}
 .indicator .lbl{font-size:0.7em;color:#94a3b8;margin-top:4px}
 .indicator.green .val{color:#10b981}.indicator.red .val{color:#ef4444}.indicator.yellow .val{color:#f59e0b}.indicator.blue .val{color:#60a5fa}
+.indicator.stale{cursor:help}
+.indicator.stale .val{opacity:.55}
 .chart-container{background:#0f172a;border-radius:10px;padding:16px;height:200px;position:relative;overflow:hidden}
 
 /* بطاقة لماذا هذا التقييم */
@@ -203,6 +205,7 @@ tr:hover{background:#1e293b88}
 <div id="reversals"></div>
 
 <div class="section-title">📊 الجدول الشامل</div>
+<div id="peNote" class="rev-note" style="display:none;margin:8px auto 0">❄️ مكرر الربح غير محدّث — مصدر البيانات قيد المعالجة</div>
 <table id="mainTable">
 <thead><tr>
 <th onclick="sortTable('score')">النقاط ↕</th>
@@ -213,7 +216,7 @@ tr:hover{background:#1e293b88}
 <th>القطاع</th>
 <th onclick="sortTable('price')">السعر ↕</th>
 <th onclick="sortTable('change')">يومي % ↕</th>
-<th onclick="sortTable('pe')">P/E ↕</th>
+<th onclick="sortTable('pe')">P/E ↕<span id="peStale" style="display:none;cursor:help;margin-right:3px" title="مكرر الربح غير محدّث — مصدر البيانات قيد المعالجة" onclick="event.stopPropagation();togglePeNote()">❄️</span></th>
 <th onclick="sortTable('pb')">P/B ↕</th>
 <th onclick="sortTable('roe')">ROE ↕</th>
 <th onclick="sortTable('rs6m')">RS 6M ↕</th>
@@ -285,6 +288,17 @@ const liqBadge = (s, compact) => {
   return '<span class="liq-gate' + (compact ? '' : ' wrap') + '"' + (th ? ' title="الحد الأدنى: ' + th + ' ريال/يوم"' : '') + '>' +
     (v ? '💧 سيولة <span dir="ltr">' + v + '</span> ريال/يوم — دون الحد' : '💧 سيولة دون الحد') + '</span>';
 };
+
+// وسوم تجميد التقييم (المحرك بعد إصلاح valuation في 27-07): valuationParts تحدد حالة كل مكوّن
+// على حدة — pb حي لـ~192 ومجمّد لـ~32 (أغلبها بنوك) بينما pe/evEbitda مجمّدان للكل، فمؤشر
+// P/E واحد في رأس العمود يغني عن تكراره في 248 خلية. الوسم عرض فقط — الأرقام لا تُمس.
+// غياب valuationParts عن السهم = عرضه القديم حرفياً بلا وسوم.
+// الحقلان يُقرآن من جذر السهم أو من valuation أيهما وُجد — موضعهما النهائي غير مثبت بعد،
+// والفحص === 'frozen' حصراً: أي قيمة أخرى (live أو مجهولة) تُعرض عادية بلا ادعاء تجميد
+const VAL_STALE_NOTE = 'غير محدّث — مصدر البيانات قيد المعالجة';
+const valPartsOf = (s) => (s && (s.valuationParts || (s.valuation && s.valuation.valuationParts))) || null;
+const valUpdatedOf = (s) => String((s && (s.valuationUpdatedAt || (s.valuation && s.valuation.valuationUpdatedAt))) || '')
+  .replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
 // المقارنة القطاعية تُحسب هنا مرة واحدة عند التحميل — حقول sectorRank/Total/Percentile/AvgScore
 // المخزَّنة مجمّدة (لا سكربت يكتبها منذ ما قبل 04-07: متوسطات صفرية وعبارات مقارنة معكوسة) فتُتجاهل نهائياً.
@@ -380,6 +394,21 @@ function init() {
   renderTopCards();
   renderReversals();
   renderTable();
+
+  // مؤشر تجميد P/E في رأس العمود وسطر الشرح فوق الجدول — يظهران فقط حين يصرّح المحرك
+  // بالتجميد عبر valuationParts. السطر ظاهر افتراضياً لا بالنقر: رأس الجدول الـsticky لا يبقى
+  // مرئياً على الموبايل والـtooltip لا يعمل باللمس، فالمستخدم يجب أن يرى الحالة قبل أي فرز.
+  // غياب الحقل عن كل الأسهم يُبقي الرأس والجدول كما هما حرفياً
+  if (stocks.some(s => { const vp = valPartsOf(s); return vp && vp.pe === 'frozen'; })) {
+    document.getElementById('peStale').style.display = '';
+    document.getElementById('peNote').style.display = '';
+  }
+}
+
+// نقرة ❄️ في رأس العمود تطوي سطر الشرح وتعيده — لا تُطلق الفرز
+function togglePeNote() {
+  const n = document.getElementById('peNote');
+  n.style.display = n.style.display === 'none' ? '' : 'none';
 }
 
 // شاشة أبرز الفرص: أعلى 5 فرص من عائلة الشراء + عدّ التصنيفات السبعة + تنبيه البيئة الهابطة
@@ -410,7 +439,7 @@ function renderDecisions() {
       return `<div class="card" onclick="openModal('${s.symbol}')">
         <div style="display:flex;justify-content:space-between;align-items:start">
           <div>
-            <div class="name">${s.name}</div>
+            <div class="name">${s.name}${sproutTag(sc)}</div>
             <div class="symbol">${s.symbol}</div>
             <div class="sector-tag">${SECTOR_AR[sc.sector] || sc.sector || 'غير مصنف'}</div>
           </div>
@@ -436,7 +465,8 @@ function getScoreClass(score) {
 }
 
 function renderTopCards() {
-  let top = stocks.filter(s => !s.investmentScore?.filtered && s.investmentScore?.total >= 65 && !liqBlocked(s))
+  // unrated يُستبعد هنا أيضاً (تصحيح 27-07): شاشة مرشَّحين والسهم لم يُختبر بالفلتر — يطابق فلتر أبرز الفرص
+  let top = stocks.filter(s => !s.investmentScore?.filtered && s.investmentScore?.total >= 65 && !isUnrated(s.investmentScore) && !liqBlocked(s))
     .sort((a,b) => (b.investmentScore?.total||0) - (a.investmentScore?.total||0))
     .slice(0, 12);
   
@@ -450,14 +480,13 @@ function renderTopCards() {
     html += `<div class="card" onclick="openModal('${s.symbol}')">
       <div style="display:flex;justify-content:space-between;align-items:start">
         <div>
-          <div class="name">${s.name}${sc.filterReason === REVERSAL_REASON ? ' <span title="تحت SMA200W — عبر بإشارات انعكاس" style="cursor:help">🌱</span>' : ''}</div>
+          <div class="name">${s.name}${sproutTag(sc)}</div>
           <div class="symbol">${s.symbol}</div>
           <div class="sector-tag">${SECTOR_AR[sc.sector] || sc.sector || ''}</div>
         </div>
         <div style="text-align:left">
           <div class="score-num ${scClass}">${sc.total}</div>
           <div class="class-badge ${sc.classCode}">${sc.classification}</div>
-          ${isUnrated(sc) ? '<div style="margin-top:4px">' + unratedBadge(sc, true) + '</div>' : ''}
         </div>
       </div>
       <div style="margin:6px 0;font-size:0.75em">
@@ -490,6 +519,11 @@ function renderTopCards() {
 // الشارات تُحسب حية من weeklyTechnical فقد تنطفئ إشارة بين حساب الفلتر الأسبوعي والسعر اليومي،
 // والحالة المجهولة (حقل غائب) تُعرض رمادية محايدة لا حمراء
 const REVERSAL_REASON = 'تحت SMA200W لكن إشارات انعكاس';
+const REVERSAL_TAG_LABEL = 'تحت SMA200W — عبر بإشارات انعكاس';
+// وسم 🌱 بجانب اسم السهم في بطاقات الفرص (أبرز + أفضل) — نص واحد يتشاركه الموضعان والمودال
+const sproutTag = (sc) => sc && sc.filterReason === REVERSAL_REASON
+  ? ' <span title="' + REVERSAL_TAG_LABEL + '" style="cursor:help">🌱</span>'
+  : '';
 function renderReversals() {
   const list = stocks.filter(s => s.investmentScore?.filterReason === REVERSAL_REASON)
     .sort((a,b) => (b.investmentScore?.total||0) - (a.investmentScore?.total||0));
@@ -693,7 +727,7 @@ function openModal(sym) {
       <div class="class-badge ${classCodeOf(s)}" style="font-size:1em;margin:8px 0">${classLabelOf(sc)}</div>
       ${isUnrated(sc) ? '<div style="margin-top:6px">' + unratedBadge(sc) + '</div>' : ''}
       ${liqBlocked(s) ? '<div style="margin-top:6px">' + liqBadge(s) + '</div>' : ''}
-      ${!sc.filtered && sc.filterReason === REVERSAL_REASON ? '<div style="color:#fcd34d;margin-top:6px;font-size:0.85em">🌱 تحت SMA200W — عبر بإشارات انعكاس</div>' : ''}
+      ${!sc.filtered && sc.filterReason === REVERSAL_REASON ? '<div style="color:#fcd34d;margin-top:6px;font-size:0.85em">🌱 ' + REVERSAL_TAG_LABEL + '</div>' : ''}
       ${sc.filtered ? '<div style="color:#f59e0b;margin-top:8px">لم يعدّ الفلتر: ' + (sc.filterReason||'') + '</div>' : ''}
     </div>`;
 
@@ -771,16 +805,23 @@ function openModal(sym) {
     </div>`;
   }
   
-  // Valuation
+  // Valuation — حالة كل مكوّن من valuationParts: المجمّد باهت بـ❄️ وtitle شارح، والحي عادي.
+  // الأرقام نفسها لا تُمس، وغياب valuationParts يعيد العرض القديم حرفياً
+  const vp = valPartsOf(s);
+  const frz = (k) => !!vp && vp[k] === 'frozen';
+  const vInd = (k, valHtml, label) => '<div class="indicator' + (frz(k) ? ' stale' : '') + '"' +
+    (frz(k) ? ' title="' + VAL_STALE_NOTE + '"' : '') + '><div class="val">' + valHtml + '</div><div class="lbl">' + label + (frz(k) ? ' ❄️' : '') + '</div></div>';
+  const vUpd = valUpdatedOf(s);
   body += `<div class="modal-section">
     <h3>💎 التقييم المالي</h3>
     <div class="indicator-grid">
-      <div class="indicator"><div class="val">${val.pe ? val.pe.toFixed(1) : '—'}</div><div class="lbl">P/E</div></div>
-      <div class="indicator"><div class="val">${val.pb ? val.pb.toFixed(2) : '—'}</div><div class="lbl">P/B</div></div>
-      <div class="indicator"><div class="val">${val.evEbitda ? val.evEbitda.toFixed(1) : '—'}</div><div class="lbl">EV/EBITDA</div></div>
-      <div class="indicator"><div class="val">${val.dividendYield ? (val.dividendYield*100).toFixed(1)+'%' : '—'}</div><div class="lbl">توزيعات</div></div>
-      <div class="indicator"><div class="val">${val.peg ? val.peg.toFixed(2) : '—'}</div><div class="lbl">PEG</div></div>
+      ${vInd('pe', val.pe ? val.pe.toFixed(1) : '—', 'P/E')}
+      ${vInd('pb', val.pb ? val.pb.toFixed(2) : '—', 'P/B')}
+      ${vInd('evEbitda', val.evEbitda ? val.evEbitda.toFixed(1) : '—', 'EV/EBITDA')}
+      ${vInd('dividendYield', val.dividendYield ? (val.dividendYield*100).toFixed(1)+'%' : '—', 'توزيعات')}
+      ${vInd('peg', val.peg ? val.peg.toFixed(2) : '—', 'PEG')}
     </div>
+    ${vUpd ? '<div style="font-size:0.75em;color:#64748b;text-align:center;margin-top:8px">تحديث المكوّنات الحية: <span dir="ltr">' + vUpd + '</span></div>' : ''}
   </div>`;
   
   // Financial health — دين/ملكية ونسبة التداول يُخفيان لقطاع Financials كله (بنوك وتأمين وتمويل):
