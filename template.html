@@ -78,6 +78,8 @@ h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .chip.active.strong_sell{background:#ef444440;color:#ef4444;border-color:#ef4444}
 .chip.active.filtered{background:#47556940;color:#cbd5e1;border-color:#64748b}
 .class-badge.filtered{background:#47556940;color:#94a3b8}
+.unrated-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:max(0.68em,9px);background:#47556933;color:#94a3b8;border:1px solid #64748b;white-space:nowrap}
+.unrated-badge.wrap{white-space:normal;line-height:1.6}
 
 /* Table */
 table{width:100%;border-collapse:collapse;margin-top:16px;font-size:0.8em}
@@ -243,6 +245,16 @@ let rowRefs = []; // {el, s} — الصفوف تُبنى مرة واحدة ثم 
 const classCodeOf = (s) => (s.investmentScore && (s.investmentScore.filtered ? 'filtered' : s.investmentScore.classCode)) || '';
 const classLabelOf = (sc) => sc.filtered ? 'لم يعدّ الفلتر' : (sc.classification || '');
 
+// unrated (يصدره المحرك اعتباراً من 02-08): السهم لم يُختبر بفلتر SMA200W لقصر تاريخه الأسبوعي —
+// ليس رفضاً كـfiltered، فنقاطه وتفاصيله تبقى ظاهرة ويُستبعد من «أبرز الفرص» فقط.
+// الفحص === true حصراً: غياب الحقل يجب أن يُبقي السلوك الحالي حرفياً.
+// !sc.filtered دفاعي: لو أصدر المحرك الحقلين معاً يوماً فالأسبقية لعرض filtered — لا شارتين متناقضتين
+const isUnrated = (sc) => !!sc && sc.unrated === true && !sc.filtered;
+const UNRATED_LABEL = 'غير مُقيَّم — بيانات أسبوعية غير كافية';
+const unratedBadge = (sc, compact) => isUnrated(sc)
+  ? '<span class="unrated-badge' + (compact ? '' : ' wrap') + '" title="' + UNRATED_LABEL + '">' + (compact ? 'غير مُقيَّم' : UNRATED_LABEL) + '</span>'
+  : '';
+
 // تطبيع عربي للبحث: همزات، تاء مربوطة، ألف مقصورة، تطويل
 const normalizeAr = (t) => String(t).toLowerCase()
   .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ـ/g, '');
@@ -313,7 +325,8 @@ function init() {
 function renderDecisions() {
   const mr = DATA.marketRegime || {};
   const BUY_FAMILY = ['strong_buy', 'buy', 'conditional_buy'];
-  const top5 = stocks.filter(s => BUY_FAMILY.includes(classCodeOf(s)))
+  // unrated لم يُختبر بالفلتر فلا يُرشَّح هنا
+  const top5 = stocks.filter(s => BUY_FAMILY.includes(classCodeOf(s)) && !isUnrated(s.investmentScore))
     .sort((a,b) => (b.investmentScore?.total||0) - (a.investmentScore?.total||0))
     .slice(0, 5);
 
@@ -383,6 +396,7 @@ function renderTopCards() {
         <div style="text-align:left">
           <div class="score-num ${scClass}">${sc.total}</div>
           <div class="class-badge ${sc.classCode}">${sc.classification}</div>
+          ${isUnrated(sc) ? '<div style="margin-top:4px">' + unratedBadge(sc, true) + '</div>' : ''}
         </div>
       </div>
       <div style="margin:6px 0;font-size:0.75em">
@@ -425,7 +439,7 @@ function renderTable() {
 
     html += `<tr onclick="openModal('${s.symbol}')" data-i="${i}">
       <td><span class="score-num ${scClass}" style="font-size:1em">${sc.filtered ? '—' : sc.total}</span></td>
-      <td><span class="class-badge ${classCodeOf(s)}" style="font-size:0.7em;padding:2px 8px">${classLabelOf(sc)}</span></td>
+      <td><span class="class-badge ${classCodeOf(s)}" style="font-size:0.7em;padding:2px 8px">${classLabelOf(sc)}</span> ${unratedBadge(sc, true)}</td>
       <td>${sc.filtered ? '' : '<span class=\'dot '+timingDot+'\'></span> '+sc.timing}</td>
       <td style="font-family:monospace;color:#64748b;text-align:center">${s.symbol}</td>
       <td style="font-weight:600">${s.name}</td>
@@ -567,6 +581,7 @@ function openModal(sym) {
     <div style="text-align:center;margin:16px 0">
       <div class="score-num ${scClass}" style="font-size:2.5em">${sc.filtered ? '—' : sc.total}<span style="font-size:0.4em;color:#94a3b8">/100</span></div>
       <div class="class-badge ${classCodeOf(s)}" style="font-size:1em;margin:8px 0">${classLabelOf(sc)}</div>
+      ${isUnrated(sc) ? '<div style="margin-top:6px">' + unratedBadge(sc) + '</div>' : ''}
       ${sc.filtered ? '<div style="color:#f59e0b;margin-top:8px">لم يعدّ الفلتر: ' + (sc.filterReason||'') + '</div>' : ''}
     </div>`;
 
