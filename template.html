@@ -78,6 +78,17 @@ h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .chip.active.strong_sell{background:#ef444440;color:#ef4444;border-color:#ef4444}
 .chip.active.filtered{background:#47556940;color:#cbd5e1;border-color:#64748b}
 .class-badge.filtered{background:#47556940;color:#94a3b8}
+.unrated-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:max(0.68em,9px);background:#47556933;color:#94a3b8;border:1px solid #64748b;white-space:nowrap}
+.unrated-badge.wrap{white-space:normal;line-height:1.6}
+.liq-gate{display:inline-block;padding:2px 8px;border-radius:12px;font-size:max(0.68em,9px);background:#78350f22;color:#fcd34d;border:1px solid #d97706;white-space:nowrap}
+.liq-gate.wrap{white-space:normal;line-height:1.6}
+
+/* شاشة استثناء الانعكاس */
+.rev-warn{text-align:center;color:#fcd34d;background:#78350f22;border:1px solid #d97706;border-radius:8px;padding:8px 14px;margin:6px auto 8px;max-width:600px;font-size:0.85em;font-weight:600}
+.rev-note{text-align:center;color:#64748b;font-size:0.76em;margin:0 auto 12px;max-width:600px}
+.rev-sig{display:inline-block;font-size:max(0.68em,9px);padding:3px 8px;border-radius:10px;background:#0f172a;color:#94a3b8;border:1px solid #334155;white-space:nowrap}
+.rev-sig.on{color:#34d399;border-color:#10b98155;background:#10b98112}
+.rev-sig.off{color:#f87171;border-color:#ef444455;background:#ef444412}
 
 /* Table */
 table{width:100%;border-collapse:collapse;margin-top:16px;font-size:0.8em}
@@ -104,6 +115,8 @@ tr:hover{background:#1e293b88}
 .indicator .val{font-size:1.3em;font-weight:bold}
 .indicator .lbl{font-size:0.7em;color:#94a3b8;margin-top:4px}
 .indicator.green .val{color:#10b981}.indicator.red .val{color:#ef4444}.indicator.yellow .val{color:#f59e0b}.indicator.blue .val{color:#60a5fa}
+.indicator.stale{cursor:help}
+.indicator.stale .val{opacity:.55}
 .chart-container{background:#0f172a;border-radius:10px;padding:16px;height:200px;position:relative;overflow:hidden}
 
 /* بطاقة لماذا هذا التقييم */
@@ -188,7 +201,11 @@ tr:hover{background:#1e293b88}
 <div class="section-title">🏆 أفضل الفرص الاستثمارية</div>
 <div class="cards" id="topCards"></div>
 
+<div class="section-title">🌱 إشارات انعكاس مبكرة <span style="font-size:0.6em;color:#64748b;font-weight:normal">تحت متوسط 200 أسبوع، عبرت الفلتر بفضل إشارات انعكاس — فئة رصد لا توصيات</span></div>
+<div id="reversals"></div>
+
 <div class="section-title">📊 الجدول الشامل</div>
+<div id="peNote" class="rev-note" style="display:none;margin:8px auto 0">❄️ مكرر الربح غير محدّث — مصدر البيانات قيد المعالجة، وكذلك مكرر القيمة الدفترية P/B للأسهم الموسومة ❄️ (أغلبها بنوك)</div>
 <table id="mainTable">
 <thead><tr>
 <th onclick="sortTable('score')">النقاط ↕</th>
@@ -199,7 +216,7 @@ tr:hover{background:#1e293b88}
 <th>القطاع</th>
 <th onclick="sortTable('price')">السعر ↕</th>
 <th onclick="sortTable('change')">يومي % ↕</th>
-<th onclick="sortTable('pe')">P/E ↕</th>
+<th onclick="sortTable('pe')">P/E ↕<span id="peStale" style="display:none;cursor:help;margin-right:3px" title="مكرر الربح غير محدّث — مصدر البيانات قيد المعالجة" onclick="event.stopPropagation();togglePeNote()">❄️</span></th>
 <th onclick="sortTable('pb')">P/B ↕</th>
 <th onclick="sortTable('roe')">ROE ↕</th>
 <th onclick="sortTable('rs6m')">RS 6M ↕</th>
@@ -242,6 +259,75 @@ let rowRefs = []; // {el, s} — الصفوف تُبنى مرة واحدة ثم 
 // classCode هو المرجع الوحيد للتصنيف (قرار المالك) — classification للمفلتر يقول "انتظار" زوراً
 const classCodeOf = (s) => (s.investmentScore && (s.investmentScore.filtered ? 'filtered' : s.investmentScore.classCode)) || '';
 const classLabelOf = (sc) => sc.filtered ? 'لم يعدّ الفلتر' : (sc.classification || '');
+
+// unrated (يصدره المحرك اعتباراً من 02-08): السهم لم يُختبر بفلتر SMA200W لقصر تاريخه الأسبوعي —
+// ليس رفضاً كـfiltered، فنقاطه وتفاصيله تبقى ظاهرة ويُستبعد من «أبرز الفرص» فقط.
+// الفحص === true حصراً: غياب الحقل يجب أن يُبقي السلوك الحالي حرفياً.
+// !sc.filtered دفاعي: لو أصدر المحرك الحقلين معاً يوماً فالأسبقية لعرض filtered — لا شارتين متناقضتين
+const isUnrated = (sc) => !!sc && sc.unrated === true && !sc.filtered;
+const UNRATED_LABEL = 'غير مُقيَّم — بيانات أسبوعية غير كافية';
+const unratedBadge = (sc, compact) => isUnrated(sc)
+  ? '<span class="unrated-badge' + (compact ? '' : ' wrap') + '" title="' + UNRATED_LABEL + '">' + (compact ? 'غير مُقيَّم' : UNRATED_LABEL) + '</span>'
+  : '';
+
+// بوابة السيولة (يصدرها المحرك اعتباراً من 05-08): عتبة قيمة تداول يومية بالريال.
+// passed === false يُستبعد من شاشتي «أبرز الفرص» و«أفضل الفرص» فقط — يبقى كاملاً في
+// الجدول وشاشة الانعكاس والمودال، والوسم يُظهر الرقم نفسه ليُقاس على حجم المركز (قرار المالك).
+// الفحص === false حصراً: غياب الحقل = السلوك الحالي حرفياً. يُقرأ من جذر السهم أو من
+// investmentScore أيهما وُجد — موضع الحقل النهائي في مخرجات المحرك غير مثبت بعد
+const liqGateOf = (s) => (s && (s.liquidityGate || (s.investmentScore && s.investmentScore.liquidityGate))) || null;
+const liqBlocked = (s) => { const lg = liqGateOf(s); return !!lg && lg.passed === false; };
+// null يجب ألا يصير «0» — Number(null) === 0 رقم مُختلَق يوحي بسيولة صفرية فعلية
+const liqNum = (v) => v != null && Number.isFinite(Number(v)) ? Number(v).toLocaleString('en') : null;
+const liqSar = (lg) => liqNum(lg.valueSar) || '—';
+const liqBadge = (s, compact) => {
+  const lg = liqGateOf(s);
+  if (!liqBlocked(s)) return '';
+  const v = liqNum(lg.valueSar);
+  const th = liqNum(lg.threshold);
+  return '<span class="liq-gate' + (compact ? '' : ' wrap') + '"' + (th ? ' title="الحد الأدنى: ' + th + ' ريال/يوم"' : '') + '>' +
+    (v ? '💧 سيولة <span dir="ltr">' + v + '</span> ريال/يوم — دون الحد' : '💧 سيولة دون الحد') + '</span>';
+};
+
+// وسوم تجميد التقييم (المحرك بعد إصلاح valuation في 27-07): valuationParts تحدد حالة كل مكوّن
+// على حدة — pb حي لـ~192 ومجمّد لـ~32 (أغلبها بنوك) بينما pe/evEbitda مجمّدان للكل، فمؤشر
+// P/E واحد في رأس العمود يغني عن تكراره في 248 خلية. الوسم عرض فقط — الأرقام لا تُمس.
+// غياب valuationParts عن السهم = عرضه القديم حرفياً بلا وسوم.
+// الحقلان يُقرآن من جذر السهم أو من valuation أيهما وُجد — موضعهما النهائي غير مثبت بعد،
+// والفحص === 'frozen' حصراً: أي قيمة أخرى (live أو مجهولة) تُعرض عادية بلا ادعاء تجميد
+const VAL_STALE_NOTE = 'غير محدّث — مصدر البيانات قيد المعالجة';
+const valPartsOf = (s) => (s && (s.valuationParts || (s.valuation && s.valuation.valuationParts))) || null;
+const valUpdatedOf = (s) => String((s && (s.valuationUpdatedAt || (s.valuation && s.valuation.valuationUpdatedAt))) || '')
+  .replace(/</g, '&lt;').replace(/"/g, '&quot;');
+
+// المقارنة القطاعية تُحسب هنا مرة واحدة عند التحميل — حقول sectorRank/Total/Percentile/AvgScore
+// المخزَّنة مجمّدة (لا سكربت يكتبها منذ ما قبل 04-07: متوسطات صفرية وعبارات مقارنة معكوسة) فتُتجاهل نهائياً.
+// المجموعة: غير المفلترين (filtered === false) في القطاع — نقاط المستبعدين صفر وتشوّه المتوسط.
+// قطاع بمؤهَّل واحد أو بلا مؤهَّلين لا يدخل الخريطة، فتُخفى الكتلة بدل ترتيب 1/1 بلا معنى
+const sectorStats = (() => {
+  const groups = Object.create(null); // بلا prototype — رمز سهم شاذ لا يلوث الخريطة
+  stocks.forEach(s => {
+    const sc = s.investmentScore;
+    if (!sc || sc.filtered !== false) return;
+    const sec = sc.sector || s.sector;
+    if (!sec) return;
+    (groups[sec] = groups[sec] || []).push({ symbol: s.symbol, total: sc.total || 0 });
+  });
+  const bySymbol = Object.create(null);
+  Object.entries(groups).forEach(([sec, g]) => {
+    const n = g.length;
+    if (n < 2) return;
+    const avg = Math.round(g.reduce((sum, x) => sum + x.total, 0) / n * 10) / 10;
+    g.sort((a, b) => b.total - a.total);
+    let rank = 1;
+    g.forEach((x, i) => {
+      if (i > 0 && x.total < g[i - 1].total) rank = i + 1; // تعادل النقاط = نفس المرتبة
+      // percentile بدلالة المعادلة الأصلية (n-rank+1)/n: المرتبة الأولى = 100%
+      bySymbol[x.symbol] = { rank, n, percentile: Math.round((n - rank + 1) / n * 100), avg, sector: sec };
+    });
+  });
+  return bySymbol;
+})();
 
 // تطبيع عربي للبحث: همزات، تاء مربوطة، ألف مقصورة، تطويل
 const normalizeAr = (t) => String(t).toLowerCase()
@@ -306,14 +392,32 @@ function init() {
     .map(([cc, lb]) => `<span class="chip ${cc}" onclick="toggleClass('${cc}',this)">${lb}</span>`).join('');
 
   renderTopCards();
+  renderReversals();
   renderTable();
+
+  // مؤشر تجميد P/E في رأس العمود وسطر الشرح فوق الجدول — يظهران فقط حين يصرّح المحرك
+  // بالتجميد عبر valuationParts. السطر ظاهر افتراضياً لا بالنقر: رأس الجدول الـsticky لا يبقى
+  // مرئياً على الموبايل والـtooltip لا يعمل باللمس، فالمستخدم يجب أن يرى الحالة قبل أي فرز.
+  // السطر مربوط بتجميد أيٍّ من العمودين — لو حرّر المحرك P/E وبقي P/B مجمّداً يبقى الشرح.
+  // غياب الحقل عن كل الأسهم يُبقي الرأس والجدول كما هما حرفياً
+  const anyPeFrozen = stocks.some(s => { const vp = valPartsOf(s); return vp && vp.pe === 'frozen'; });
+  const anyPbFrozen = stocks.some(s => { const vp = valPartsOf(s); return vp && vp.pb === 'frozen'; });
+  if (anyPeFrozen) document.getElementById('peStale').style.display = '';
+  if (anyPeFrozen || anyPbFrozen) document.getElementById('peNote').style.display = '';
+}
+
+// نقرة ❄️ في رأس العمود تطوي سطر الشرح وتعيده — لا تُطلق الفرز
+function togglePeNote() {
+  const n = document.getElementById('peNote');
+  n.style.display = n.style.display === 'none' ? '' : 'none';
 }
 
 // شاشة أبرز الفرص: أعلى 5 فرص من عائلة الشراء + عدّ التصنيفات السبعة + تنبيه البيئة الهابطة
 function renderDecisions() {
   const mr = DATA.marketRegime || {};
   const BUY_FAMILY = ['strong_buy', 'buy', 'conditional_buy'];
-  const top5 = stocks.filter(s => BUY_FAMILY.includes(classCodeOf(s)))
+  // unrated لم يُختبر بالفلتر فلا يُرشَّح هنا، ودون حد السيولة لا يُرشَّح كفرصة
+  const top5 = stocks.filter(s => BUY_FAMILY.includes(classCodeOf(s)) && !isUnrated(s.investmentScore) && !liqBlocked(s))
     .sort((a,b) => (b.investmentScore?.total||0) - (a.investmentScore?.total||0))
     .slice(0, 5);
 
@@ -336,7 +440,7 @@ function renderDecisions() {
       return `<div class="card" onclick="openModal('${s.symbol}')">
         <div style="display:flex;justify-content:space-between;align-items:start">
           <div>
-            <div class="name">${s.name}</div>
+            <div class="name">${s.name}${sproutTag(sc)}</div>
             <div class="symbol">${s.symbol}</div>
             <div class="sector-tag">${SECTOR_AR[sc.sector] || sc.sector || 'غير مصنف'}</div>
           </div>
@@ -362,7 +466,8 @@ function getScoreClass(score) {
 }
 
 function renderTopCards() {
-  let top = stocks.filter(s => !s.investmentScore?.filtered && s.investmentScore?.total >= 65)
+  // unrated يُستبعد هنا أيضاً (تصحيح 27-07): شاشة مرشَّحين والسهم لم يُختبر بالفلتر — يطابق فلتر أبرز الفرص
+  let top = stocks.filter(s => !s.investmentScore?.filtered && s.investmentScore?.total >= 65 && !isUnrated(s.investmentScore) && !liqBlocked(s))
     .sort((a,b) => (b.investmentScore?.total||0) - (a.investmentScore?.total||0))
     .slice(0, 12);
   
@@ -376,7 +481,7 @@ function renderTopCards() {
     html += `<div class="card" onclick="openModal('${s.symbol}')">
       <div style="display:flex;justify-content:space-between;align-items:start">
         <div>
-          <div class="name">${s.name}</div>
+          <div class="name">${s.name}${sproutTag(sc)}</div>
           <div class="symbol">${s.symbol}</div>
           <div class="sector-tag">${SECTOR_AR[sc.sector] || sc.sector || ''}</div>
         </div>
@@ -407,7 +512,61 @@ function renderTopCards() {
     </div>`;
   });
   
-  document.getElementById('topCards').innerHTML = html || '<div style="color:#64748b;padding:20px;text-align:center">لا توجد أسهم تعدت حاجز 65 نقطة</div>';
+  document.getElementById('topCards').innerHTML = html || '<div style="color:#64748b;padding:20px;text-align:center">لا أسهم مؤهلة اليوم (65+ نقطة وفوق حد السيولة)</div>';
+}
+
+// شاشة استثناء الانعكاس: أسهم عبرت فلتر SMA200W الإقصائي بإشارات الانعكاس الثلاث وهي بعدُ تحته.
+// المطابقة التامة إلزامية — نص الرفض المقابل «تحت SMA200W بدون إشارات انعكاس» يختلف بكلمة واحدة.
+// الشارات تُحسب حية من weeklyTechnical فقد تنطفئ إشارة بين حساب الفلتر الأسبوعي والسعر اليومي،
+// والحالة المجهولة (حقل غائب) تُعرض رمادية محايدة لا حمراء
+const REVERSAL_REASON = 'تحت SMA200W لكن إشارات انعكاس';
+const REVERSAL_TAG_LABEL = 'تحت SMA200W — عبر بإشارات انعكاس';
+// وسم 🌱 بجانب اسم السهم في بطاقات الفرص (أبرز + أفضل) — نص واحد يتشاركه الموضعان والمودال
+const sproutTag = (sc) => sc && sc.filterReason === REVERSAL_REASON
+  ? ' <span title="' + REVERSAL_TAG_LABEL + '" style="cursor:help">🌱</span>'
+  : '';
+function renderReversals() {
+  const list = stocks.filter(s => s.investmentScore?.filterReason === REVERSAL_REASON)
+    .sort((a,b) => (b.investmentScore?.total||0) - (a.investmentScore?.total||0));
+  const el = document.getElementById('reversals');
+  if (!list.length) {
+    el.innerHTML = '<div style="color:#64748b;padding:16px;text-align:center">لا أسهم في هذه الفئة اليوم — لم يمنح الفلتر استثناء الانعكاس لأي سهم</div>';
+    return;
+  }
+  // ✓/✕ قبل التسمية: تمييز لا يعتمد اللون وحده
+  const sig = (state, label, v, dec) => {
+    const val = v != null ? '<span dir="ltr">' + Number(v).toFixed(dec) + '</span>' : '—';
+    return state == null
+      ? `<span class="rev-sig">${label} ${val}</span>`
+      : `<span class="rev-sig ${state ? 'on' : 'off'}">${state ? '✓' : '✕'} ${label} ${val}</span>`;
+  };
+  // التحذير جزء من الشاشة نفسها وقبل الأسماء — شرط الناقد
+  el.innerHTML = '<div class="rev-warn">⚠️ الاتجاه لم يثبت بعد — مخاطرة أعلى من قائمة الشراء</div>' +
+    '<div class="rev-note">الشارات محسوبة بآخر سعر — الحمراء إشارة تراجعت بعد الفرز الأسبوعي</div>' +
+    '<div class="cards">' + list.map(s => {
+      const sc = s.investmentScore || {};
+      const wt = s.weeklyTechnical || {};
+      return `<div class="card" onclick="openModal('${s.symbol}')">
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div>
+            <div class="name">${s.name}</div>
+            <div class="symbol">${s.symbol}</div>
+          </div>
+          <div style="text-align:left">
+            <div class="score-num ${getScoreClass(sc.total)}">${sc.total}<span style="font-size:0.5em;color:#94a3b8">/100</span></div>
+            <div class="class-badge ${classCodeOf(s)}">${classLabelOf(sc)}</div>
+            ${isUnrated(sc) ? '<div style="margin-top:4px">' + unratedBadge(sc, true) + '</div>' : ''}
+            ${liqBlocked(s) ? '<div style="margin-top:4px">' + liqBadge(s) + '</div>' : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">
+          ${sig(wt.ema40w != null && s.currentPrice != null ? s.currentPrice > wt.ema40w : null, 'EMA40W', wt.ema40w, 2)}
+          ${sig(wt.rsi14w != null ? wt.rsi14w > 50 : null, 'RSI-W', wt.rsi14w, 1)}
+          ${sig(wt.macdW != null && wt.macdSignalW != null ? wt.macdW > wt.macdSignalW : null, 'MACD-W', wt.macdW, 2)}
+        </div>
+        <div class="price ${(s.dailyChange||0) >= 0 ? 'up' : 'down'}" style="margin-top:6px;font-size:1.2em">${s.currentPrice != null ? s.currentPrice + ' ر.س' : '—'}</div>
+      </div>`;
+    }).join('') + '</div>';
 }
 
 // يُبنى الجدول كاملاً مرة واحدة — الفلترة إخفاءً والفرز إعادة ترتيب للعقد نفسها (248 صفاً)
@@ -420,12 +579,19 @@ function renderTable() {
     let timingDot = sc.timing === 'ممتاز' ? 'g' : (sc.timing === 'مقبول' ? 'y' : 'r');
     let pe = s.valuation?.pe ? s.valuation.pe.toFixed(1) : '—';
     let pb = s.valuation?.pb ? s.valuation.pb.toFixed(2) : '—';
+    // P/B مجمّد جزئياً (32 من 224 سهماً لديها valuationParts، أغلبها بنوك حيث P/B هو المقياس
+    // الأصح) — المؤشر لكل خلية على حدة لا لرأس العمود بعكس P/E المجمّد بالكامل.
+    // الفرز لا يتأثر: sortRows تقرأ البيانات لا الخلية
+    const vp = valPartsOf(s);
+    if (vp && vp.pb === 'frozen') {
+      pb = '<span style="opacity:.55">' + pb + '</span> <span title="مكرر القيمة الدفترية ' + VAL_STALE_NOTE + '" style="cursor:help">❄️</span>';
+    }
     let roe = s.financials?.returnOnEquity != null ? s.financials.returnOnEquity + '%' : '—';
     let rs6 = s.relativeStrength?.rsTasi6m != null ? (s.relativeStrength.rsTasi6m > 0 ? '+' : '') + s.relativeStrength.rsTasi6m.toFixed(1) + '%' : '—';
 
     html += `<tr onclick="openModal('${s.symbol}')" data-i="${i}">
       <td><span class="score-num ${scClass}" style="font-size:1em">${sc.filtered ? '—' : sc.total}</span></td>
-      <td><span class="class-badge ${classCodeOf(s)}" style="font-size:0.7em;padding:2px 8px">${classLabelOf(sc)}</span></td>
+      <td><span class="class-badge ${classCodeOf(s)}" style="font-size:0.7em;padding:2px 8px">${classLabelOf(sc)}</span> ${unratedBadge(sc, true)} ${liqBadge(s, true)}</td>
       <td>${sc.filtered ? '' : '<span class=\'dot '+timingDot+'\'></span> '+sc.timing}</td>
       <td style="font-family:monospace;color:#64748b;text-align:center">${s.symbol}</td>
       <td style="font-weight:600">${s.name}</td>
@@ -567,6 +733,9 @@ function openModal(sym) {
     <div style="text-align:center;margin:16px 0">
       <div class="score-num ${scClass}" style="font-size:2.5em">${sc.filtered ? '—' : sc.total}<span style="font-size:0.4em;color:#94a3b8">/100</span></div>
       <div class="class-badge ${classCodeOf(s)}" style="font-size:1em;margin:8px 0">${classLabelOf(sc)}</div>
+      ${isUnrated(sc) ? '<div style="margin-top:6px">' + unratedBadge(sc) + '</div>' : ''}
+      ${liqBlocked(s) ? '<div style="margin-top:6px">' + liqBadge(s) + '</div>' : ''}
+      ${!sc.filtered && sc.filterReason === REVERSAL_REASON ? '<div style="color:#fcd34d;margin-top:6px;font-size:0.85em">🌱 ' + REVERSAL_TAG_LABEL + '</div>' : ''}
       ${sc.filtered ? '<div style="color:#f59e0b;margin-top:8px">لم يعدّ الفلتر: ' + (sc.filterReason||'') + '</div>' : ''}
     </div>`;
 
@@ -644,16 +813,24 @@ function openModal(sym) {
     </div>`;
   }
   
-  // Valuation
+  // Valuation — حالة كل مكوّن من valuationParts: المجمّد باهت بـ❄️ وtitle شارح، والحي عادي.
+  // الأرقام نفسها لا تُمس، وغياب valuationParts يعيد العرض القديم حرفياً.
+  // PEG مشتق من P/E فيتبع حالة تجميده — المحرك لا يصدر له حالة مستقلة (قرار المالك 27-07)
+  const vp = valPartsOf(s);
+  const frz = (k) => !!vp && vp[k] === 'frozen';
+  const vInd = (k, valHtml, label) => '<div class="indicator' + (frz(k) ? ' stale' : '') + '"' +
+    (frz(k) ? ' title="' + VAL_STALE_NOTE + '"' : '') + '><div class="val">' + valHtml + '</div><div class="lbl">' + label + (frz(k) ? ' ❄️' : '') + '</div></div>';
+  const vUpd = valUpdatedOf(s);
   body += `<div class="modal-section">
     <h3>💎 التقييم المالي</h3>
     <div class="indicator-grid">
-      <div class="indicator"><div class="val">${val.pe ? val.pe.toFixed(1) : '—'}</div><div class="lbl">P/E</div></div>
-      <div class="indicator"><div class="val">${val.pb ? val.pb.toFixed(2) : '—'}</div><div class="lbl">P/B</div></div>
-      <div class="indicator"><div class="val">${val.evEbitda ? val.evEbitda.toFixed(1) : '—'}</div><div class="lbl">EV/EBITDA</div></div>
-      <div class="indicator"><div class="val">${val.dividendYield ? (val.dividendYield*100).toFixed(1)+'%' : '—'}</div><div class="lbl">توزيعات</div></div>
-      <div class="indicator"><div class="val">${val.peg ? val.peg.toFixed(2) : '—'}</div><div class="lbl">PEG</div></div>
+      ${vInd('pe', val.pe ? val.pe.toFixed(1) : '—', 'P/E')}
+      ${vInd('pb', val.pb ? val.pb.toFixed(2) : '—', 'P/B')}
+      ${vInd('evEbitda', val.evEbitda ? val.evEbitda.toFixed(1) : '—', 'EV/EBITDA')}
+      ${vInd('dividendYield', val.dividendYield ? (val.dividendYield*100).toFixed(1)+'%' : '—', 'توزيعات')}
+      ${vInd('pe' /* PEG مشتق فيتبع P/E عمداً */, val.peg ? val.peg.toFixed(2) : '—', 'PEG')}
     </div>
+    ${vUpd ? '<div style="font-size:0.75em;color:#64748b;text-align:center;margin-top:8px">تحديث المكوّنات الحية: <span dir="ltr">' + vUpd + '</span></div>' : ''}
   </div>`;
   
   // Financial health — دين/ملكية ونسبة التداول يُخفيان لقطاع Financials كله (بنوك وتأمين وتمويل):
@@ -692,7 +869,9 @@ function openModal(sym) {
     </div>
   </div>`;
   
-  // Risk
+  // Risk — قيمة التداول اليومية تُعرض متى وُجدت liquidityGate:
+  // حمراء دون الحد، خضراء فوقه، محايدة إن جُهلت passed (لا ادعاء اجتياز لحالة لم تُفحص)
+  const lg = liqGateOf(s);
   body += `<div class="modal-section">
     <h3>🛡️ المخاطر</h3>
     <div class="indicator-grid">
@@ -700,6 +879,7 @@ function openModal(sym) {
       <div class="indicator"><div class="val">${dt.high52w || '—'}</div><div class="lbl">أعلى 52 أسبوع</div></div>
       <div class="indicator"><div class="val">${dt.low52w || '—'}</div><div class="lbl">أدنى 52 أسبوع</div></div>
       <div class="indicator"><div class="val">${dt.avgVol20d ? (dt.avgVol20d/1000).toFixed(0)+'K' : '—'}</div><div class="lbl">متوسط حجم 20D</div></div>
+      ${lg ? '<div class="indicator ' + (lg.passed === false ? 'red' : lg.passed === true ? 'green' : '') + '"><div class="val" dir="ltr">' + liqSar(lg) + '</div><div class="lbl">قيمة التداول ريال/يوم</div></div>' : ''}
     </div>
   </div>`;
   
@@ -712,17 +892,21 @@ function openModal(sym) {
     </div>`;
   }
   
-  // Sector comparison
-  if (!sc.filtered && sc.sectorRank) {
+  // Sector comparison — من sectorStats المحسوبة عند التحميل؛ الحقول المخزَّنة المجمّدة متجاهلة.
+  // st.sector من الخريطة نفسها كي لا يفترق العنوان عن مفتاح التجميع
+  const st = !sc.filtered && sectorStats[s.symbol];
+  if (st) {
+    const diff = (sc.total || 0) - st.avg;
+    const d = Math.round(Math.abs(diff)); // تقريب المقدار المطلق — متناظر حول المتوسط
     body += `<div class="modal-section">
-      <h3>المقارنة القطاعية — ${SECTOR_AR[sc.sector] || sc.sector}</h3>
+      <h3>المقارنة القطاعية — ${SECTOR_AR[st.sector] || st.sector}</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-        <div class="indicator"><div class="val" style="color:#60a5fa">${sc.sectorRank}/${sc.sectorTotal}</div><div class="lbl">الترتيب</div></div>
-        <div class="indicator"><div class="val" style="color:#60a5fa">${sc.sectorPercentile}%</div><div class="lbl">Percentile</div></div>
-        <div class="indicator"><div class="val" style="color:#94a3b8">${sc.sectorAvgScore}</div><div class="lbl">متوسط القطاع</div></div>
+        <div class="indicator"><div class="val" style="color:#60a5fa">${st.rank}/${st.n}</div><div class="lbl">الترتيب</div></div>
+        <div class="indicator"><div class="val" style="color:#60a5fa">${st.percentile}%</div><div class="lbl">Percentile</div></div>
+        <div class="indicator"><div class="val" style="color:#94a3b8">${st.avg.toFixed(1)}</div><div class="lbl">متوسط القطاع</div></div>
       </div>
       <div style="font-size:0.8em;color:#94a3b8;margin-top:8px;text-align:center">
-        ${sc.total > sc.sectorAvgScore ? '<span style="color:#10b981">أعلى من متوسط القطاع بـ '+(sc.total - sc.sectorAvgScore).toFixed(0)+' نقطة</span>' : '<span style="color:#ef4444">أقل من متوسط القطاع بـ '+(sc.sectorAvgScore - sc.total).toFixed(0)+' نقطة</span>'}
+        ${diff > 0 && d ? '<span style="color:#10b981">أعلى من متوسط القطاع بـ '+d+' نقطة</span>' : diff < 0 && d ? '<span style="color:#ef4444">أقل من متوسط القطاع بـ '+d+' نقطة</span>' : '<span style="color:#94a3b8">عند متوسط القطاع تقريباً</span>'}
       </div>
     </div>`;
   }
