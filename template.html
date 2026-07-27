@@ -80,6 +80,8 @@ h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .class-badge.filtered{background:#47556940;color:#94a3b8}
 .unrated-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:max(0.68em,9px);background:#47556933;color:#94a3b8;border:1px solid #64748b;white-space:nowrap}
 .unrated-badge.wrap{white-space:normal;line-height:1.6}
+.liq-gate{display:inline-block;padding:2px 8px;border-radius:12px;font-size:max(0.68em,9px);background:#78350f22;color:#fcd34d;border:1px solid #d97706;white-space:nowrap}
+.liq-gate.wrap{white-space:normal;line-height:1.6}
 
 /* شاشة استثناء الانعكاس */
 .rev-warn{text-align:center;color:#fcd34d;background:#78350f22;border:1px solid #d97706;border-radius:8px;padding:8px 14px;margin:6px auto 8px;max-width:600px;font-size:0.85em;font-weight:600}
@@ -265,6 +267,25 @@ const unratedBadge = (sc, compact) => isUnrated(sc)
   ? '<span class="unrated-badge' + (compact ? '' : ' wrap') + '" title="' + UNRATED_LABEL + '">' + (compact ? 'غير مُقيَّم' : UNRATED_LABEL) + '</span>'
   : '';
 
+// بوابة السيولة (يصدرها المحرك اعتباراً من 05-08): عتبة قيمة تداول يومية بالريال.
+// passed === false يُستبعد من شاشتي «أبرز الفرص» و«أفضل الفرص» فقط — يبقى كاملاً في
+// الجدول وشاشة الانعكاس والمودال، والوسم يُظهر الرقم نفسه ليُقاس على حجم المركز (قرار المالك).
+// الفحص === false حصراً: غياب الحقل = السلوك الحالي حرفياً. يُقرأ من جذر السهم أو من
+// investmentScore أيهما وُجد — موضع الحقل النهائي في مخرجات المحرك غير مثبت بعد
+const liqGateOf = (s) => (s && (s.liquidityGate || (s.investmentScore && s.investmentScore.liquidityGate))) || null;
+const liqBlocked = (s) => { const lg = liqGateOf(s); return !!lg && lg.passed === false; };
+// null يجب ألا يصير «0» — Number(null) === 0 رقم مُختلَق يوحي بسيولة صفرية فعلية
+const liqNum = (v) => v != null && Number.isFinite(Number(v)) ? Number(v).toLocaleString('en') : null;
+const liqSar = (lg) => liqNum(lg.valueSar) || '—';
+const liqBadge = (s, compact) => {
+  const lg = liqGateOf(s);
+  if (!liqBlocked(s)) return '';
+  const v = liqNum(lg.valueSar);
+  const th = liqNum(lg.threshold);
+  return '<span class="liq-gate' + (compact ? '' : ' wrap') + '"' + (th ? ' title="الحد الأدنى: ' + th + ' ريال/يوم"' : '') + '>' +
+    (v ? '💧 سيولة <span dir="ltr">' + v + '</span> ريال/يوم — دون الحد' : '💧 سيولة دون الحد') + '</span>';
+};
+
 // المقارنة القطاعية تُحسب هنا مرة واحدة عند التحميل — حقول sectorRank/Total/Percentile/AvgScore
 // المخزَّنة مجمّدة (لا سكربت يكتبها منذ ما قبل 04-07: متوسطات صفرية وعبارات مقارنة معكوسة) فتُتجاهل نهائياً.
 // المجموعة: غير المفلترين (filtered === false) في القطاع — نقاط المستبعدين صفر وتشوّه المتوسط.
@@ -365,8 +386,8 @@ function init() {
 function renderDecisions() {
   const mr = DATA.marketRegime || {};
   const BUY_FAMILY = ['strong_buy', 'buy', 'conditional_buy'];
-  // unrated لم يُختبر بالفلتر فلا يُرشَّح هنا
-  const top5 = stocks.filter(s => BUY_FAMILY.includes(classCodeOf(s)) && !isUnrated(s.investmentScore))
+  // unrated لم يُختبر بالفلتر فلا يُرشَّح هنا، ودون حد السيولة لا يُرشَّح كفرصة
+  const top5 = stocks.filter(s => BUY_FAMILY.includes(classCodeOf(s)) && !isUnrated(s.investmentScore) && !liqBlocked(s))
     .sort((a,b) => (b.investmentScore?.total||0) - (a.investmentScore?.total||0))
     .slice(0, 5);
 
@@ -415,7 +436,7 @@ function getScoreClass(score) {
 }
 
 function renderTopCards() {
-  let top = stocks.filter(s => !s.investmentScore?.filtered && s.investmentScore?.total >= 65)
+  let top = stocks.filter(s => !s.investmentScore?.filtered && s.investmentScore?.total >= 65 && !liqBlocked(s))
     .sort((a,b) => (b.investmentScore?.total||0) - (a.investmentScore?.total||0))
     .slice(0, 12);
   
@@ -429,7 +450,7 @@ function renderTopCards() {
     html += `<div class="card" onclick="openModal('${s.symbol}')">
       <div style="display:flex;justify-content:space-between;align-items:start">
         <div>
-          <div class="name">${s.name}</div>
+          <div class="name">${s.name}${sc.filterReason === REVERSAL_REASON ? ' <span title="تحت SMA200W — عبر بإشارات انعكاس" style="cursor:help">🌱</span>' : ''}</div>
           <div class="symbol">${s.symbol}</div>
           <div class="sector-tag">${SECTOR_AR[sc.sector] || sc.sector || ''}</div>
         </div>
@@ -461,7 +482,7 @@ function renderTopCards() {
     </div>`;
   });
   
-  document.getElementById('topCards').innerHTML = html || '<div style="color:#64748b;padding:20px;text-align:center">لا توجد أسهم تعدت حاجز 65 نقطة</div>';
+  document.getElementById('topCards').innerHTML = html || '<div style="color:#64748b;padding:20px;text-align:center">لا أسهم مؤهلة اليوم (65+ نقطة وفوق حد السيولة)</div>';
 }
 
 // شاشة استثناء الانعكاس: أسهم عبرت فلتر SMA200W الإقصائي بإشارات الانعكاس الثلاث وهي بعدُ تحته.
@@ -500,6 +521,7 @@ function renderReversals() {
             <div class="score-num ${getScoreClass(sc.total)}">${sc.total}<span style="font-size:0.5em;color:#94a3b8">/100</span></div>
             <div class="class-badge ${classCodeOf(s)}">${classLabelOf(sc)}</div>
             ${isUnrated(sc) ? '<div style="margin-top:4px">' + unratedBadge(sc, true) + '</div>' : ''}
+            ${liqBlocked(s) ? '<div style="margin-top:4px">' + liqBadge(s) + '</div>' : ''}
           </div>
         </div>
         <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">
@@ -527,7 +549,7 @@ function renderTable() {
 
     html += `<tr onclick="openModal('${s.symbol}')" data-i="${i}">
       <td><span class="score-num ${scClass}" style="font-size:1em">${sc.filtered ? '—' : sc.total}</span></td>
-      <td><span class="class-badge ${classCodeOf(s)}" style="font-size:0.7em;padding:2px 8px">${classLabelOf(sc)}</span> ${unratedBadge(sc, true)}</td>
+      <td><span class="class-badge ${classCodeOf(s)}" style="font-size:0.7em;padding:2px 8px">${classLabelOf(sc)}</span> ${unratedBadge(sc, true)} ${liqBadge(s, true)}</td>
       <td>${sc.filtered ? '' : '<span class=\'dot '+timingDot+'\'></span> '+sc.timing}</td>
       <td style="font-family:monospace;color:#64748b;text-align:center">${s.symbol}</td>
       <td style="font-weight:600">${s.name}</td>
@@ -670,6 +692,8 @@ function openModal(sym) {
       <div class="score-num ${scClass}" style="font-size:2.5em">${sc.filtered ? '—' : sc.total}<span style="font-size:0.4em;color:#94a3b8">/100</span></div>
       <div class="class-badge ${classCodeOf(s)}" style="font-size:1em;margin:8px 0">${classLabelOf(sc)}</div>
       ${isUnrated(sc) ? '<div style="margin-top:6px">' + unratedBadge(sc) + '</div>' : ''}
+      ${liqBlocked(s) ? '<div style="margin-top:6px">' + liqBadge(s) + '</div>' : ''}
+      ${!sc.filtered && sc.filterReason === REVERSAL_REASON ? '<div style="color:#fcd34d;margin-top:6px;font-size:0.85em">🌱 تحت SMA200W — عبر بإشارات انعكاس</div>' : ''}
       ${sc.filtered ? '<div style="color:#f59e0b;margin-top:8px">لم يعدّ الفلتر: ' + (sc.filterReason||'') + '</div>' : ''}
     </div>`;
 
@@ -795,7 +819,9 @@ function openModal(sym) {
     </div>
   </div>`;
   
-  // Risk
+  // Risk — قيمة التداول اليومية تُعرض متى وُجدت liquidityGate:
+  // حمراء دون الحد، خضراء فوقه، محايدة إن جُهلت passed (لا ادعاء اجتياز لحالة لم تُفحص)
+  const lg = liqGateOf(s);
   body += `<div class="modal-section">
     <h3>🛡️ المخاطر</h3>
     <div class="indicator-grid">
@@ -803,6 +829,7 @@ function openModal(sym) {
       <div class="indicator"><div class="val">${dt.high52w || '—'}</div><div class="lbl">أعلى 52 أسبوع</div></div>
       <div class="indicator"><div class="val">${dt.low52w || '—'}</div><div class="lbl">أدنى 52 أسبوع</div></div>
       <div class="indicator"><div class="val">${dt.avgVol20d ? (dt.avgVol20d/1000).toFixed(0)+'K' : '—'}</div><div class="lbl">متوسط حجم 20D</div></div>
+      ${lg ? '<div class="indicator ' + (lg.passed === false ? 'red' : lg.passed === true ? 'green' : '') + '"><div class="val" dir="ltr">' + liqSar(lg) + '</div><div class="lbl">قيمة التداول ريال/يوم</div></div>' : ''}
     </div>
   </div>`;
   
