@@ -81,6 +81,13 @@ h1{text-align:center;color:#f59e0b;margin:20px 0 8px;font-size:1.6em}
 .unrated-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:max(0.68em,9px);background:#47556933;color:#94a3b8;border:1px solid #64748b;white-space:nowrap}
 .unrated-badge.wrap{white-space:normal;line-height:1.6}
 
+/* شاشة استثناء الانعكاس */
+.rev-warn{text-align:center;color:#fcd34d;background:#78350f22;border:1px solid #d97706;border-radius:8px;padding:8px 14px;margin:6px auto 8px;max-width:600px;font-size:0.85em;font-weight:600}
+.rev-note{text-align:center;color:#64748b;font-size:0.76em;margin:0 auto 12px;max-width:600px}
+.rev-sig{display:inline-block;font-size:max(0.68em,9px);padding:3px 8px;border-radius:10px;background:#0f172a;color:#94a3b8;border:1px solid #334155;white-space:nowrap}
+.rev-sig.on{color:#34d399;border-color:#10b98155;background:#10b98112}
+.rev-sig.off{color:#f87171;border-color:#ef444455;background:#ef444412}
+
 /* Table */
 table{width:100%;border-collapse:collapse;margin-top:16px;font-size:0.8em}
 th{background:#334155;color:#f59e0b;padding:10px 6px;text-align:right;white-space:nowrap;position:sticky;top:0;z-index:1;cursor:pointer}
@@ -189,6 +196,9 @@ tr:hover{background:#1e293b88}
 
 <div class="section-title">🏆 أفضل الفرص الاستثمارية</div>
 <div class="cards" id="topCards"></div>
+
+<div class="section-title">🌱 إشارات انعكاس مبكرة <span style="font-size:0.6em;color:#64748b;font-weight:normal">تحت متوسط 200 أسبوع، عبرت الفلتر بفضل إشارات انعكاس — فئة رصد لا توصيات</span></div>
+<div id="reversals"></div>
 
 <div class="section-title">📊 الجدول الشامل</div>
 <table id="mainTable">
@@ -347,6 +357,7 @@ function init() {
     .map(([cc, lb]) => `<span class="chip ${cc}" onclick="toggleClass('${cc}',this)">${lb}</span>`).join('');
 
   renderTopCards();
+  renderReversals();
   renderTable();
 }
 
@@ -451,6 +462,54 @@ function renderTopCards() {
   });
   
   document.getElementById('topCards').innerHTML = html || '<div style="color:#64748b;padding:20px;text-align:center">لا توجد أسهم تعدت حاجز 65 نقطة</div>';
+}
+
+// شاشة استثناء الانعكاس: أسهم عبرت فلتر SMA200W الإقصائي بإشارات الانعكاس الثلاث وهي بعدُ تحته.
+// المطابقة التامة إلزامية — نص الرفض المقابل «تحت SMA200W بدون إشارات انعكاس» يختلف بكلمة واحدة.
+// الشارات تُحسب حية من weeklyTechnical فقد تنطفئ إشارة بين حساب الفلتر الأسبوعي والسعر اليومي،
+// والحالة المجهولة (حقل غائب) تُعرض رمادية محايدة لا حمراء
+const REVERSAL_REASON = 'تحت SMA200W لكن إشارات انعكاس';
+function renderReversals() {
+  const list = stocks.filter(s => s.investmentScore?.filterReason === REVERSAL_REASON)
+    .sort((a,b) => (b.investmentScore?.total||0) - (a.investmentScore?.total||0));
+  const el = document.getElementById('reversals');
+  if (!list.length) {
+    el.innerHTML = '<div style="color:#64748b;padding:16px;text-align:center">لا أسهم في هذه الفئة اليوم — لم يمنح الفلتر استثناء الانعكاس لأي سهم</div>';
+    return;
+  }
+  // ✓/✕ قبل التسمية: تمييز لا يعتمد اللون وحده
+  const sig = (state, label, v, dec) => {
+    const val = v != null ? '<span dir="ltr">' + Number(v).toFixed(dec) + '</span>' : '—';
+    return state == null
+      ? `<span class="rev-sig">${label} ${val}</span>`
+      : `<span class="rev-sig ${state ? 'on' : 'off'}">${state ? '✓' : '✕'} ${label} ${val}</span>`;
+  };
+  // التحذير جزء من الشاشة نفسها وقبل الأسماء — شرط الناقد
+  el.innerHTML = '<div class="rev-warn">⚠️ الاتجاه لم يثبت بعد — مخاطرة أعلى من قائمة الشراء</div>' +
+    '<div class="rev-note">الشارات محسوبة بآخر سعر — الحمراء إشارة تراجعت بعد الفرز الأسبوعي</div>' +
+    '<div class="cards">' + list.map(s => {
+      const sc = s.investmentScore || {};
+      const wt = s.weeklyTechnical || {};
+      return `<div class="card" onclick="openModal('${s.symbol}')">
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div>
+            <div class="name">${s.name}</div>
+            <div class="symbol">${s.symbol}</div>
+          </div>
+          <div style="text-align:left">
+            <div class="score-num ${getScoreClass(sc.total)}">${sc.total}<span style="font-size:0.5em;color:#94a3b8">/100</span></div>
+            <div class="class-badge ${classCodeOf(s)}">${classLabelOf(sc)}</div>
+            ${isUnrated(sc) ? '<div style="margin-top:4px">' + unratedBadge(sc, true) + '</div>' : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">
+          ${sig(wt.ema40w != null && s.currentPrice != null ? s.currentPrice > wt.ema40w : null, 'EMA40W', wt.ema40w, 2)}
+          ${sig(wt.rsi14w != null ? wt.rsi14w > 50 : null, 'RSI-W', wt.rsi14w, 1)}
+          ${sig(wt.macdW != null && wt.macdSignalW != null ? wt.macdW > wt.macdSignalW : null, 'MACD-W', wt.macdW, 2)}
+        </div>
+        <div class="price ${(s.dailyChange||0) >= 0 ? 'up' : 'down'}" style="margin-top:6px;font-size:1.2em">${s.currentPrice != null ? s.currentPrice + ' ر.س' : '—'}</div>
+      </div>`;
+    }).join('') + '</div>';
 }
 
 // يُبنى الجدول كاملاً مرة واحدة — الفلترة إخفاءً والفرز إعادة ترتيب للعقد نفسها (248 صفاً)
