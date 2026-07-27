@@ -255,6 +255,35 @@ const unratedBadge = (sc, compact) => isUnrated(sc)
   ? '<span class="unrated-badge' + (compact ? '' : ' wrap') + '" title="' + UNRATED_LABEL + '">' + (compact ? 'غير مُقيَّم' : UNRATED_LABEL) + '</span>'
   : '';
 
+// المقارنة القطاعية تُحسب هنا مرة واحدة عند التحميل — حقول sectorRank/Total/Percentile/AvgScore
+// المخزَّنة مجمّدة (لا سكربت يكتبها منذ ما قبل 04-07: متوسطات صفرية وعبارات مقارنة معكوسة) فتُتجاهل نهائياً.
+// المجموعة: غير المفلترين (filtered === false) في القطاع — نقاط المستبعدين صفر وتشوّه المتوسط.
+// قطاع بمؤهَّل واحد أو بلا مؤهَّلين لا يدخل الخريطة، فتُخفى الكتلة بدل ترتيب 1/1 بلا معنى
+const sectorStats = (() => {
+  const groups = Object.create(null); // بلا prototype — رمز سهم شاذ لا يلوث الخريطة
+  stocks.forEach(s => {
+    const sc = s.investmentScore;
+    if (!sc || sc.filtered !== false) return;
+    const sec = sc.sector || s.sector;
+    if (!sec) return;
+    (groups[sec] = groups[sec] || []).push({ symbol: s.symbol, total: sc.total || 0 });
+  });
+  const bySymbol = Object.create(null);
+  Object.entries(groups).forEach(([sec, g]) => {
+    const n = g.length;
+    if (n < 2) return;
+    const avg = Math.round(g.reduce((sum, x) => sum + x.total, 0) / n * 10) / 10;
+    g.sort((a, b) => b.total - a.total);
+    let rank = 1;
+    g.forEach((x, i) => {
+      if (i > 0 && x.total < g[i - 1].total) rank = i + 1; // تعادل النقاط = نفس المرتبة
+      // percentile بدلالة المعادلة الأصلية (n-rank+1)/n: المرتبة الأولى = 100%
+      bySymbol[x.symbol] = { rank, n, percentile: Math.round((n - rank + 1) / n * 100), avg, sector: sec };
+    });
+  });
+  return bySymbol;
+})();
+
 // تطبيع عربي للبحث: همزات، تاء مربوطة، ألف مقصورة، تطويل
 const normalizeAr = (t) => String(t).toLowerCase()
   .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ـ/g, '');
@@ -727,17 +756,21 @@ function openModal(sym) {
     </div>`;
   }
   
-  // Sector comparison
-  if (!sc.filtered && sc.sectorRank) {
+  // Sector comparison — من sectorStats المحسوبة عند التحميل؛ الحقول المخزَّنة المجمّدة متجاهلة.
+  // st.sector من الخريطة نفسها كي لا يفترق العنوان عن مفتاح التجميع
+  const st = !sc.filtered && sectorStats[s.symbol];
+  if (st) {
+    const diff = (sc.total || 0) - st.avg;
+    const d = Math.round(Math.abs(diff)); // تقريب المقدار المطلق — متناظر حول المتوسط
     body += `<div class="modal-section">
-      <h3>المقارنة القطاعية — ${SECTOR_AR[sc.sector] || sc.sector}</h3>
+      <h3>المقارنة القطاعية — ${SECTOR_AR[st.sector] || st.sector}</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-        <div class="indicator"><div class="val" style="color:#60a5fa">${sc.sectorRank}/${sc.sectorTotal}</div><div class="lbl">الترتيب</div></div>
-        <div class="indicator"><div class="val" style="color:#60a5fa">${sc.sectorPercentile}%</div><div class="lbl">Percentile</div></div>
-        <div class="indicator"><div class="val" style="color:#94a3b8">${sc.sectorAvgScore}</div><div class="lbl">متوسط القطاع</div></div>
+        <div class="indicator"><div class="val" style="color:#60a5fa">${st.rank}/${st.n}</div><div class="lbl">الترتيب</div></div>
+        <div class="indicator"><div class="val" style="color:#60a5fa">${st.percentile}%</div><div class="lbl">Percentile</div></div>
+        <div class="indicator"><div class="val" style="color:#94a3b8">${st.avg.toFixed(1)}</div><div class="lbl">متوسط القطاع</div></div>
       </div>
       <div style="font-size:0.8em;color:#94a3b8;margin-top:8px;text-align:center">
-        ${sc.total > sc.sectorAvgScore ? '<span style="color:#10b981">أعلى من متوسط القطاع بـ '+(sc.total - sc.sectorAvgScore).toFixed(0)+' نقطة</span>' : '<span style="color:#ef4444">أقل من متوسط القطاع بـ '+(sc.sectorAvgScore - sc.total).toFixed(0)+' نقطة</span>'}
+        ${diff > 0 && d ? '<span style="color:#10b981">أعلى من متوسط القطاع بـ '+d+' نقطة</span>' : diff < 0 && d ? '<span style="color:#ef4444">أقل من متوسط القطاع بـ '+d+' نقطة</span>' : '<span style="color:#94a3b8">عند متوسط القطاع تقريباً</span>'}
       </div>
     </div>`;
   }
