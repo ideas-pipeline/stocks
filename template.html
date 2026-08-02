@@ -326,8 +326,9 @@ function verdictOf(sc) {
     if (VERDICT_TIMING_OK.includes(sc.timing)) {
       // «شراء مشروط» يحتفظ بشرطه في العنوان (تصحيح المالك 02-08): السطر الأخضر الكامل
       // كان يمحو الشرط ويمنح يقيناً لا يستحقه السهم — صيغة مخففة بلون بين الأخضر والرمادي
+      // «يفضّل دخول تدريجي» هو تعريف المحرك نفسه للمشروط (تذييل الصفحة) — لا شرط مخترع ولا وعد بتفاصيل لا يفي بها المودال
       return c === 'شراء مشروط'
-        ? { text: 'فرصة شراء مشروطة — راجع التفاصيل', cls: 'v-cond' }
+        ? { text: 'فرصة شراء مشروطة — يفضّل دخول تدريجي', cls: 'v-cond' }
         : { text: 'فرصة شراء — السعر مناسب والتوقيت مناسب', cls: 'v-buy' };
     }
     if (sc.timing === 'انتظر') return { text: 'سهم جيد — لكن التوقيت غير مناسب الآن', cls: 'v-timing' };
@@ -786,8 +787,12 @@ function renderLevelsBlock(s) {
 // جملة واحدة قصيرة بعربية بسيطة تشرح المعنى لا الحساب، مع الاتجاه الأفضل «عموماً» حيث يفيد
 // ودون أي حكم على السهم المعروض نفسه. المودال فقط — الجدول (248 صفاً) خارج النطاق عمداً.
 // عرض بحت: لا رقم ولا حساب يتغير، وinterpretation/execInterpretation المتحجران غير مستخدمين.
-// الحقول خارج قائمة المالك المعتمدة (EMA40W، ميل SMA200، نسبة التداول، القوة النسبية،
-// أعلى/أدنى 52 أسبوعاً، متوسط الحجم، قيمة التداول) تبقى بلا شرح حتى يقرّها — لا اجتهاد
+// الشرح يبقى ظاهراً تحت القيمة الغائبة «—» عمداً — قاعدة المالك: لا تخفِ، وسّم.
+// «نسبة التداول» وحدها بلا شرح بقرار مؤجل: المؤشر Current Ratio (أصول متداولة ÷ خصوم
+// متداولة — قيم مثل 1.93) بينما صياغة المالك المقترحة له تصف دوران السهم اليومي
+// (turnoverPct شارة 🔄 على البطاقات) — إلصاقها به يضلل، فتُرك حتى يحسم أيهما يقصد.
+// rs وyr52 نص واحد مكرر تحت البلاطات الشقيقة عمداً («خلال المدة»/«أعلى وأدنى») —
+// صياغة المالك الحرفية مصممة للمشاركة، وكل رقم يستحق شرحه الملاصق
 const IND_DESC = {
   pe: 'كم سنة من الأرباح الحالية تحتاج لاسترداد سعر السهم — الأقل أرخص عموماً',
   pb: 'سعر السهم مقارنة بصافي ممتلكات الشركة — الأقل أرخص عموماً',
@@ -802,6 +807,12 @@ const IND_DESC = {
   rsi14w: 'قوة الدفع الشرائي — فوق 50 تعني غلبة المشترين عموماً',
   macdw: 'مؤشر تحوّل الاتجاه — فوق الصفر ميل للصعود عموماً',
   atr: 'متوسط تحرك السعر اليومي — الأقل يعني حركة أهدأ',
+  ema40w: 'متوسط سعر السهم خلال آخر 40 أسبوعاً — السعر فوقه يعني اتجاهاً صاعداً',
+  sma200Slope: 'هل المتوسط طويل المدى نفسه يرتفع أم ينخفض — الاتجاه العام للسهم',
+  rs: 'أداء السهم مقارنة بمؤشر السوق خلال المدة — الموجب يعني تفوقاً على السوق',
+  yr52: 'أعلى وأدنى سعر بلغه السهم خلال سنة — يبيّن موقع السعر الحالي بينهما',
+  avgVol: 'عدد الأسهم المتداولة يومياً في المتوسط خلال آخر 20 يوماً',
+  liqValue: 'كم ريالاً يُتداول من السهم يومياً — الأهم لمعرفة سهولة الدخول والخروج',
 };
 const indDesc = (k) => IND_DESC[k] ? '<div class="ind-desc">' + IND_DESC[k] + '</div>' : '';
 
@@ -948,10 +959,10 @@ function openModal(sym) {
     <h3>📈 الاتجاه الأسبوعي</h3>
     <div class="indicator-grid">
       <div class="indicator ${wt.sma200w && s.currentPrice > wt.sma200w ? 'green' : 'red'}"><div class="val">${wt.sma200w || '—'}</div><div class="lbl">SMA 200W</div>${indDesc('sma200w')}</div>
-      <div class="indicator ${wt.ema40w && s.currentPrice > wt.ema40w ? 'green' : 'red'}"><div class="val">${wt.ema40w || '—'}</div><div class="lbl">EMA 40W</div></div>
+      <div class="indicator ${wt.ema40w && s.currentPrice > wt.ema40w ? 'green' : 'red'}"><div class="val">${wt.ema40w || '—'}</div><div class="lbl">EMA 40W</div>${indDesc('ema40w')}</div>
       <div class="indicator ${wt.rsi14w > 50 ? 'green' : 'red'}"><div class="val">${wt.rsi14w || '—'}</div><div class="lbl">RSI 14W</div>${indDesc('rsi14w')}</div>
       <div class="indicator ${wt.macdW > 0 ? 'green' : 'red'}"><div class="val">${wt.macdW != null ? wt.macdW.toFixed(2) : '—'}</div><div class="lbl">MACD W</div>${indDesc('macdw')}</div>
-      <div class="indicator"><div class="val">${wt.sma200wSlope != null ? wt.sma200wSlope+'%' : '—'}</div><div class="lbl">ميل SMA200</div></div>
+      <div class="indicator"><div class="val">${wt.sma200wSlope != null ? wt.sma200wSlope+'%' : '—'}</div><div class="lbl">ميل SMA200</div>${indDesc('sma200Slope')}</div>
     </div>
   </div>`;
   
@@ -959,9 +970,9 @@ function openModal(sym) {
   body += `<div class="modal-section">
     <h3>⚡ القوة النسبية مقابل TASI</h3>
     <div class="indicator-grid">
-      <div class="indicator ${(rs.rsTasi3m||0) > 0 ? 'green' : 'red'}"><div class="val">${rs.rsTasi3m != null ? (rs.rsTasi3m>0?'+':'')+rs.rsTasi3m.toFixed(1)+'%' : '—'}</div><div class="lbl">3 أشهر</div></div>
-      <div class="indicator ${(rs.rsTasi6m||0) > 0 ? 'green' : 'red'}"><div class="val">${rs.rsTasi6m != null ? (rs.rsTasi6m>0?'+':'')+rs.rsTasi6m.toFixed(1)+'%' : '—'}</div><div class="lbl">6 أشهر</div></div>
-      <div class="indicator ${(rs.rsTasi12m||0) > 0 ? 'green' : 'red'}"><div class="val">${rs.rsTasi12m != null ? (rs.rsTasi12m>0?'+':'')+rs.rsTasi12m.toFixed(1)+'%' : '—'}</div><div class="lbl">12 شهر</div></div>
+      <div class="indicator ${(rs.rsTasi3m||0) > 0 ? 'green' : 'red'}"><div class="val" dir="ltr">${rs.rsTasi3m != null ? (rs.rsTasi3m>0?'+':'')+rs.rsTasi3m.toFixed(1)+'%' : '—'}</div><div class="lbl">3 أشهر</div>${indDesc('rs')}</div>
+      <div class="indicator ${(rs.rsTasi6m||0) > 0 ? 'green' : 'red'}"><div class="val" dir="ltr">${rs.rsTasi6m != null ? (rs.rsTasi6m>0?'+':'')+rs.rsTasi6m.toFixed(1)+'%' : '—'}</div><div class="lbl">6 أشهر</div>${indDesc('rs')}</div>
+      <div class="indicator ${(rs.rsTasi12m||0) > 0 ? 'green' : 'red'}"><div class="val" dir="ltr">${rs.rsTasi12m != null ? (rs.rsTasi12m>0?'+':'')+rs.rsTasi12m.toFixed(1)+'%' : '—'}</div><div class="lbl">12 شهر</div>${indDesc('rs')}</div>
     </div>
   </div>`;
   
@@ -972,10 +983,10 @@ function openModal(sym) {
     <h3>🛡️ المخاطر</h3>
     <div class="indicator-grid">
       <div class="indicator ${(dt.atrPct||0) < 2.5 ? 'green' : 'red'}"><div class="val">${dt.atrPct != null ? dt.atrPct+'%' : '—'}</div><div class="lbl">التقلب ATR%</div>${indDesc('atr')}</div>
-      <div class="indicator"><div class="val">${dt.high52w || '—'}</div><div class="lbl">أعلى 52 أسبوع</div></div>
-      <div class="indicator"><div class="val">${dt.low52w || '—'}</div><div class="lbl">أدنى 52 أسبوع</div></div>
-      <div class="indicator"><div class="val">${dt.avgVol20d ? (dt.avgVol20d/1000).toFixed(0)+'K' : '—'}</div><div class="lbl">متوسط حجم 20D</div></div>
-      ${lg ? '<div class="indicator ' + (lg.passed === false ? 'red' : lg.passed === true ? 'green' : '') + '"><div class="val" dir="ltr">' + liqSar(lg) + '</div><div class="lbl">قيمة التداول ريال/يوم</div></div>' : ''}
+      <div class="indicator"><div class="val">${dt.high52w || '—'}</div><div class="lbl">أعلى 52 أسبوع</div>${indDesc('yr52')}</div>
+      <div class="indicator"><div class="val">${dt.low52w || '—'}</div><div class="lbl">أدنى 52 أسبوع</div>${indDesc('yr52')}</div>
+      <div class="indicator"><div class="val">${dt.avgVol20d ? (dt.avgVol20d/1000).toFixed(0)+'K' : '—'}</div><div class="lbl">متوسط حجم 20D</div>${indDesc('avgVol')}</div>
+      ${lg ? '<div class="indicator ' + (lg.passed === false ? 'red' : lg.passed === true ? 'green' : '') + '"><div class="val" dir="ltr">' + liqSar(lg) + '</div><div class="lbl">قيمة التداول ريال/يوم</div>' + indDesc('liqValue') + '</div>' : ''}
     </div>
   </div>`;
   
