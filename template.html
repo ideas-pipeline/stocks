@@ -149,12 +149,17 @@ tr:hover{background:#1e293b88}
 .pillar-bar .bar-track{flex:1;height:10px;background:#334155;border-radius:5px;overflow:hidden}
 .pillar-bar .bar-fill{height:100%;border-radius:5px}
 .pillar-bar .bar-val{min-width:40px;text-align:left;font-weight:bold}
+/* شرح دائم مرئي تحت الأرقام في المودال — لا tooltip: لا يعمل باللمس والمالك على الجوال.
+   ‎#94a3b8 لا ‎#64748b (تباين AA على الخلفيتين) وأرضية 10px بنمط max() المعتمد في الملف */
+.pillar-desc{font-size:max(0.7em,10px);color:#94a3b8;margin:-2px 0 10px;line-height:1.5}
+.indicator .ind-desc{font-size:max(0.68em,10px);color:#94a3b8;line-height:1.55;margin-top:4px}
 
 .class-badge.conditional_buy{background:#3b82f625;color:#60a5fa;border:1px dashed #3b82f6}
 
 /* سطر الحكم أعلى البطاقة — زاويتا اليمين شبه حادتين كي يُرسم الحد شريطاً لا قوساً منحنياً */
 .verdict{font-size:0.92em;font-weight:700;line-height:1.5;padding:7px 10px;border-radius:8px 3px 3px 8px;margin-bottom:6px;border-right:3px solid}
 .verdict.v-buy{background:#10b98118;color:#34d399;border-right-color:#10b981}
+.verdict.v-cond{background:#10b9810e;color:#8ec8ab;border-right-color:#639e81;border-right-style:dashed} /* أخضر مطفأ بين الأخضر والرمادي — الشرط لا يستحق أخضر v-buy الكامل، والمتقطع عرف «مشروط» القائم في الشارة وقناة تمييز لا تعتمد اللون */
 .verdict.v-timing{background:#f59e0b18;color:#fcd34d;border-right-color:#f59e0b}
 .verdict.v-hold{background:#47556926;color:#cbd5e1;border-right-color:#64748b}
 .verdict.v-sell{background:#ef444418;color:#f87171;border-right-color:#ef4444}
@@ -318,7 +323,13 @@ function verdictOf(sc) {
   if (isUnrated(sc)) return { text: 'غير مُقيَّم — بيانات غير كافية', cls: 'v-off' };
   const c = sc.classification;
   if (VERDICT_BUY_SET.includes(c)) {
-    if (VERDICT_TIMING_OK.includes(sc.timing)) return { text: 'فرصة شراء — السعر مناسب والتوقيت مناسب', cls: 'v-buy' };
+    if (VERDICT_TIMING_OK.includes(sc.timing)) {
+      // «شراء مشروط» يحتفظ بشرطه في العنوان (تصحيح المالك 02-08): السطر الأخضر الكامل
+      // كان يمحو الشرط ويمنح يقيناً لا يستحقه السهم — صيغة مخففة بلون بين الأخضر والرمادي
+      return c === 'شراء مشروط'
+        ? { text: 'فرصة شراء مشروطة — راجع التفاصيل', cls: 'v-cond' }
+        : { text: 'فرصة شراء — السعر مناسب والتوقيت مناسب', cls: 'v-buy' };
+    }
     if (sc.timing === 'انتظر') return { text: 'سهم جيد — لكن التوقيت غير مناسب الآن', cls: 'v-timing' };
     return null; // توقيت غائب أو بقيمة مجهولة — لا يُخترع حكم توقيت
   }
@@ -337,7 +348,7 @@ const verdictBlock = (s) => {
   const sc = s && s.investmentScore;
   const v = verdictOf(sc);
   if (!v) return '';
-  if ((v.cls === 'v-buy' || v.cls === 'v-timing') && liqBlocked(s)) return '';
+  if ((v.cls === 'v-buy' || v.cls === 'v-cond' || v.cls === 'v-timing') && liqBlocked(s)) return '';
   const td = Array.isArray(sc.topDrivers) ? sc.topDrivers : [];
   const drivers = td.slice(0, 3)
     .map(d => '<span class="driver ' + d.type + '">' + ltrNums(d.text) + '</span>').join(' ');
@@ -770,6 +781,30 @@ function renderLevelsBlock(s) {
   </div>`;
 }
 
+// شرح دائم مرئي تحت كل رقم في المودال (قرار المالك 02-08): نص ظاهر لا tooltip ولا hover —
+// ورشة 27-07 أثبتت ثلاث مرات أن التلميحات لا تعمل باللمس والمالك يستخدم الجوال.
+// جملة واحدة قصيرة بعربية بسيطة تشرح المعنى لا الحساب، مع الاتجاه الأفضل «عموماً» حيث يفيد
+// ودون أي حكم على السهم المعروض نفسه. المودال فقط — الجدول (248 صفاً) خارج النطاق عمداً.
+// عرض بحت: لا رقم ولا حساب يتغير، وinterpretation/execInterpretation المتحجران غير مستخدمين.
+// الحقول خارج قائمة المالك المعتمدة (EMA40W، ميل SMA200، نسبة التداول، القوة النسبية،
+// أعلى/أدنى 52 أسبوعاً، متوسط الحجم، قيمة التداول) تبقى بلا شرح حتى يقرّها — لا اجتهاد
+const IND_DESC = {
+  pe: 'كم سنة من الأرباح الحالية تحتاج لاسترداد سعر السهم — الأقل أرخص عموماً',
+  pb: 'سعر السهم مقارنة بصافي ممتلكات الشركة — الأقل أرخص عموماً',
+  evEbitda: 'قيمة الشركة كلها مقارنة بأرباح نشاطها الأساسي — الأقل أرخص عموماً',
+  divYield: 'ما توزعه الشركة نقداً كل سنة كنسبة من سعر السهم',
+  peg: 'هل السعر مبرَّر بنمو الأرباح؟ — بين 0 و1 جذاب عموماً', // «بين 0 و1» لا «أقل من 1»: السالب (أرباح أو نمو سالب) ليس جذاباً
+  roe: 'كم ربحاً تولّده الشركة من أموال ملاكها — الأعلى أفضل عموماً',
+  margin: 'كم يتبقى ربحاً صافياً من كل 100 ريال مبيعات',
+  revGrowth: 'هل مبيعات الشركة تزيد أم تنقص عن العام السابق؟',
+  debtEquity: 'حجم الديون مقارنة بأموال الملاك — الأقل أكثر أماناً عموماً',
+  sma200w: 'متوسط السعر في نحو أربع سنوات — البقاء فوقه علامة اتجاه صاعد طويل',
+  rsi14w: 'قوة الدفع الشرائي — فوق 50 تعني غلبة المشترين عموماً',
+  macdw: 'مؤشر تحوّل الاتجاه — فوق الصفر ميل للصعود عموماً',
+  atr: 'متوسط تحرك السعر اليومي — الأقل يعني حركة أهدأ',
+};
+const indDesc = (k) => IND_DESC[k] ? '<div class="ind-desc">' + IND_DESC[k] + '</div>' : '';
+
 function openModal(sym) {
   let s = stocks.find(x => x.symbol === sym);
   if (!s) return;
@@ -800,20 +835,21 @@ function openModal(sym) {
   if (!sc.filtered) {
     // Pillar bars
     let pillars = [
-      ['المالية', sc.financial, 30],
-      ['الاتجاه', sc.trend, 25],
-      ['الزخم', sc.relativeStrength, 15],
-      ['المخاطر', sc.risk, 20],
-      ['التقييم', sc.valuation, 15],
+      ['المالية', sc.financial, 30, 'قوة أرباح الشركة وسلامة وضعها المالي'],
+      ['الاتجاه', sc.trend, 25, 'هل السعر في مسار صاعد على المدى الطويل؟'],
+      ['الزخم', sc.relativeStrength, 15, 'أداء السهم مقارنة ببقية السوق في الأشهر الأخيرة'],
+      ['المخاطر', sc.risk, 20, 'مدى هدوء تحركات السهم — نقاط أعلى تعني تقلباً أقل'],
+      ['التقييم', sc.valuation, 15, 'هل السعر الحالي رخيص أم غالٍ مقارنة بأرباح الشركة؟'],
     ];
-    pillars.forEach(([label, val, max]) => {
+    pillars.forEach(([label, val, max, desc]) => {
       let pct = Math.round((val/max)*100);
       let color = pct >= 65 ? '#10b981' : (pct >= 40 ? '#f59e0b' : '#ef4444');
       body += `<div class="pillar-bar">
         <span class="bar-label">${label}</span>
         <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
         <span class="bar-val" style="color:${color}">${val}/${max}</span>
-      </div>`;
+      </div>
+      <div class="pillar-desc">${desc}</div>`;
     });
     
     // Timing
@@ -876,17 +912,19 @@ function openModal(sym) {
   // PEG مشتق من P/E فيتبع حالة تجميده — المحرك لا يصدر له حالة مستقلة (قرار المالك 27-07)
   const vp = valPartsOf(s);
   const frz = (k) => !!vp && vp[k] === 'frozen';
-  const vInd = (k, valHtml, label) => '<div class="indicator' + (frz(k) ? ' stale' : '') + '"' +
-    (frz(k) ? ' title="' + VAL_STALE_NOTE + '"' : '') + '><div class="val">' + valHtml + '</div><div class="lbl">' + label + (frz(k) ? ' ❄️' : '') + '</div></div>';
+  // dk مفتاح الشرح مستقل عن k مفتاح التجميد — PEG يتبع تجميد P/E لكن شرحه شرح PEG.
+  // وسم ❄️ داخل سطر التسمية فيبقى فوق الشرح كما قرر المالك
+  const vInd = (k, valHtml, label, dk) => '<div class="indicator' + (frz(k) ? ' stale' : '') + '"' +
+    (frz(k) ? ' title="' + VAL_STALE_NOTE + '"' : '') + '><div class="val">' + valHtml + '</div><div class="lbl">' + label + (frz(k) ? ' ❄️' : '') + '</div>' + indDesc(dk) + '</div>';
   const vUpd = valUpdatedOf(s);
   body += `<div class="modal-section">
     <h3>💎 التقييم المالي</h3>
     <div class="indicator-grid">
-      ${vInd('pe', val.pe ? val.pe.toFixed(1) : '—', 'P/E')}
-      ${vInd('pb', val.pb ? val.pb.toFixed(2) : '—', 'P/B')}
-      ${vInd('evEbitda', val.evEbitda ? val.evEbitda.toFixed(1) : '—', 'EV/EBITDA')}
-      ${vInd('dividendYield', val.dividendYield ? (val.dividendYield*100).toFixed(1)+'%' : '—', 'توزيعات')}
-      ${vInd('pe' /* PEG مشتق فيتبع P/E عمداً */, val.peg ? val.peg.toFixed(2) : '—', 'PEG')}
+      ${vInd('pe', val.pe ? val.pe.toFixed(1) : '—', 'P/E', 'pe')}
+      ${vInd('pb', val.pb ? val.pb.toFixed(2) : '—', 'P/B', 'pb')}
+      ${vInd('evEbitda', val.evEbitda ? val.evEbitda.toFixed(1) : '—', 'EV/EBITDA', 'evEbitda')}
+      ${vInd('dividendYield', val.dividendYield ? (val.dividendYield*100).toFixed(1)+'%' : '—', 'توزيعات', 'divYield')}
+      ${vInd('pe' /* PEG مشتق فيتبع P/E عمداً */, val.peg ? val.peg.toFixed(2) : '—', 'PEG', 'peg')}
     </div>
     ${vUpd ? '<div style="font-size:0.75em;color:#64748b;text-align:center;margin-top:8px">تحديث المكوّنات الحية: <span dir="ltr">' + vUpd + '</span></div>' : ''}
   </div>`;
@@ -897,10 +935,10 @@ function openModal(sym) {
   body += `<div class="modal-section">
     <h3>🏦 الصحة المالية</h3>
     <div class="indicator-grid">
-      <div class="indicator ${fin.returnOnEquity > 12 ? 'green' : (fin.returnOnEquity > 0 ? 'yellow' : 'red')}"><div class="val">${fin.returnOnEquity != null ? fin.returnOnEquity+'%' : '—'}</div><div class="lbl">ROE</div></div>
-      <div class="indicator ${fin.profitMargins > 12 ? 'green' : (fin.profitMargins > 0 ? 'yellow' : 'red')}"><div class="val">${fin.profitMargins != null ? fin.profitMargins+'%' : '—'}</div><div class="lbl">هامش الربح</div></div>
-      <div class="indicator ${fin.revenueGrowth > 5 ? 'green' : (fin.revenueGrowth >= 0 ? 'yellow' : 'red')}"><div class="val">${fin.revenueGrowth != null ? fin.revenueGrowth+'%' : '—'}</div><div class="lbl">نمو الإيرادات</div></div>
-      ${isFinSector ? '' : `<div class="indicator"><div class="val">${fin.debtToEquity != null ? fin.debtToEquity+'%' : '—'}</div><div class="lbl">دين/ملكية</div></div>
+      <div class="indicator ${fin.returnOnEquity > 12 ? 'green' : (fin.returnOnEquity > 0 ? 'yellow' : 'red')}"><div class="val">${fin.returnOnEquity != null ? fin.returnOnEquity+'%' : '—'}</div><div class="lbl">ROE</div>${indDesc('roe')}</div>
+      <div class="indicator ${fin.profitMargins > 12 ? 'green' : (fin.profitMargins > 0 ? 'yellow' : 'red')}"><div class="val">${fin.profitMargins != null ? fin.profitMargins+'%' : '—'}</div><div class="lbl">هامش الربح</div>${indDesc('margin')}</div>
+      <div class="indicator ${fin.revenueGrowth > 5 ? 'green' : (fin.revenueGrowth >= 0 ? 'yellow' : 'red')}"><div class="val">${fin.revenueGrowth != null ? fin.revenueGrowth+'%' : '—'}</div><div class="lbl">نمو الإيرادات</div>${indDesc('revGrowth')}</div>
+      ${isFinSector ? '' : `<div class="indicator"><div class="val">${fin.debtToEquity != null ? fin.debtToEquity+'%' : '—'}</div><div class="lbl">دين/ملكية</div>${indDesc('debtEquity')}</div>
       <div class="indicator"><div class="val">${fin.currentRatio != null ? fin.currentRatio : '—'}</div><div class="lbl">نسبة التداول</div></div>`}
     </div>
   </div>`;
@@ -909,10 +947,10 @@ function openModal(sym) {
   body += `<div class="modal-section">
     <h3>📈 الاتجاه الأسبوعي</h3>
     <div class="indicator-grid">
-      <div class="indicator ${wt.sma200w && s.currentPrice > wt.sma200w ? 'green' : 'red'}"><div class="val">${wt.sma200w || '—'}</div><div class="lbl">SMA 200W</div></div>
+      <div class="indicator ${wt.sma200w && s.currentPrice > wt.sma200w ? 'green' : 'red'}"><div class="val">${wt.sma200w || '—'}</div><div class="lbl">SMA 200W</div>${indDesc('sma200w')}</div>
       <div class="indicator ${wt.ema40w && s.currentPrice > wt.ema40w ? 'green' : 'red'}"><div class="val">${wt.ema40w || '—'}</div><div class="lbl">EMA 40W</div></div>
-      <div class="indicator ${wt.rsi14w > 50 ? 'green' : 'red'}"><div class="val">${wt.rsi14w || '—'}</div><div class="lbl">RSI 14W</div></div>
-      <div class="indicator ${wt.macdW > 0 ? 'green' : 'red'}"><div class="val">${wt.macdW != null ? wt.macdW.toFixed(2) : '—'}</div><div class="lbl">MACD W</div></div>
+      <div class="indicator ${wt.rsi14w > 50 ? 'green' : 'red'}"><div class="val">${wt.rsi14w || '—'}</div><div class="lbl">RSI 14W</div>${indDesc('rsi14w')}</div>
+      <div class="indicator ${wt.macdW > 0 ? 'green' : 'red'}"><div class="val">${wt.macdW != null ? wt.macdW.toFixed(2) : '—'}</div><div class="lbl">MACD W</div>${indDesc('macdw')}</div>
       <div class="indicator"><div class="val">${wt.sma200wSlope != null ? wt.sma200wSlope+'%' : '—'}</div><div class="lbl">ميل SMA200</div></div>
     </div>
   </div>`;
@@ -933,7 +971,7 @@ function openModal(sym) {
   body += `<div class="modal-section">
     <h3>🛡️ المخاطر</h3>
     <div class="indicator-grid">
-      <div class="indicator ${(dt.atrPct||0) < 2.5 ? 'green' : 'red'}"><div class="val">${dt.atrPct != null ? dt.atrPct+'%' : '—'}</div><div class="lbl">التقلب ATR%</div></div>
+      <div class="indicator ${(dt.atrPct||0) < 2.5 ? 'green' : 'red'}"><div class="val">${dt.atrPct != null ? dt.atrPct+'%' : '—'}</div><div class="lbl">التقلب ATR%</div>${indDesc('atr')}</div>
       <div class="indicator"><div class="val">${dt.high52w || '—'}</div><div class="lbl">أعلى 52 أسبوع</div></div>
       <div class="indicator"><div class="val">${dt.low52w || '—'}</div><div class="lbl">أدنى 52 أسبوع</div></div>
       <div class="indicator"><div class="val">${dt.avgVol20d ? (dt.avgVol20d/1000).toFixed(0)+'K' : '—'}</div><div class="lbl">متوسط حجم 20D</div></div>
