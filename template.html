@@ -153,6 +153,8 @@ tr:hover{background:#1e293b88}
    ‎#94a3b8 لا ‎#64748b (تباين AA على الخلفيتين) وأرضية 10px بنمط max() المعتمد في الملف */
 .pillar-desc{font-size:max(0.7em,10px);color:#94a3b8;margin:-2px 0 10px;line-height:1.5}
 .indicator .ind-desc{font-size:max(0.68em,10px);color:#94a3b8;line-height:1.55;margin-top:4px}
+/* شرح مشترك بصيغة الزوج (52 أسبوعاً) — صف ختامي بعرض الشبكة بدل تكراره تحت بلاطتين متجاورتين */
+.indicator-grid > .ind-desc.grid-span{grid-column:1/-1;font-size:max(0.68em,10px);color:#94a3b8;line-height:1.55;text-align:center} /* توسيط لا يمين: بلاطتا الزوج هما العمودان الأوسطان على الديسكتوب، واليمين يرسو تحت ATR خارج الزوج */
 
 .class-badge.conditional_buy{background:#3b82f625;color:#60a5fa;border:1px dashed #3b82f6}
 
@@ -788,11 +790,12 @@ function renderLevelsBlock(s) {
 // ودون أي حكم على السهم المعروض نفسه. المودال فقط — الجدول (248 صفاً) خارج النطاق عمداً.
 // عرض بحت: لا رقم ولا حساب يتغير، وinterpretation/execInterpretation المتحجران غير مستخدمين.
 // الشرح يبقى ظاهراً تحت القيمة الغائبة «—» عمداً — قاعدة المالك: لا تخفِ، وسّم.
-// «نسبة التداول» وحدها بلا شرح بقرار مؤجل: المؤشر Current Ratio (أصول متداولة ÷ خصوم
-// متداولة — قيم مثل 1.93) بينما صياغة المالك المقترحة له تصف دوران السهم اليومي
-// (turnoverPct شارة 🔄 على البطاقات) — إلصاقها به يضلل، فتُرك حتى يحسم أيهما يقصد.
-// rs وyr52 نص واحد مكرر تحت البلاطات الشقيقة عمداً («خلال المدة»/«أعلى وأدنى») —
-// صياغة المالك الحرفية مصممة للمشاركة، وكل رقم يستحق شرحه الملاصق
+// «نسبة التداول» هي Current Ratio المحاسبية (أصول متداولة ÷ خصوم متداولة) — حُسم الالتباس
+// مع دوران السهم (turnoverPct شارة 🔄) وأقرّ المالك الصياغة الحالية 02-08. شرح الدوران
+// لا يُنقل للشارة — النطاق المودال فقط (قرار المالك).
+// rs نص واحد مكرر تحت البلاطات الثلاث عمداً («خلال المدة» مصممة للمشاركة)، بينما yr52
+// بصيغة الزوج («أعلى وأدنى... بينهما») فيُعرض مرة واحدة صفاً ختامياً بعرض الشبكة —
+// تكراره تحت بلاطتين متجاورتين كان يُقرأ خطأَ نسخ (قرار المالك 02-08)
 const IND_DESC = {
   pe: 'كم سنة من الأرباح الحالية تحتاج لاسترداد سعر السهم — الأقل أرخص عموماً',
   pb: 'سعر السهم مقارنة بصافي ممتلكات الشركة — الأقل أرخص عموماً',
@@ -813,6 +816,7 @@ const IND_DESC = {
   yr52: 'أعلى وأدنى سعر بلغه السهم خلال سنة — يبيّن موقع السعر الحالي بينهما',
   avgVol: 'عدد الأسهم المتداولة يومياً في المتوسط خلال آخر 20 يوماً',
   liqValue: 'كم ريالاً يُتداول من السهم يومياً — الأهم لمعرفة سهولة الدخول والخروج',
+  currentRatio: 'قدرة الشركة على سداد التزاماتها القريبة من أصولها المتاحة — فوق 1 مريح عموماً',
 };
 const indDesc = (k) => IND_DESC[k] ? '<div class="ind-desc">' + IND_DESC[k] + '</div>' : '';
 
@@ -950,7 +954,7 @@ function openModal(sym) {
       <div class="indicator ${fin.profitMargins > 12 ? 'green' : (fin.profitMargins > 0 ? 'yellow' : 'red')}"><div class="val">${fin.profitMargins != null ? fin.profitMargins+'%' : '—'}</div><div class="lbl">هامش الربح</div>${indDesc('margin')}</div>
       <div class="indicator ${fin.revenueGrowth > 5 ? 'green' : (fin.revenueGrowth >= 0 ? 'yellow' : 'red')}"><div class="val">${fin.revenueGrowth != null ? fin.revenueGrowth+'%' : '—'}</div><div class="lbl">نمو الإيرادات</div>${indDesc('revGrowth')}</div>
       ${isFinSector ? '' : `<div class="indicator"><div class="val">${fin.debtToEquity != null ? fin.debtToEquity+'%' : '—'}</div><div class="lbl">دين/ملكية</div>${indDesc('debtEquity')}</div>
-      <div class="indicator"><div class="val">${fin.currentRatio != null ? fin.currentRatio : '—'}</div><div class="lbl">نسبة التداول</div></div>`}
+      <div class="indicator"><div class="val">${fin.currentRatio != null ? fin.currentRatio : '—'}</div><div class="lbl">نسبة التداول</div>${indDesc('currentRatio')}</div>`}
     </div>
   </div>`;
   
@@ -983,10 +987,11 @@ function openModal(sym) {
     <h3>🛡️ المخاطر</h3>
     <div class="indicator-grid">
       <div class="indicator ${(dt.atrPct||0) < 2.5 ? 'green' : 'red'}"><div class="val">${dt.atrPct != null ? dt.atrPct+'%' : '—'}</div><div class="lbl">التقلب ATR%</div>${indDesc('atr')}</div>
-      <div class="indicator"><div class="val">${dt.high52w || '—'}</div><div class="lbl">أعلى 52 أسبوع</div>${indDesc('yr52')}</div>
-      <div class="indicator"><div class="val">${dt.low52w || '—'}</div><div class="lbl">أدنى 52 أسبوع</div>${indDesc('yr52')}</div>
+      <div class="indicator"><div class="val">${dt.high52w || '—'}</div><div class="lbl">أعلى 52 أسبوع</div></div>
+      <div class="indicator"><div class="val">${dt.low52w || '—'}</div><div class="lbl">أدنى 52 أسبوع</div></div>
       <div class="indicator"><div class="val">${dt.avgVol20d ? (dt.avgVol20d/1000).toFixed(0)+'K' : '—'}</div><div class="lbl">متوسط حجم 20D</div>${indDesc('avgVol')}</div>
       ${lg ? '<div class="indicator ' + (lg.passed === false ? 'red' : lg.passed === true ? 'green' : '') + '"><div class="val" dir="ltr">' + liqSar(lg) + '</div><div class="lbl">قيمة التداول ريال/يوم</div>' + indDesc('liqValue') + '</div>' : ''}
+      <div class="ind-desc grid-span">${IND_DESC.yr52}</div>
     </div>
   </div>`;
   
