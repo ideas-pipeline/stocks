@@ -151,10 +151,20 @@ tr:hover{background:#1e293b88}
 .pillar-bar .bar-val{min-width:40px;text-align:left;font-weight:bold}
 
 .class-badge.conditional_buy{background:#3b82f625;color:#60a5fa;border:1px dashed #3b82f6}
+
+/* سطر الحكم أعلى البطاقة — زاويتا اليمين شبه حادتين كي يُرسم الحد شريطاً لا قوساً منحنياً */
+.verdict{font-size:0.92em;font-weight:700;line-height:1.5;padding:7px 10px;border-radius:8px 3px 3px 8px;margin-bottom:6px;border-right:3px solid}
+.verdict.v-buy{background:#10b98118;color:#34d399;border-right-color:#10b981}
+.verdict.v-timing{background:#f59e0b18;color:#fcd34d;border-right-color:#f59e0b}
+.verdict.v-hold{background:#47556926;color:#cbd5e1;border-right-color:#64748b}
+.verdict.v-sell{background:#ef444418;color:#f87171;border-right-color:#ef4444}
+.verdict.v-off{background:#47556926;color:#94a3b8;border-right-color:#64748b}
+.verdict-drivers{margin:0 0 8px}
+.verdict-drivers .vd-lbl{font-size:0.68em;color:#64748b}
 .interp{font-size:0.8em;color:#94a3b8;margin-top:8px;line-height:1.5;padding:8px;background:#0f172a;border-radius:8px}
 .driver{display:inline-block;font-size:0.7em;padding:2px 6px;border-radius:4px;margin:2px}
 .driver.positive{background:#10b98115;color:#10b981}
-.driver.negative{background:#ef444415;color:#ef4444}
+.driver.negative{background:#ef444415;color:#f87171} /* ‎#f87171 لا ‎#ef4444: تباين AA بعد صعود الشرائح لصدارة البطاقة */
 .footer{text-align:center;color:#475569;margin-top:32px;font-size:0.8em;padding:16px}
 
 /* Mobile */
@@ -287,6 +297,52 @@ const liqBadge = (s, compact) => {
   const th = liqNum(lg.threshold);
   return '<span class="liq-gate' + (compact ? '' : ' wrap') + '"' + (th ? ' title="الحد الأدنى: ' + th + ' ريال/يوم"' : '') + '>' +
     (v ? '💧 سيولة <span dir="ltr">' + v + '</span> ريال/يوم — دون الحد' : '💧 سيولة دون الحد') + '</span>';
+};
+
+// سطر الحكم أعلى البطاقة (قرار المالك 02-08): جملة واحدة بعربية بسيطة تجيب «هل هذه فرصة شراء،
+// والسعر مناسب، والتوقيت مناسب؟» — مبنية حصراً من الحقول الحية المحسوبة يومياً
+// (filtered/unrated/classification/timing/topDrivers). interpretation وexecInterpretation
+// محظوران هنا نهائياً: أثبت الفحص أنهما نص متحجّر لم يتغيّر 28 يوماً رغم تغيّر النقاط —
+// عرضهما حكم عمره شهر بصياغة واثقة. السطر عرض لما حسبه المحرك لا أكثر: أي حقل لازم للحكم
+// غائب أو بقيمة غير معروفة = لا سطر إطلاقاً، لا حكم ناقص ولا حكم مخترع.
+// المطابقة على classification النصي (قرار المالك) بعد فحص filtered أولاً — classification
+// للمفلتر يقول «انتظار» زوراً كما هو موثق عند classCodeOf أعلاه.
+// «شراء قوي» غير موجود في بيانات اليوم لكنه تصنيف المحرك الأعلى — يُعامل شراءً احتياطاً
+const VERDICT_BUY_SET = ['شراء قوي', 'شراء', 'شراء مشروط'];
+const VERDICT_TIMING_OK = ['ممتاز', 'مقبول'];
+function verdictOf(sc) {
+  if (!sc) return null;
+  if (sc.filtered) return { text: 'مستبعَد — لم يعبر الفلتر', cls: 'v-off' };
+  // الصياغة هنا بلا «أسبوعية» عمداً (نص المالك الحرفي، عربية بسيطة) — تختلف عن UNRATED_LABEL
+  // الفني قصداً لا سهواً، فلا تُوحَّدا
+  if (isUnrated(sc)) return { text: 'غير مُقيَّم — بيانات غير كافية', cls: 'v-off' };
+  const c = sc.classification;
+  if (VERDICT_BUY_SET.includes(c)) {
+    if (VERDICT_TIMING_OK.includes(sc.timing)) return { text: 'فرصة شراء — السعر مناسب والتوقيت مناسب', cls: 'v-buy' };
+    if (sc.timing === 'انتظر') return { text: 'سهم جيد — لكن التوقيت غير مناسب الآن', cls: 'v-timing' };
+    return null; // توقيت غائب أو بقيمة مجهولة — لا يُخترع حكم توقيت
+  }
+  if (c === 'انتظار') return { text: 'ليست فرصة شراء الآن', cls: 'v-hold' };
+  if (c === 'بيع' || c === 'بيع قوي') return { text: 'لا يُنصح بالشراء', cls: 'v-sell' };
+  return null; // تصنيف مجهول
+}
+// الكتلة الكاملة: السطر وتحته أقوى ثلاثة عوامل من topDrivers بنصها كما هو — بلا إعادة صياغة
+// (ltrNums عزل اتجاه للأرقام السالبة لا صياغة — نفس علة «14.4-%» الموثقة عنده).
+// topDrivers ليست شرطاً للحكم: المصفوفة الفارغة قيمة مشروعة من المحرك (3 أسهم مُقيَّمة اليوم)
+// والحكم مبني من classification/timing وحدهما — فيُعرض السطر وتُحذف العوامل فقط.
+// التسمية «أبرز العوامل:» تقطع قراءة السببية — عامل إيجابي تحت حكم سلبي ليس تعليلاً له.
+// حكم شرائي على سهم محجوب سيولةً يناقض شارة 💧 على البطاقة نفسها (الملف يعتبره غير مرشح
+// كفرصة — فلترا أبرز/أفضل الفرص) فيُحجب السطر الشرائي ولا يُخترع حكم بديل
+const verdictBlock = (s) => {
+  const sc = s && s.investmentScore;
+  const v = verdictOf(sc);
+  if (!v) return '';
+  if ((v.cls === 'v-buy' || v.cls === 'v-timing') && liqBlocked(s)) return '';
+  const td = Array.isArray(sc.topDrivers) ? sc.topDrivers : [];
+  const drivers = td.slice(0, 3)
+    .map(d => '<span class="driver ' + d.type + '">' + ltrNums(d.text) + '</span>').join(' ');
+  return '<div class="verdict ' + v.cls + '">' + v.text + '</div>' +
+    (drivers ? '<div class="verdict-drivers"><span class="vd-lbl">أبرز العوامل:</span> ' + drivers + '</div>' : '');
 };
 
 // وسوم تجميد التقييم (المحرك بعد إصلاح valuation في 27-07): valuationParts تحدد حالة كل مكوّن
@@ -438,6 +494,7 @@ function renderDecisions() {
       const sc = s.investmentScore || {};
       const timingDot = sc.timing === 'ممتاز' ? 'g' : (sc.timing === 'مقبول' ? 'y' : 'r');
       return `<div class="card" onclick="openModal('${s.symbol}')">
+        ${verdictBlock(s)}
         <div style="display:flex;justify-content:space-between;align-items:start">
           <div>
             <div class="name">${s.name}${sproutTag(sc)}</div>
@@ -449,8 +506,7 @@ function renderDecisions() {
             <div class="class-badge ${sc.classCode}">${sc.classification}</div>
           </div>
         </div>
-        <div style="margin:6px 0">${(sc.topDrivers||[]).slice(0,3).map(d => `<span class="driver ${d.type}">${d.text}</span>`).join(' ')}</div>
-        <div class="timing"><span class="dot ${timingDot}"></span> توقيت: ${sc.timing || '—'}${sc.timingSignals != null ? ' (' + sc.timingSignals + '/4)' : ''}</div>
+        <div class="timing" style="margin-top:6px"><span class="dot ${timingDot}"></span> توقيت: ${sc.timing || '—'}${sc.timingSignals != null ? ' (' + sc.timingSignals + '/4)' : ''}</div>
       </div>`;
     }).join('') + '</div>';
   } else {
@@ -479,6 +535,7 @@ function renderTopCards() {
     let timingDot = sc.timing === 'ممتاز' ? 'g' : (sc.timing === 'مقبول' ? 'y' : 'r');
     
     html += `<div class="card" onclick="openModal('${s.symbol}')">
+      ${verdictBlock(s)}
       <div style="display:flex;justify-content:space-between;align-items:start">
         <div>
           <div class="name">${s.name}${sproutTag(sc)}</div>
@@ -547,6 +604,7 @@ function renderReversals() {
       const sc = s.investmentScore || {};
       const wt = s.weeklyTechnical || {};
       return `<div class="card" onclick="openModal('${s.symbol}')">
+        ${verdictBlock(s)}
         <div style="display:flex;justify-content:space-between;align-items:start">
           <div>
             <div class="name">${s.name}</div>
